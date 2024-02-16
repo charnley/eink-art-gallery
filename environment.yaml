@@ -1,0 +1,22 @@
+name: dev-env
+channels:
+- defaults
+- conda-forge
+dependencies:
+- python=3.12
+
+- ipywidgets
+- jinja2
+- jupyter
+- jupyterlab
+- jupytext
+- matplotlib
+- mypy
+- numpy
+- pandas
+- pip
+- pre-commit
+- pytest
+- scipy
+- pip:
+  - tdqm

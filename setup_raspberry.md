@@ -1,16 +1,19 @@
 
-# Setup Python and apt dependencies
+# Setup Raspberry zero for e-ink display
 
-    sudo apt install libopenjp2-7
-    sudo apt install python3-pip python3-setuptools python3-venv python3-wheel
 
-# Enable SPI
+## Enable SPI
 
     sudo raspi-config
     # Choose Interfacing Options -> SPI -> Yes
     sudo reboot
 
-# Create a env
+## Setup Python and apt dependencies
+
+    sudo apt install libopenjp2-7
+    sudo apt install python3-pip python3-setuptools python3-venv python3-wheel
+
+## Create a env
 
 Use `apt` python, do not try fancy `conda` setup.
 
@@ -25,7 +28,7 @@ Actually, it was because there was multiple Python envs found)
     wget bootstrap.pypa.io/get-pip.py
     python get-pip.py
 
-# Installing the dependencies
+## Installing the dependencies
 
 From the ewave guide
 
@@ -37,7 +40,7 @@ From the ewave guide
 
     pip install pillow numpy RPi.GPIO spidev gpiozero spidev
 
-# References
+## References
 
  - https://www.waveshare.com/wiki/13.3inch_e-Paper_HAT_(K)
  - https://www.waveshare.com/wiki/13.3inch_e-Paper_HAT_(K)_Manual#Working_With_Raspberry_Pi
