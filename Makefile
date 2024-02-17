@@ -46,6 +46,5 @@ types:
 clean:
 	rm -r build *.pyc __pycache__ _tmp_* *.egg-info
 
-clean_env:
+clean-env:
 	rm -fr ./env
-

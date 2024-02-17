@@ -3,13 +3,13 @@ channels:
 - defaults
 - conda-forge
 dependencies:
-- python=3.12
+- python=3.11
 
 - ipywidgets
 - jinja2
-- jupyter
 - jupyterlab
 - jupytext
+- pytorch
 - matplotlib
 - mypy
 - numpy
@@ -18,5 +18,7 @@ dependencies:
 - pre-commit
 - pytest
 - scipy
+- diffusers
+- huggingface_hub=0.20
 - pip:
   - tdqm
