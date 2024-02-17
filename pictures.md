@@ -13,6 +13,7 @@
 
  - https://huggingface.co/docs/hub/diffusers
  - https://huggingface.co/ProomptEngineer/pe-pencil-drawing-style
+ - https://huggingface.co/sanderland/science-sobotta-anatomical-drawings
 
 ## References
 

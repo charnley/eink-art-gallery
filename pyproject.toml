@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "picture_generator"
+dynamic = ["version"]
+authors = []
+requires-python = ">=3.10"
+
+[tool.setuptools.dynamic]
+version = {attr = "picture_generator.version.__version__"}
+
+[options.packages.find]
+where="src"
+
+[tool.setuptools.package-data]
+"*" = ["*.jinja"]
