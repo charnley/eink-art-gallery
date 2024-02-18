@@ -19,6 +19,9 @@ dependencies:
 - pytest
 - scipy
 - diffusers
+- transformers
+- invisible-watermark
 - huggingface_hub=0.20
 - pip:
   - tdqm
+  - invisible-watermark
