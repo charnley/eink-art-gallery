@@ -14,14 +14,14 @@ dependencies:
 - mypy
 - numpy
 - pandas
-- pip
 - pre-commit
 - pytest
 - scipy
 - diffusers
 - transformers
-- invisible-watermark
 - huggingface_hub=0.20
+
+- pip
 - pip:
   - tdqm
   - invisible-watermark
