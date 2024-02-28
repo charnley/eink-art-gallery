@@ -1,5 +1,5 @@
 fastapi
-fastapi_utils
+fastapi-utilities
 python-multipart
 
 uvicorn

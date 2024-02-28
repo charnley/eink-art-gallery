@@ -2,7 +2,7 @@ import logging
 from io import BytesIO
 
 from fastapi import FastAPI, HTTPException, UploadFile
-from fastapi_utils.tasks import repeat_every
+from fastapi_utilities import repeat_at
 from PIL import Image
 
 import picture_shower
@@ -12,8 +12,7 @@ app = FastAPI()
 
 
 @app.on_event("startup")
-@repeat_every(seconds=5)  # 1 hour
-# @repeat_at(cron="*/2 * * * *") #every 2nd minute
+@repeat_at(cron="0 3 * * *")  # every 3 am
 def start_up():
     logger.info("Repeat reset")
     picture_shower.init()
