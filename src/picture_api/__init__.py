@@ -11,8 +11,11 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 
-@repeat_every(seconds=10)  # 1 hour
+@app.on_event("startup")
+@repeat_every(seconds=5)  # 1 hour
+# @repeat_at(cron="*/2 * * * *") #every 2nd minute
 def start_up():
+    logger.info("Repeat reset")
     picture_shower.init()
     picture_shower.clear()
     picture_shower.sleep()
