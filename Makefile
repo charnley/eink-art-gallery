@@ -21,7 +21,7 @@ env_picture:
 	make dev-pip python=./$@/bin/python
 
 dev-pip:
-	${python} -m install -e .
+	${python} -m pip install -e .
 
 # development
 
