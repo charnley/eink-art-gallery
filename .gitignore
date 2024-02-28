@@ -1,4 +1,4 @@
-
+*.out
 *.git
 ./src/waveshare_epd/
 src/waveshare_epd
