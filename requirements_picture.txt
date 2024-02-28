@@ -1,0 +1,12 @@
+fastapi
+python-multipart
+uvicorn
+pyyaml
+
+RPi.GPIO
+gpiozero
+numpy
+pillow
+spidev
+
+waveshare-epaper

@@ -1,4 +1,6 @@
 
+env_*
+
 # test and type
 .pytest
 conda

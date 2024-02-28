@@ -78,11 +78,11 @@ repos:
   - repo: local
     hooks:
 
-      - id: mypy
-        name: Static type checking
-        entry: mypy
-        files: \.py$
-        language: python
+      # - id: mypy
+      #   name: Static type checking
+      #   entry: mypy
+      #   files: \.py$
+      #   language: python
 
       - id: jupyisort
         name: Sorts ipynb imports

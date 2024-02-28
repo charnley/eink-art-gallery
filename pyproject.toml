@@ -3,7 +3,7 @@ requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "picture_generator"
+name = "picture_bundle"
 dynamic = ["version"]
 authors = []
 requires-python = ">=3.10"

@@ -4,7 +4,11 @@ from functools import cache
 from pathlib import Path
 
 from PIL import Image
-from waveshare_epd import epd13in3k  # type: ignore
+
+try:
+    from waveshare_epd import epd13in3k  # type: ignore
+except ModuleNotFoundError:
+    epd13in3k = None
 
 logger = logging.getLogger(__name__)
 
@@ -23,15 +27,19 @@ def sleep():
     epd.sleep()
 
 
-def clear():
-    logging.info("init and Clear")
+def init():
+    logging.info("init display")
     epd = get_epd()
     epd.init()
+
+
+def clear():
+    logging.info("clear display")
+    epd = get_epd()
     epd.Clear()
 
 
 def display(image: Image.Image):
-    logging.info("Displaying")
+    logging.info("display pillow")
     epd = get_epd()
     epd.display(epd.getbuffer(image))
-    time.sleep(2)

@@ -1,20 +1,32 @@
 conda=conda
 python=python
-pip=./env/bin/pip
+pip=pip
 module=eink_picture_generator
 
 .PHONY: build check clean test
 
-all: env dev-pip
+# setup
+
+art: env dev-pip
+
+picture: env_picture dev-pip
+
+env_art:
+	${conda} env create -f environment.yaml -p ./env --quiet
+	make dev-pip python=./$@/bin/python
+
+env_picture:
+	python3 -m venv ./$@
+	./$@/bin/python -m pip install -r ./requirements_picture.txt
+	make dev-pip python=./$@/bin/python
+
+dev-pip:
+	${python} -m install -e .
+
+# development
 
 todo:
 	grep "# TODO" */*.py | sed -e 's/    //g' | sed -e 's/# TODO//'
-
-env:
-	${conda} env create -f environment.yaml -p ./env --quiet
-
-dev-pip: env
-	${pip} install -e .
 
 conda-install-build:
 	${conda} install conda-build -c conda-forge -y
@@ -32,9 +44,6 @@ test: test-unit
 test-unit:
 	${python} -m pytest --basetemp=".pytest" -vrs tests/
 
-start-jupyter:
-	${python} -m jupyter lab
-
 # test-ipynb:
 # 	jupytext --output _tmp_script.py notebooks/example_demo.ipynb
 # 	${python} _tmp_script.py
@@ -43,8 +52,18 @@ types:
 	${python} -m monkeytype run `which pytest` ./tests/
 	${python} -m monkeytype list-modules | grep ${module} | xargs -n1 monkeytype apply
 
+# start
+
+start-jupyter:
+	${python} -m jupyter lab
+
+start-picture-api:
+	${python} -m uvicorn picture_api:app --log-config=logging.yaml
+
+# clean
+
 clean:
 	rm -r build *.pyc __pycache__ _tmp_* *.egg-info
 
 clean-env:
-	rm -fr ./env
+	rm -fr ./env_art ./env_picture
