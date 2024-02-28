@@ -58,7 +58,10 @@ start-jupyter:
 	${python} -m jupyter lab
 
 start-picture-api:
-	${python} -m uvicorn picture_api:app --log-config=logging.yaml --port 80
+	${python} -m uvicorn picture_api:app \
+		--host 0.0.0.0 \
+		--port 8080 \
+		--log-config=logging.yaml
 
 # clean
 

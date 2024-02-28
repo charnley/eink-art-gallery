@@ -3,6 +3,7 @@ import time
 from functools import cache
 from pathlib import Path
 
+import epaper
 from PIL import Image
 
 try:
@@ -18,7 +19,8 @@ logging.info("epd13in3k Demo")
 
 @cache
 def get_epd():
-    epd = epd13in3k.EPD()
+    # epd = epd13in3k.EPD()
+    epd = epaper.epaper("epd13in3k").EPD()
     return epd
 
 
