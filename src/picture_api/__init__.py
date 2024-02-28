@@ -12,17 +12,6 @@ app = FastAPI()
 
 
 @app.on_event("startup")
-async def hey2():
-    print("hey2")
-
-
-@app.on_event("startup")
-@repeat_at(cron="*/2 * * * *")  # every 2nd minute
-async def hey():
-    print("hey")
-
-
-@app.on_event("startup")
 @repeat_at(cron="0 3 * * *")  # every 3 am
 def start_up():
     logger.info("Repeat reset")
