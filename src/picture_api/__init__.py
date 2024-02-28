@@ -1,8 +1,7 @@
 import logging
 from io import BytesIO
-from typing import Annotated
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, HTTPException, UploadFile
 from PIL import Image
 
 import picture_shower

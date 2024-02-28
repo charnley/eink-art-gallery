@@ -1,3 +1,5 @@
+ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+
 conda=conda
 python=python
 pip=pip
@@ -9,7 +11,7 @@ module=eink_picture_generator
 
 art: env dev-pip
 
-picture: env_picture dev-pip
+picture: epaper.git env_picture dev-pip
 
 env_art:
 	${conda} env create -f environment.yaml -p ./env --quiet
@@ -22,6 +24,10 @@ env_picture:
 
 dev-pip:
 	${python} -m pip install -e .
+
+epaper.git:
+	git clone https://github.com/waveshareteam/e-Paper.git $@ --depth 1 --quiet
+	ln -s ${ROOT_DIR}/$@/RaspberryPi_JetsonNano/python/lib/waveshare_epd ./src/waveshare_epd
 
 # development
 

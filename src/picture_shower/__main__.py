@@ -3,7 +3,6 @@ import time
 from pathlib import Path
 
 from PIL import Image
-from waveshare_epd import epd13in3k  # type: ignore
 
 import picture_shower
 
@@ -36,7 +35,7 @@ def main(args=None):
 
     except KeyboardInterrupt:
         logging.info("ctrl + c:")
-        epd13in3k.epdconfig.module_exit(cleanup=True)
+        picture_shower.exit()
         exit()
 
 
