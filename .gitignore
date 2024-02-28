@@ -1,6 +1,7 @@
 
 *.git
 ./src/waveshare_epd/
+src/waveshare_epd
 env_*
 
 # test and type
