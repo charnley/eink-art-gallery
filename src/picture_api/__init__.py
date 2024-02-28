@@ -33,8 +33,6 @@ async def display_image(file: UploadFile):
     picture_shower.display(image)
     picture_shower.sleep()
 
-    return {"filename": file.filename}
-
 
 @app.post("/display/text")
 async def display_text():
@@ -48,7 +46,6 @@ async def set_clear():
     picture_shower.init()
     picture_shower.clear()
     picture_shower.sleep()
-    raise NotImplementedError()
 
 
 @app.get("/status")
