@@ -2,6 +2,7 @@ import logging
 from io import BytesIO
 
 from fastapi import FastAPI, HTTPException, UploadFile
+from fastapi_utils.tasks import repeat_every
 from PIL import Image
 
 import picture_shower
@@ -9,9 +10,12 @@ import picture_shower
 logger = logging.getLogger(__name__)
 app = FastAPI()
 
-# @app.post("/files/")
-# async def create_file(file: Annotated[bytes, File()]):
-#     return {"file_size": len(file)}
+
+@repeat_every(seconds=10)  # 1 hour
+def start_up():
+    picture_shower.init()
+    picture_shower.clear()
+    picture_shower.sleep()
 
 
 @app.post("/display/bitmap")
