@@ -17,11 +17,15 @@ dependencies:
 - pre-commit
 - pytest
 - scipy
-- diffusers
-- transformers
-- huggingface_hub=0.20
 
 - pip
 - pip:
-  - tdqm
+  - huggingface_hub
+  - accelerate
+  - diffusers
   - invisible-watermark
+  - tdqm
+  - torch
+  - torchaudio
+  - torchvision
+  - transformers
