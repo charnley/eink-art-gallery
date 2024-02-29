@@ -15,7 +15,7 @@ art: env dev-pip
 picture: epaper.git env_picture dev-pip
 
 env_art:
-	${conda} env create -f environment.yaml -p ./env --quiet
+	${conda} env create -f ./environment_art.yaml -p ./$@ --quiet
 	make dev-pip python=./$@/bin/python
 
 env_picture:
@@ -51,9 +51,6 @@ test: test-unit
 test-unit:
 	${python} -m pytest --basetemp=".pytest" -vrs tests/
 
-start-jupyter:
-	 HF_HOME=${ROOT_DIR}/models jupyter-lab
-
 # test-ipynb:
 # 	jupytext --output _tmp_script.py notebooks/example_demo.ipynb
 # 	${python} _tmp_script.py
@@ -64,8 +61,18 @@ types:
 
 # start
 
-start-jupyter:
-	${python} -m jupyter lab
+start-art-jupyter:
+	HF_HOME=${ROOT_DIR}/models jupyter-lab
+
+start-art-service:
+	HF_HOME=${ROOT_DIR}/models ${python} -m art_service
+
+start-art-api:
+	HF_HOME=${ROOT_DIR}/models \
+	${python} -m uvicorn art_api:app \
+		--host 0.0.0.0 \
+		--port 8080 \
+		--log-config=logging.yaml
 
 start-picture-api:
 	${python} -m uvicorn picture_api:app \

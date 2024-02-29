@@ -42,6 +42,9 @@
 
 ## Prompt notes
 
+  pen sketch of just the profile of an inner goddess in warrior outfit in their power no background
+
+  Coloring page for adults, bold lines, dark lines, mandala bust image, mandala MAD Magazine character face, white background
 
   {subject}, sketch by michael jenson kilm, in the style of nostalgic
   illustration, black and white style, realist detail, album covers,

@@ -4,12 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "picture_bundle"
-dynamic = ["version"]
+# dynamic = ["version"]
+version = "0.0.0"
 authors = []
 requires-python = ">=3.10"
 
-[tool.setuptools.dynamic]
-version = {attr = "picture_generator.version.__version__"}
+# [tool.setuptools.dynamic]
+# version = {attr = "paper_project.version.__version__"}
 
 [options.packages.find]
 where="src"
