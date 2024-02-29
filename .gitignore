@@ -3,6 +3,7 @@
 ./src/waveshare_epd/
 src/waveshare_epd
 env_*
+models/
 
 # test and type
 .pytest
