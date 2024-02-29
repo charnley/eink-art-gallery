@@ -17,17 +17,56 @@
 
 ## References
 
- - https://en.wikipedia.org/wiki/Floyd%E2%80%93Steinberg_dithering
  - https://en.wikipedia.org/wiki/Atkinson_dithering
- - https://huggingface.co/stabilityai/stable-cascade
+ - https://en.wikipedia.org/wiki/Floyd%E2%80%93Steinberg_dithering
+ - https://freeflo.ai/style
+ - https://huggingface.co/Lykon/dreamshaper-xl-turbo
  - https://huggingface.co/stabilityai/sdxl-turbo
+ - https://huggingface.co/stabilityai/stable-cascade
  - https://lexica.art
+ - https://stable-diffusion-art.com/how-negative-prompt-work/
+ - https://supagruen.github.io/StableDiffusion-CheatSheet/
+ - https://www.reddit.com/r/StableDiffusion/comments/1aupf04/comparison_47_sdxl_18_turbo_checkpoints_70/?xpromo_edp=enabled
 
 
 ## Inspiration
 
  - https://lexica.art/prompt/e735c52a-ee0c-495d-86c9-ea86c83b1432
 
+
+## Config
+
+
+  HF_HOME - Huggingface home, set it to somewhere not ~/
+
+
+## Prompt notes
+
+
+  {subject}, sketch by michael jenson kilm, in the style of nostalgic
+  illustration, black and white style, realist detail, album covers,
+  watercolorist, miniature and small-scale paintings, hyper-realistic animal
+  illustrations
+
+  one black line drawing of {subject}, in the style of simplified and stylized
+  illustrations, simple line drawing, high resolution vector
+
+  {subject} in the style of extreme caricature
+
+  a black and white drawing of a {subject}, in the style of retro-futuristic
+  propaganda, clownpunk, slender, 2d game art, horror academia, ritualistic
+  masks, playful coloration
+
+  {subject} in the style of ink drawing, detailed crowd scenes, english
+  countryside, illustration, contax g1
+
+  {subject} in the style of rough portrait, realistic hyper-detailed portraits,
+  lively tavern scenes, queer academia, hallyu, linear delicacy, heavy use of
+  palette knives, oil on canvas
+
+  Ink splatter art, {subject}, photogram, white wash, high key lighting, high contrast
+
+  drawing of a {subject} in the style of horror manga, shiny eyes, a black and white illustration, shige's visual aesthetic style, low resolution, full body, full shot, cloisonnism
 
 
 

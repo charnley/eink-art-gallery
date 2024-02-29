@@ -4,6 +4,7 @@ conda=conda
 python=python
 pip=pip
 module=eink_picture_generator
+ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 .PHONY: build check clean test
 
@@ -49,6 +50,9 @@ test: test-unit
 
 test-unit:
 	${python} -m pytest --basetemp=".pytest" -vrs tests/
+
+start-jupyter:
+	 HF_HOME=${ROOT_DIR}/models jupyter-lab
 
 # test-ipynb:
 # 	jupytext --output _tmp_script.py notebooks/example_demo.ipynb
