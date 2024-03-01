@@ -9,6 +9,7 @@ from art_generator import (
     preload_fast_model,
     preload_slow_model,
 )
+from art_utils import atkinson
 from art_utils.network_utils import send_photo
 
 logger = logging.getLogger(__name__)
@@ -34,8 +35,7 @@ def main(args=None):
     if args.prompt is None:
         prompt = "Enchanted Forest, Mystical, Glowing Flora, Fauna, Magical Creatures, black and white, single lines, no background"
     else:
-        prompt = ", ".join(args.prompt)
-        prompt_append = ", black and white, single lines, no background"
+        prompt = " ".join(args.prompt)
 
     logger.info(f"prompt: {prompt}")
     logger.info("Generating a random photo")
@@ -46,6 +46,10 @@ def main(args=None):
     else:
         pipe = preload_slow_model()
         image = get_picture_slow(pipe, prompt)
+
+    # Dither
+    logger.info("dithering the picture")
+    image = atkinson(image)
 
     logger.info("Sending it to paper frame")
     send_photo(image, "http://192.168.1.26:8080/display/bitmap")
