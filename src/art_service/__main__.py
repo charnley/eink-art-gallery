@@ -22,7 +22,7 @@ def main(args=None):
 
     # TODO Generate random prompt first
     logger.info("Generating a random prompt")
-    prompt = "black and white, pen sketch, single lines, swiss mountains, spring, adventure, no background"
+    prompt = "black and white, pen sketch, single lines, swiss mountains, pandas playing, spring, no background"
 
     logger.info("Generating a random photo")
     pipe = preload_fast_model()
