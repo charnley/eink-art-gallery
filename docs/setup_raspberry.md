@@ -46,4 +46,3 @@ From the ewave guide
  - https://www.waveshare.com/wiki/13.3inch_e-Paper_HAT_(K)_Manual#Working_With_Raspberry_Pi
  - https://www.waveshare.com/wiki/13.3inch_e-Paper_HAT_(K)_Manual#Overview
  - https://www.the-diy-life.com/make-a-youtube-subscriber-counter-using-an-e-ink-display-and-a-raspberry-pi-zero-w/
-

@@ -70,6 +70,3 @@
   Ink splatter art, {subject}, photogram, white wash, high key lighting, high contrast
 
   drawing of a {subject} in the style of horror manga, shiny eyes, a black and white illustration, shige's visual aesthetic style, low resolution, full body, full shot, cloisonnism
-
-
-

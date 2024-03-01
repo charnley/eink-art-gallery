@@ -1,11 +1,10 @@
+import logging
+from functools import cache
 
 import torch
-from functools import cache
 from diffusers import AutoPipelineForText2Image, DiffusionPipeline
 
 from art_utils import constants
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +18,9 @@ def preload_fast_model(straight_to_gpu=True):
     """Return fast pipeline, e.i. stabilityai/sdxl-turbo"""
 
     logger.info("Loading the fast model from disk...")
-    pipe = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16")
+    pipe = AutoPipelineForText2Image.from_pretrained(
+        "stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16"
+    )
 
     logger.info("Loading the fast model from disk...")
     if straight_to_gpu:
@@ -35,14 +36,17 @@ def preload_slow_model(straight_to_gpu=True):
 
     logger.info("Loading the slow model")
 
-    pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16, use_safetensors=True, variant="fp16")
+    pipe = DiffusionPipeline.from_pretrained(
+        "stabilityai/stable-diffusion-xl-base-1.0",
+        torch_dtype=torch.float16,
+        use_safetensors=True,
+        variant="fp16",
+    )
     if straight_to_gpu:
         logger.info("Loading the model to GPU")
         pipe.to("cuda")
 
     return pipe
-
-
 
 
 def style_scanner(pipe, prompt, num_images_per_prompt=4):
@@ -78,5 +82,17 @@ def get_picture_fast(pipe, prompt):
     return image
 
 
+def get_picture_slow(pipe, prompt):
+
+    image = pipe(
+        prompt,
+        width=constants.WIDTH,
+        height=constants.HEIGHT,
+        num_images_per_prompt=1,
+    ).images[0]
+
+    return image
 
 
+def prompt_generator():
+    raise NotImplementedError()

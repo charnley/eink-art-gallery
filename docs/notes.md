@@ -42,4 +42,3 @@
 
 	draw.rectangle((new_x1, new_y1, new_x2, new_y2), fill="black")
 	draw.text(new_pos, text, font=font, fill="white")
-

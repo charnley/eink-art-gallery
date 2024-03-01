@@ -9,21 +9,22 @@ dependencies:
 - jinja2
 - jupyterlab
 - jupytext
-- pytorch
 - matplotlib
 - mypy
 - numpy
 - pandas
 - pre-commit
 - pytest
+- pytorch
 - scipy
 
 - pip
 - pip:
-  - huggingface_hub
   - accelerate
   - diffusers
+  - huggingface_hub
   - invisible-watermark
+  - sentencepiece
   - tdqm
   - torch
   - torchaudio
