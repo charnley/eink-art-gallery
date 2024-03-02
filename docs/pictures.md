@@ -19,6 +19,11 @@
 
  - https://en.wikipedia.org/wiki/Atkinson_dithering
  - https://en.wikipedia.org/wiki/Floyd%E2%80%93Steinberg_dithering
+ - https://surma.dev/things/ditherpunk/
+ - https://tannerhelland.com/2012/12/28/dithering-eleven-algorithms-source-code.html
+
+ - https://midlibrary.io/
+
  - https://freeflo.ai/style
  - https://huggingface.co/Lykon/dreamshaper-xl-turbo
  - https://huggingface.co/stabilityai/sdxl-turbo
@@ -27,6 +32,8 @@
  - https://stable-diffusion-art.com/how-negative-prompt-work/
  - https://supagruen.github.io/StableDiffusion-CheatSheet/
  - https://www.reddit.com/r/StableDiffusion/comments/1aupf04/comparison_47_sdxl_18_turbo_checkpoints_70/?xpromo_edp=enabled
+
+
 
 
 ## Inspiration
