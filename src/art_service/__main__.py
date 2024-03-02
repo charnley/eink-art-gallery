@@ -9,7 +9,7 @@ from art_generator import (
     preload_fast_model,
     preload_slow_model,
 )
-from art_utils import atkinson
+from art_utils import atkinson_dither
 from art_utils.network_utils import send_photo
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ def main(args=None):
 
     # Dither
     logger.info("dithering the picture")
-    image = atkinson(image)
+    image = atkinson_dither(image)
 
     logger.info("Sending it to paper frame")
     send_photo(image, "http://192.168.1.26:8080/display/bitmap")
