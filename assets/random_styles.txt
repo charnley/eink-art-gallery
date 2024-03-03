@@ -4,7 +4,6 @@ Circut diagram
 Coloring book page
 Coloring-in sheet
 Elevation drawing
-Halftone print
 Ink drawing
 One line art
 Parametric Drawing
