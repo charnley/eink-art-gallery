@@ -39,6 +39,12 @@
 
    echo "PATH=$PATH:$HOME/miniforge/bin" >> .bashrc
    source .bashrc
-  
-- Install the art python environment with 
 
+- Install the art python environment with
+
+
+
+## Cron job
+
+    crontab -e
+    30 4 * * * cd ~/path/to/project && make start-art-service python=./env_art/bin/python
