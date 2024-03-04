@@ -17,18 +17,28 @@
 
 - Install WSL cuda bridge
 
+    # update apt
+    sudo apt update
+    sudo apt upgrade
+
+
     # Select Linux, x86, WSL-Ubuntu, 2.0, deb (network)
     https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=WSL-Ubuntu&target_version=2.0&target_type=deb_network
 
     # Which means today running the following commands in WSL Ubuntu
     wget https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-keyring_1.1-1_all.deb
     sudo dpkg -i cuda-keyring_1.1-1_all.deb
-    sudo apt-get update
-    sudo apt-get -y install cuda-toolkit-12-3
+    sudo apt update
+    sudo apt -y install cuda-toolkit-12-3
 
 - Install miniforge
 
-   # 
+   wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-aarch64.sh -O ~/miniforge.sh
+   bash ~/miniforge.sh -b -p ~/miniforge
+   rm ~/miniforge.sh
+
+   echo "PATH=$PATH:$HOME/miniforge/bin" >> .bashrc
+   source .bashrc
   
 - Install the art python environment with 
 
