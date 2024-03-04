@@ -1,25 +1,27 @@
-Assembly drawing
-Brush drawing
-Circut diagram
-Coloring book page
-Coloring-in sheet
-Elevation drawing
-Ink drawing
-One line art
-Parametric Drawing
-Pen drawing
-Schematics
-Silhouette
-Stippling
-Sumi-e drawing
-Wireframe
-Wood engraving
-Ann Telnaes
-B. Kliban
-Christian Coigny
-Christophe Staelens
-Dave Sim
-Gerd Arntz
-Jon Carling
-Nathan Wirth
-Shigeo Fukuda
+assembly drawing
+brush drawing, white background
+circut diagram
+abstract simplistic line art
+one line, black and white, drawing
+coloring book page, white background
+coloring-in sheet, white background
+elevation drawing
+ink drawing, white background
+one line art
+parametric drawing
+pen drawing, white background
+schematics
+silhouette
+stippling
+sumi-e drawing, white background
+wireframe
+wood engraving
+ann telnaes
+b. kliban, white background
+christian coigny
+christophe staelens
+dave sim
+gerd arntz
+jon carling
+nathan wirth
+shigeo fukuda, black and white

@@ -84,8 +84,11 @@ def get_picture_fast(pipe, prompt):
 
 def get_picture_slow(pipe, prompt):
 
+    negative_prompt = "paper, frame, picture frame, border, photorealistic, deformed, glitch, blurry, noisy, off-center, picture-frame, poster, signature"
+
     image = pipe(
         prompt,
+        negative_prompt=negative_prompt,
         width=constants.WIDTH,
         height=constants.HEIGHT,
         num_images_per_prompt=1,
