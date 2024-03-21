@@ -69,6 +69,7 @@ def style_scanner(pipe, prompt, num_images_per_prompt=4):
 
 def get_picture_fast(pipe, prompt):
 
+    logger.info("Generating picture from prompt")
     image = pipe(
         prompt,
         # negative_prompt=negative_prompt,
@@ -86,6 +87,7 @@ def get_picture_slow(pipe, prompt):
 
     negative_prompt = "paper, frame, picture frame, border, photorealistic, deformed, glitch, blurry, noisy, off-center, picture-frame, poster, signature"
 
+    logger.info("Generating picture from prompt, using negative prompts")
     image = pipe(
         prompt,
         negative_prompt=negative_prompt,

@@ -1,5 +1,5 @@
 assembly drawing
-brush drawing, white background
+brush pen drawing, white background
 circut diagram
 abstract simplistic line art
 one line, black and white, drawing

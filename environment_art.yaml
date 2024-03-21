@@ -30,3 +30,5 @@ dependencies:
   - torchaudio
   - torchvision
   - transformers
+  - ctransformers
+  - jupyter-datatables
