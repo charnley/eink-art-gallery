@@ -23,6 +23,8 @@
  - https://tannerhelland.com/2012/12/28/dithering-eleven-algorithms-source-code.html
 
  - https://midlibrary.io/
+ - https://botcreative.com
+ - https://sdxl.parrotzone.art/
 
  - https://freeflo.ai/style
  - https://huggingface.co/Lykon/dreamshaper-xl-turbo
