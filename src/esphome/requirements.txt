@@ -1,0 +1,3 @@
+esphome
+pillow
+python-magic-bin

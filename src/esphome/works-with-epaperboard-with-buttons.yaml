@@ -1,0 +1,106 @@
+esphome:
+  name: epaperdisplay
+  on_boot:
+    priority: -10
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return !id(button_1).state && !id(button_2).state;
+          then:
+            - logger.log: "Normal wake-up, displaying black.png"
+            - display.page.show: normal_page
+            - delay: 5000ms  # Delay to ensure the image is displayed
+            - deep_sleep.enter: deep_sleep_control
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+    version: recommended
+
+logger:
+  baud_rate: 115200
+  level: DEBUG
+
+debug:
+  update_interval: 2s
+
+image:
+  - file: images/test.png
+    id: test_image
+    resize: 960x680
+    type: BINARY
+    dither: FLOYDSTEINBERG
+
+  - file: images/jimmy.png
+    id: jimmy_image
+    resize: 960x680
+    type: BINARY
+    dither: FLOYDSTEINBERG
+
+  - file: images/black.png
+    id: black_image
+    resize: 960x680
+    type: BINARY
+    dither: FLOYDSTEINBERG
+
+spi:
+  clk_pin: 13
+  mosi_pin: 14
+
+display:
+  - platform: waveshare_epaper
+    id: my_display
+    cs_pin: 15
+    dc_pin: 27
+    busy_pin: 25
+    reset_pin: 26
+    model: 13.3in-k
+    update_interval: never
+    pages:
+      - id: button1_page
+        lambda: |-
+          it.image(0, 0, id(test_image));
+      - id: button2_page
+        lambda: |-
+          it.image(0, 0, id(jimmy_image));
+      - id: normal_page
+        lambda: |-
+          it.image(0, 0, id(black_image));
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO0
+      mode: INPUT_PULLUP
+    id: button_1
+    on_press:
+      then:
+        - logger.log: "Button 1 Pressed, displaying test.png"
+        - lambda: |-
+            id(deep_sleep_control).set_run_duration(5 * 60 * 1000);  // 5 minutes runtime
+            id(deep_sleep_control).set_sleep_duration(8 * 60 * 60 * 1000);  // 8 hours sleep
+        - display.page.show: button1_page
+        - delay: 5000ms
+        - deep_sleep.enter: deep_sleep_control
+
+  - platform: gpio
+    pin:
+      number: GPIO2
+      mode: INPUT_PULLUP
+    id: button_2
+    on_press:
+      then:
+        - logger.log: "Button 2 Pressed, displaying jimmy.png"
+        - lambda: |-
+            id(deep_sleep_control).set_run_duration(20 * 1000);  // 20 seconds runtime
+            id(deep_sleep_control).set_sleep_duration(24 * 60 * 60 * 1000);  // 24 hours sleep
+        - display.page.show: button2_page
+        - delay: 5000ms
+        - deep_sleep.enter: deep_sleep_control
+
+deep_sleep:
+  id: deep_sleep_control
+  run_duration: 20s  # Default runtime
+  sleep_duration: 24h  # Default sleep duration

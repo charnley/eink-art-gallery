@@ -1,0 +1,114 @@
+# esphome:
+#   name: epaperdisplay
+#   # board: esp32dev
+#   # platform: ESP32
+#   on_boot:
+#     priority: -10
+#     then:
+#       - logger.log: "not displayed image"
+#       - delay: 1s
+#       - logger.log: "not not displayed image"
+#       - component.update: my_display
+
+
+# esp32:
+  # board: esp32-s3-devkitc-1
+  # flash_size: 16MB
+  # framework:
+  #   type: arduino
+
+esphome:
+  name: epaperdisplay
+  on_boot:
+    priority: -10
+    then:
+      - logger.log: "not displayed image"
+      - delay: 1s
+      - logger.log: "not not displayed image"
+      - component.update: my_display
+      - logger.log: "changed"
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: arduino
+    version: recommended
+logger:
+  baud_rate: 115200
+  level: DEBUG
+
+debug:
+  update_interval: 2s
+
+sensor:
+  - platform: debug
+    free:
+      name: "Heap Free"
+    block:
+      name: "Heap Max Block"
+    # psram:
+    #   name: "PSRAM"
+# psram:
+#   id: my_psram
+#   speed: 80MHz
+image:
+  - file: images/jimmy.png
+    id: my_image
+    resize: 960x680
+    type: BINARY
+    dither: FLOYDSTEINBERG
+
+spi:
+  # esp32-epaper driver
+  clk_pin: 13
+  mosi_pin: 14 # this might also refer to SPI DIN
+display:
+  - platform: waveshare_epaper
+    id: my_display
+
+    # # esp32-s3 esp32-epaper-driver with HAT
+    cs_pin: 10
+    dc_pin: 9
+    busy_pin:  7
+    reset_pin: 8
+
+    # esp32-epaper-driver no HAT
+    # cs_pin: 15
+    # dc_pin: 27
+    # busy_pin:  25
+    # reset_pin: 26
+
+    # # esp32-epaper-driver with HAT
+    # cs_pin: 15
+    # dc_pin: 27
+    # busy_pin:  25
+    # reset_pin: 26
+
+    # # esp32-s3 esp32-epaper-driver with HAT
+    # cs_pin: 15
+    # dc_pin: 37
+    # busy_pin:  35
+    # reset_pin: 36
+
+    # wroom
+    # wrover
+    # cs_pin: 27
+    # dc_pin: 25
+    # busy_pin:  32
+    # reset_pin: 33
+
+    # esp32-s3
+    # cs_pin: 10
+    # dc_pin: 9
+    # busy_pin: 7
+    # reset_pin: 8
+
+    model: 13.3in-k
+    update_interval: never
+    lambda: |-
+      it.image(0, 0, id(my_image));
+      ESP_LOGD("display", "Image displayed successfull");
+
+deep_sleep:
+  run_duration: 10s
+  sleep_duration: 1s
+
