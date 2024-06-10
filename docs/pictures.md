@@ -35,6 +35,7 @@
  - https://supagruen.github.io/StableDiffusion-CheatSheet/
  - https://www.reddit.com/r/StableDiffusion/comments/1aupf04/comparison_47_sdxl_18_turbo_checkpoints_70/?xpromo_edp=enabled
  - https://medium.com/@gregor.laeufer/putting-ai-art-on-my-wall-with-sdxl-a76591f3d847
+ - https://midlibrary.io/midguide/how-to-apply-any-style-to-any-prompt-in-midjourney-ai
 
 
 

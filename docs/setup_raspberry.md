@@ -40,6 +40,20 @@ From the ewave guide
 
     pip install pillow numpy RPi.GPIO spidev gpiozero spidev
 
+## Setup service
+
+make a bash script like `start_server.sh` and put in $HOME
+
+    #!/bin/bash
+    cd dev/project_dir
+    source ./env_picture/bin/activate
+    export PYTHONPATH=`pwd`/src
+    nohup make start-picture-api &
+
+Then setup crontab to start on reboot. `crontab -e`
+
+    @reboot /path/to/your_script.sh
+
 ## References
 
  - https://www.waveshare.com/wiki/13.3inch_e-Paper_HAT_(K)
