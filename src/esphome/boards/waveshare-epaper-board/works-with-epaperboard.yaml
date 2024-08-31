@@ -1,21 +1,3 @@
-# esphome:
-#   name: epaperdisplay
-#   # board: esp32dev
-#   # platform: ESP32
-#   on_boot:
-#     priority: -10
-#     then:
-#       - logger.log: "not displayed image"
-#       - delay: 1s
-#       - logger.log: "not not displayed image"
-#       - component.update: my_display
-
-
-# esp32:
-  # board: esp32-s3-devkitc-1
-  # flash_size: 16MB
-  # framework:
-  #   type: arduino
 
 esphome:
   name: epaperdisplay
@@ -28,7 +10,7 @@ esphome:
       - component.update: my_display
       - logger.log: "changed"
 esp32:
-  board: esp-wrover-kit
+  board: esp32dev
   framework:
     type: arduino
     version: recommended
@@ -72,31 +54,6 @@ display:
     busy_pin:  25
     reset_pin: 26
 
-    # # esp32-epaper-driver with HAT
-    # cs_pin: 15
-    # dc_pin: 27
-    # busy_pin:  25
-    # reset_pin: 26
-
-    # # esp32-s3 esp32-epaper-driver with HAT
-    # cs_pin: 15
-    # dc_pin: 37
-    # busy_pin:  35
-    # reset_pin: 36
-
-    # wroom
-    # wrover
-    # cs_pin: 27
-    # dc_pin: 25
-    # busy_pin:  32
-    # reset_pin: 33
-
-    # esp32-s3
-    # cs_pin: 10
-    # dc_pin: 9
-    # busy_pin: 7
-    # reset_pin: 8
-
     model: 13.3in-k
     update_interval: never
     lambda: |-
@@ -104,12 +61,6 @@ display:
       ESP_LOGD("display", "Image displayed successfull");
 
 deep_sleep:
-  run_duration: 10s
+  run_duration: 9s
   sleep_duration: 1s
-
-external_components:
-  # - source: github://pr#4710
-  #   components: [image, display]
-  # - source: ../../../esphome/esphome/components 
-  #   components: [ image, display ]
 

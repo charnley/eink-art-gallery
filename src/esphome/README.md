@@ -24,9 +24,6 @@
 - https://www.home-assistant.io/integrations/http/#hosting-files
 
 
-
-
-
 # settings
 
 CLK and SCK is the same thing:
