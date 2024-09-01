@@ -1,19 +1,24 @@
 import numpy as np
+from numba import jit
 from PIL import Image
 
 
-def atkinson_dither(image: Image.Image) -> Image.Image:
-    """ """
+@jit
+def set_atkinson_dither_array(img: np.ndarray):
+    """changes img array with atkinson dithering"""
+
+    low = 0
+    heigh = 255
+
     frac = 8  # Atkinson constant
-    neighbours = [(1, 0), (2, 0), (-1, 1), (0, 1), (1, 1), (0, 2)]
-    img = np.array(image.convert("L"), dtype=np.int32)
+    neighbours = np.array([[1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]])
     threshold = np.zeros(256, dtype=np.int32)
     threshold[128:] = 255
     height, width = img.shape
     for y in range(height):
         for x in range(width):
             old = img[y, x]
-            old = np.min([old, 255])
+            old = np.min(np.array([old, 255]))
             new = threshold[old]
             err = (old - new) // frac
             img[y, x] = new
@@ -21,5 +26,13 @@ def atkinson_dither(image: Image.Image) -> Image.Image:
                 nx, ny = x + dx, y + dy
                 if 0 <= nx < width and 0 <= ny < height:
                     # Make sure that img set is between 0 and 255 (negative error could surpass the value)
-                    img[ny, nx] = np.clip(img[ny, nx] + err, 0, 255)
+                    img_yx = img[ny, nx] + err
+                    img_yx = np.minimum(heigh, np.maximum(img_yx, low))
+                    img[ny, nx] = img_yx
+
+
+def atkinson_dither(image: Image.Image) -> Image.Image:
+    """ """
+    img = np.array(image.convert("L"), dtype=np.int32)
+    set_atkinson_dither_array(img)
     return Image.fromarray(np.uint8(img))
