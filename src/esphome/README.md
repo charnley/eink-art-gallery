@@ -10,7 +10,6 @@
 - https://github.com/waveshareteam/e-Paper/tree/master
 - https://www.waveshare.com/wiki/13.3inch_e-Paper_HAT_(K)_Manual#Resource
 
-
 ## E-paper Driver HAT
 
 - https://www.waveshare.com/wiki/E-Paper_Driver_HAT
@@ -23,7 +22,6 @@
 
 - https://www.home-assistant.io/integrations/http/#hosting-files
 
-
 # settings
 
 CLK and SCK is the same thing:
@@ -35,16 +33,13 @@ there are 2 types of boards, set 13.3 to B type
 - Display Config: B
 - Interface Config: 0
 
-
-
-
 wire colors:
-- Grey: VCC/3.3v 
-- Brown: GND
-- Blue: DIN/MOSI
-- Yellow: CLK/SCK
-- Orange: CS
-- Green: DC
-- White: RST
-- Purple: Busy
-- Red: PWR
+- 🩶 Grey: VCC/3.3v 
+- 🟤 Brown: GND
+- 🟡 Yellow: CLK/SCK
+- 🔵 Blue: DIN/MOSI
+- 🟠 Orange: CS
+- 🟢 Green: DC
+- ⚪️ White: RST
+- 🟣 Purple: Busy
+- 🔴 Red: PWR
