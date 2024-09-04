@@ -28,7 +28,7 @@ sensor:
     block:
       name: "Heap Max Block"
 image:
-  - file: ../images/960x680/jimmy.png
+  - file: ../../images/960x680/image.png
     id: my_image
     resize: 960x680
     type: BINARY
