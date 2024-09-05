@@ -22,7 +22,7 @@ esp32:
 
 logger:
   baud_rate: 115200
-  level: VERY_VERBOSE
+  level: DEBUG
 
 debug:
   update_interval: 2s

@@ -16,6 +16,10 @@ deep_sleep:
   run_duration: 15s
   sleep_duration: 1s
 
+logger:
+  baud_rate: 115200
+  level: DEBUG
+
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
@@ -48,6 +52,7 @@ display:
     dc_pin: 9
     busy_pin: 7
     reset_pin: 4
+    reset_duration: 200ms
 
     model: 13.3in-k
     update_interval: never

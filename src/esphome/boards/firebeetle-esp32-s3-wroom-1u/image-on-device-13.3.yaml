@@ -3,11 +3,10 @@ esphome:
   on_boot:
     priority: -10
     then:
-      - logger.log: "not displayed image"
-      - delay: 1s
-      - logger.log: "not not displayed image"
+      - logger.log: "before my_display"
       - component.update: my_display
-      - logger.log: "changed"
+      - logger.log: "changed, hopefully"
+
 esp32:
   board: dfrobot_firebeetle2_esp32s3
   framework:
@@ -16,7 +15,7 @@ esp32:
 
 logger:
   baud_rate: 115200
-  level: DEBUG
+  level: VERY_VERBOSE
 
 debug:
   update_interval: 2s
@@ -28,7 +27,7 @@ sensor:
     block:
       name: "Heap Max Block"
 image:
-  - file: ../../images/960x680/image.png
+  - file: ../../images/960x680/test.png
     id: my_image
     resize: 960x680
     type: BINARY
@@ -44,10 +43,9 @@ display:
 
     cs_pin: 10          # Chip Select (CS)
     dc_pin: 9           # Data/Command (DC)
-    busy_pin:
-      number: 7         # Busy
-      inverted: false
+    busy_pin: 7
     reset_pin: 4        # Reset (RST)
+    reset_duration: 300ms
 
     model: 13.3in-k
     update_interval: never
@@ -56,6 +54,6 @@ display:
       ESP_LOGD("display", "Image displayed successfull");
 
 deep_sleep:
-  run_duration: 15s
+  run_duration: 20s
   sleep_duration: 1s
 

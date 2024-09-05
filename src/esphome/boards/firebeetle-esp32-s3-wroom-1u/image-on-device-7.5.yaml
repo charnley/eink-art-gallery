@@ -3,11 +3,9 @@ esphome:
   on_boot:
     priority: -10
     then:
-      - logger.log: "not displayed image"
-      - delay: 1s
-      - logger.log: "not not displayed image"
+      - logger.log: "before my_display"
       - component.update: my_display
-      - logger.log: "changed"
+      - logger.log: "changed, hopefully"
 esp32:
   board: dfrobot_firebeetle2_esp32s3
   framework:

@@ -10,6 +10,15 @@
 
 # software
 - install the latest version of esphome(atleast 2024.8.0)
+```
+python -m venv venv
+. ./venv/bin/activate
+pip install esphome
+pip install python-magic-bin
+pip install python-magic
+pip install "pillow==10.2.0"
+```
+
 - copy the create a copy of src/esphome/secrets.yaml.example into src/esphome/secrets.yaml
   - `cp src/esphome/secrets.yaml.example src/esphome/secrets.yaml`
   - edit with the right passwords and ssid for wifi
@@ -61,3 +70,17 @@ wire colors:
 - ⚪️ White: RST
 - 🟣 Purple: Busy
 - 🔴 Red: PWR
+
+
+# firebeetle-esp32-s3-wroom-1u wiring
+
+wire colors:
+- 🩶 Grey: VCC/3.3v   -> 3V3
+- 🟤 Brown: GND       -> GND
+- 🟡 Yellow: CLK/SCK  -> D12 / IO12
+- 🔵 Blue: DIN/MOSI   -> A5  / IO11
+- 🟠 Orange: CS       -> A4  / IO10
+- 🟢 Green: DC        -> D7  / IO9
+- ⚪️ White: RST       -> A0  / IO4
+- 🟣 Purple: Busy     -> D5  / IO7
+- 🔴 Red: PWR         -> SCL / IO2
