@@ -76,7 +76,6 @@ display:
     model: 7.50inV2alt
     reset_duration: 200ms
     update_interval: never
-    # the colors are inverted, i have no idea why
     lambda: |-
-      it.image(0, 0, id(my_image));
-      ESP_LOGD("display", "Image displayed successfull");
+      it.image(0, 0, id(my_image), Color::BLACK, Color::WHITE);
+      ESP_LOGD("display", "Image displayed successfully");
