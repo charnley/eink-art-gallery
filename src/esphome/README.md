@@ -60,27 +60,29 @@ there are 2 types of boards, set 13.3 to B type
 - Display Config: B
 - Interface Config: 0
 
-wire colors:
-- 🩶 Grey: VCC/3.3v 
-- 🟤 Brown: GND
-- 🟡 Yellow: CLK/SCK
-- 🔵 Blue: DIN/MOSI
-- 🟠 Orange: CS
-- 🟢 Green: DC
-- ⚪️ White: RST
-- 🟣 Purple: Busy
-- 🔴 Red: PWR
+| Wire Color | Connection |
+|------------|------------|
+| 🩶 Grey    | VCC/3.3v   |
+| 🟤 Brown   | GND        |
+| 🟡 Yellow  | CLK/SCK    |
+| 🔵 Blue    | DIN/MOSI   |
+| 🟠 Orange  | CS         |
+| 🟢 Green   | DC         |
+| ⚪️ White   | RST        |
+| 🟣 Purple  | Busy       |
+| 🔴 Red     | PWR        |
 
 
 # firebeetle-esp32-s3-wroom-1u wiring
 
-wire colors:
-- 🩶 Grey: VCC/3.3v   -> 3V3
-- 🟤 Brown: GND       -> GND
-- 🟡 Yellow: CLK/SCK  -> D12 / IO12
-- 🔵 Blue: DIN/MOSI   -> A5  / IO11
-- 🟠 Orange: CS       -> A4  / IO10
-- 🟢 Green: DC        -> D7  / IO9
-- ⚪️ White: RST       -> A0  / IO4
-- 🟣 Purple: Busy     -> D5  / IO7
-- 🔴 Red: PWR         -> SCL / IO2
+| Wire Color | HAT Driver  | ESP32 Pin    |
+|------------|-------------|--------------|
+| 🩶 Grey    | VCC/3.3v    | 3V3          |
+| 🟤 Brown   | GND         | GND          |
+| 🟡 Yellow  | CLK/SCK     | D12 / IO12   |
+| 🔵 Blue    | DIN/MOSI    | A5  / IO11   |
+| 🟠 Orange  | CS          | A4  / IO10   |
+| 🟢 Green   | DC          | D7  / IO9    |
+| ⚪️ White   | RST         | A0  / IO4    |
+| 🟣 Purple  | Busy        | D5  / IO7    |
+| 🔴 Red     | PWR         | SCL / IO2    |
