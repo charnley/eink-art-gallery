@@ -11,8 +11,7 @@ substitutions:
 
 esphome:
   name: eink_frame_${device_id}
-  friendly_name: "${device_id}"
-  # Remove the on_shutdown trigger
+  friendly_name: "eink frame ${device_id}"
 
 esp32:
   board: dfrobot_firebeetle2_esp32s3
@@ -25,8 +24,8 @@ time:
     id: sntp_time
 
 deep_sleep:
-  id: deep_sleep_control
-  run_duration: 2min
+  run_duration: 40s
+  sleep_duration: 60min
 
 logger:
   baud_rate: 115200
@@ -52,8 +51,6 @@ online_image:
     on_error:
       then:
         - logger.log: "Error downloading image"
-        - delay: 5s
-        - deep_sleep.enter: deep_sleep_control
 
 spi:
   clk_pin: 12
@@ -62,23 +59,18 @@ spi:
 display:
   - platform: waveshare_epaper
     id: my_display
-
     cs_pin: 10
     dc_pin: 9
     busy_pin: 7
     reset_pin: 4
     reset_duration: 200ms
-
     model: 13.3in-k
     update_interval: never
-    # the colors are inverted, i have no idea why
     lambda: |-
       it.image(0, 0, id(my_image), Color::BLACK, Color::WHITE);
       ESP_LOGD("display", "Image displayed successfully");
-      id(deep_sleep_control).begin_sleep();  # Enter deep sleep after display update
-
 api:
-  # Remove the encryption key
 
 ota:
   - platform: esphome
+
