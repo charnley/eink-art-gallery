@@ -26,6 +26,7 @@ time:
 deep_sleep:
   run_duration: 40s
   sleep_duration: 60min
+  id: deep_sleep_control
 
 logger:
   baud_rate: 115200
@@ -77,6 +78,11 @@ api:
       - sensor.template.publish:
           id: battery_level
           state: !lambda "return id(battery_level).state;"
+      - homeassistant.service:
+          service: binary_sensor.update
+          data:
+            entity_id: binary_sensor.${device_id}_status
+            state: "on"
 
 ota:
   - platform: esphome
@@ -103,3 +109,8 @@ sensor:
       if (voltage < 3.0) return 0;
       if (voltage > 4.2) return 100;
       return (voltage - 3.0) / (4.2 - 3.0) * 100.0;
+
+binary_sensor:
+  - platform: status
+    name: "${device_id} Status"
+    id: device_status
