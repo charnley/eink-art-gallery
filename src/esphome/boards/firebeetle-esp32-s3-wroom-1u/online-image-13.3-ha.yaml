@@ -24,8 +24,8 @@ time:
     id: sntp_time
 
 deep_sleep:
-  run_duration: 40s
-  sleep_duration: 60min
+  # run_duration: 40s
+  # sleep_duration: 60min
   id: deep_sleep_control
 
 logger:
@@ -83,6 +83,10 @@ api:
           data:
             entity_id: binary_sensor.${device_id}_status
             state: "on"
+  services:
+    - service: update_image
+      then:
+        - button.press: update_image_button
 
 ota:
   - platform: esphome
@@ -114,3 +118,12 @@ binary_sensor:
   - platform: status
     name: "${device_id} Status"
     id: device_status
+
+button:
+  - platform: template
+    name: "Update Image"
+    id: update_image_button
+    on_press:
+      then:
+        - logger.log: "Image update triggered from HA"
+        - component.update: my_image
