@@ -13,7 +13,7 @@ esp32:
     version: recommended
 
 deep_sleep:
-  run_duration: 15s
+  run_duration: 60s
   sleep_duration: 1s
 
 logger:
@@ -27,10 +27,9 @@ wifi:
     - component.update: my_image
 
 online_image:
-  - url: http://192.168.1.249:8000/images/960x680/image.png
+  - url: http://homeassistant.local:8099/api/image.png
     id: my_image
     format: png
-    resize: 960x680
     type: BINARY
     on_download_finished:
       then:
