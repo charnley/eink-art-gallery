@@ -5,12 +5,14 @@ http_request:
   verify_ssl: false
 
 substitutions:
-  device_id: "default_id"  # This will be overridden when flashing
+  device_id: "default_id"
+  wifi_ssid: "YourDefaultSSID"
+  wifi_password: "YourDefaultPassword"
 
 esphome:
   name: eink_frame_${device_id}
   friendly_name: "${device_id}"
-  device_id: eink_frame_${device_id}  # Replace with a unique identifier for each device
+  # Remove the on_shutdown trigger
 
 esp32:
   board: dfrobot_firebeetle2_esp32s3
@@ -24,30 +26,19 @@ time:
 
 deep_sleep:
   id: deep_sleep_control
-  run_duration: 2min  # Fallback duration if something goes wrong
-  sleep_duration:
-    lambda: |-
-      if (id(sntp_time).is_synced()) {
-        auto now = id(sntp_time).now();
-        auto wake_time = id(sntp_time).make_time(now.year, now.month, now.day_of_month, 4, 0, 0);
-        if (now.hour >= 4) {
-          wake_time = wake_time.timestamp + 24 * 60 * 60;  // Add 24 hours if it's past 4 AM
-        }
-        return (wake_time.timestamp - now.timestamp) * 1000;  // Convert to milliseconds
-      } else {
-        ESP_LOGW("deep_sleep", "SNTP not synced, falling back to 24-hour sleep");
-        return 24 * 60 * 60 * 1000;  // 24 hours in milliseconds
-      }
+  run_duration: 2min
 
 logger:
   baud_rate: 115200
   level: DEBUG
 
 wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
+  ssid: ${wifi_ssid}
+  password: ${wifi_password}
   on_connect:
     - component.update: my_image
+
+captive_portal:
 
 online_image:
   - url: http://homeassistant.local:8099/api/image.png
@@ -88,4 +79,6 @@ display:
 
 api:
   # Remove the encryption key
+
 ota:
+  - platform: esphome
