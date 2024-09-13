@@ -19,12 +19,23 @@ pip install python-magic
 pip install "pillow==10.2.0"
 ```
 
+# no HA support
 - copy the create a copy of src/esphome/secrets.yaml.example into src/esphome/secrets.yaml
   - `cp src/esphome/secrets.yaml.example src/esphome/secrets.yaml`
   - edit with the right passwords and ssid for wifi
 - connect your esp32 the computer
-- run `esphome run src/esphome/boards/firebeetle-esp32-s3-wroom-1u/online-image-13.3.yaml`
+- run `esphome run src/esphome/boards/firebeetle-esp32-s3-wroom-1u/online-image-13.3-simple.yaml`
 - wait until you see output and it changes
+
+# HA support
+
+run
+```
+esphome -s device_id living_room -s wifi_ssid yourssid -s wifi_password yourpassword run boards/firebeetle-esp32-s3-wroom-1u/online-image-13.3-ha.yaml
+```
+eink_frame will be prefixed on the name so it becomes `eink_frame_living_room`, it must be unique.
+
+##
 # useful links
 
 ## esphome
