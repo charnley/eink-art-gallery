@@ -5,13 +5,41 @@ http_request:
   verify_ssl: false
 
 substitutions:
-  device_id: "default_id"
-  wifi_ssid: "YourDefaultSSID"
-  wifi_password: "YourDefaultPassword"
+  device_id: "first"
+  wifi_ssid: !secret wifi_ssid
+  wifi_password: !secret wifi_password
+  wake_up_time: "04:00:00"
 
 esphome:
   name: eink_frame_${device_id}
   friendly_name: "eink frame ${device_id}"
+  on_boot:
+    priority: 600.0  # Ensure this runs after time synchronization
+    then:
+      - lambda: |-
+          auto now = id(sntp_time).now();
+          int32_t duration = 24 * 60 * 60;
+          if (now.is_valid()) {
+            auto target = now;
+            target.hour = 4;
+            target.minute = 0;
+            target.second = 0;
+
+            if (now.timestamp > target.timestamp) {
+              target = ESPTime::from_epoch_local(target.timestamp + 24 * 60 * 60);
+            }
+
+            duration = target.timestamp - now.timestamp;
+            ESP_LOGI("deep_sleep", "Will sleep for %d seconds until 4:00 AM after run_duration", duration);
+          } else {
+            ESP_LOGE("deep_sleep", "Invalid time, using fallback sleep duration of 24 hours");
+          }
+
+          if (!id(stay_awake_switch).state) {
+            id(deep_sleep_control).set_sleep_duration(duration * 1000);
+          } else {
+            ESP_LOGI("deep_sleep", "Stay awake mode is active, not setting sleep duration");
+          }
 
 esp32:
   board: dfrobot_firebeetle2_esp32s3
@@ -19,14 +47,16 @@ esp32:
     type: arduino
     version: recommended
 
+deep_sleep:
+  id: deep_sleep_control
+  run_duration: 50min
+
 time:
   - platform: sntp
     id: sntp_time
 
-deep_sleep:
-  # run_duration: 40s
-  # sleep_duration: 60min
-  id: deep_sleep_control
+# Remove the existing interval component
+
 
 logger:
   baud_rate: 115200
@@ -83,10 +113,12 @@ api:
           data:
             entity_id: binary_sensor.${device_id}_status
             state: "on"
-  services:
-    - service: update_image
-      then:
-        - button.press: update_image_button
+      - homeassistant.service:
+          service: input_select.select_option
+          data:
+            entity_id: input_select.${device_id}_mode
+            option: !lambda |-
+              return id(stay_awake_mode).state ? "stay_awake" : "deep_sleep";
 
 ota:
   - platform: esphome
@@ -115,9 +147,68 @@ sensor:
       return (voltage - 3.0) / (4.2 - 3.0) * 100.0;
 
 binary_sensor:
+  - platform: template
+    name: "Stay Awake Mode"
+    id: stay_awake_mode
+    on_state:
+      then:
+        - if:
+            condition:
+              lambda: 'return id(stay_awake_mode).state;'
+            then:
+              - logger.log: 
+                  format: "Stay Awake Mode changed to ON"
+                  level: INFO
+              - deep_sleep.prevent: deep_sleep_control
+            else:
+              - logger.log:
+                  format: "Stay Awake Mode changed to OFF"
+                  level: INFO
+              # - deep_sleep.enter: deep_sleep_control
+
   - platform: status
     name: "${device_id} Status"
     id: device_status
+
+  - platform: gpio
+    name: "Deep Sleep Switch"
+    id: deep_sleep_switch
+    pin:
+      number: GPIO5
+      mode:
+        input: true
+        pullup: true
+    filters:
+      - invert:
+      - delayed_on: 200ms
+      - delayed_off: 200ms
+    on_press:
+      then:
+        - lambda: |-
+            id(deep_sleep_switch).publish_state(true);
+            id(stay_awake_switch).publish_state(false);
+            id(stay_awake_mode).publish_state(false);
+        # - logger.log: "Deep sleep switch pressed"
+
+  - platform: gpio
+    name: "Stay Awake Switch"
+    id: stay_awake_switch
+    pin:
+      number: GPIO6
+      mode:
+        input: true
+        pullup: true
+    filters:
+      - invert:
+      - delayed_on: 200ms
+      - delayed_off: 200ms
+    on_press:
+      then:
+        - lambda: |-
+            id(stay_awake_switch).publish_state(true);
+            id(deep_sleep_switch).publish_state(false);
+            id(stay_awake_mode).publish_state(true);
+        # - logger.log: "Stay awake switch pressed"
 
 button:
   - platform: template
