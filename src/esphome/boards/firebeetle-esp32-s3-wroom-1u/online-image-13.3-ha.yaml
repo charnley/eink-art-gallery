@@ -8,38 +8,11 @@ substitutions:
   device_id: "first"
   wifi_ssid: !secret wifi_ssid
   wifi_password: !secret wifi_password
-  wake_up_time: "04:00:00"
+  wake_up_time: "22:10:00"
 
 esphome:
-  name: eink_frame_${device_id}
+  name: eink-frame-${device_id}
   friendly_name: "eink frame ${device_id}"
-  on_boot:
-    priority: 600.0  # Ensure this runs after time synchronization
-    then:
-      - lambda: |-
-          auto now = id(sntp_time).now();
-          int32_t duration = 24 * 60 * 60;  // Default to 24 hours
-          if (now.is_valid()) {
-            int32_t seconds_since_midnight = now.hour * 3600 + now.minute * 60 + now.second;
-            int32_t seconds_until_4am = 4 * 3600; // 4 AM in seconds
-            
-            if (seconds_since_midnight < seconds_until_4am) {
-              duration = seconds_until_4am - seconds_since_midnight;
-            } else {
-              duration = (24 * 3600 - seconds_since_midnight) + seconds_until_4am;
-            }
-            
-            ESP_LOGI("deep_sleep", "Current time: %02d:%02d:%02d", now.hour, now.minute, now.second);
-            ESP_LOGI("deep_sleep", "Will sleep for %d seconds until next 4:00 AM", duration);
-          } else {
-            ESP_LOGE("deep_sleep", "Invalid time, using fallback sleep duration of 24 hours");
-          }
-          if (!id(stay_awake_mode).state) {
-            id(deep_sleep_control).set_sleep_duration(duration * 1000);
-            ESP_LOGI("deep_sleep", "Sleep duration set to %.2f seconds", float(duration));
-          } else {
-            ESP_LOGI("deep_sleep", "Stay awake mode is active, not setting sleep duration");
-          }
 
 esp32:
   board: dfrobot_firebeetle2_esp32s3
@@ -50,13 +23,11 @@ esp32:
 deep_sleep:
   id: deep_sleep_control
   run_duration: 1min
+  sleep_duration: 24h  # Fallback duration if 'until' doesn't work
 
 time:
-  - platform: sntp
-    id: sntp_time
-
-# Remove the existing interval component
-
+  - platform: homeassistant
+    id: homeassistant_time
 
 logger:
   baud_rate: 115200
@@ -78,8 +49,13 @@ online_image:
     type: BINARY
     on_download_finished:
       then:
+        - logger.log: "Downloaded image, updating display"
         - component.update: my_display
-        - logger.log: "Downloaded image"
+        - delay: 7s
+        - deep_sleep.enter:
+            id: deep_sleep_control
+            until: "${wake_up_time}"
+            time_id: homeassistant_time
     on_error:
       then:
         - logger.log: "Error downloading image"
@@ -103,6 +79,13 @@ display:
       ESP_LOGD("display", "Image displayed successfully");
 
 api:
+  services:
+    - service: enter_deep_sleep
+      then:
+        - deep_sleep.enter:
+            id: deep_sleep_control
+            until: "${wake_up_time}"
+            time_id: homeassistant_time
   on_client_connected:
     then:
       - sensor.template.publish:
@@ -129,9 +112,7 @@ sensor:
     name: "Battery Voltage"
     id: battery_voltage
     update_interval: 60s
-    attenuation: 11db
-    filters:
-      - multiply: 2
+    attenuation: auto
     unit_of_measurement: "V"
     accuracy_decimals: 2
 
@@ -164,7 +145,11 @@ binary_sensor:
               - logger.log:
                   format: "Stay Awake Mode changed to OFF"
                   level: INFO
-              # - deep_sleep.enter: deep_sleep_control
+              - deep_sleep.allow: deep_sleep_control
+              - deep_sleep.enter:
+                  id: deep_sleep_control
+                  until: "${wake_up_time}"
+                  time_id: homeassistant_time
 
   - platform: status
     name: "${device_id} Status"
