@@ -8,7 +8,7 @@ substitutions:
   device_id: "first"
   wifi_ssid: !secret wifi_ssid
   wifi_password: !secret wifi_password
-  wake_up_time: "22:10:00"
+  wake_up_time: "04:00:00"
 
 esphome:
   name: eink-frame-${device_id}
@@ -79,13 +79,6 @@ display:
       ESP_LOGD("display", "Image displayed successfully");
 
 api:
-  services:
-    - service: enter_deep_sleep
-      then:
-        - deep_sleep.enter:
-            id: deep_sleep_control
-            until: "${wake_up_time}"
-            time_id: homeassistant_time
   on_client_connected:
     then:
       - sensor.template.publish:
@@ -102,6 +95,12 @@ api:
             entity_id: input_select.${device_id}_mode
             option: !lambda |-
               return id(stay_awake_mode).state ? "stay_awake" : "deep_sleep";
+      - sensor.template.publish:
+          id: battery_voltage
+          state: !lambda "return id(battery_voltage).state;"
+      - sensor.template.publish:
+          id: battery_level
+          state: !lambda "return id(battery_level).state;"
 
 ota:
   - platform: esphome
