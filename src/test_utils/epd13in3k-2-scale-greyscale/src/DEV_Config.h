@@ -71,6 +71,7 @@
 #define EPD_RST_PIN  26
 #define EPD_DC_PIN   27
 #define EPD_BUSY_PIN 25
+// add the power to EN on the waveshare esp32 driver board
 
 #define GPIO_PIN_SET   1
 #define GPIO_PIN_RESET 0
