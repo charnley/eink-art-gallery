@@ -46,12 +46,12 @@
 **/
 
 // waveshare esp32 driver board - tested and works
-#define EPD_SCK_PIN  13
-#define EPD_MOSI_PIN 14
-#define EPD_CS_PIN   15
-#define EPD_RST_PIN  26
-#define EPD_DC_PIN   27
-#define EPD_BUSY_PIN 25
+// #define EPD_SCK_PIN  13
+// #define EPD_MOSI_PIN 14
+// #define EPD_CS_PIN   15
+// #define EPD_RST_PIN  26
+// #define EPD_DC_PIN   27
+// #define EPD_BUSY_PIN 25
 // add the power to EN on the waveshare esp32 driver board
 
 // feather v2 - esp32 4MB flash and 2 MB PSRAM - tested and works

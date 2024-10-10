@@ -60,7 +60,7 @@ int EPD_13in3k_test(void)
     DEV_Delay_ms(3000);
 #endif
 
-#if 1  // Drawing on the image
+#if 0  // Drawing on the image
 	Paint_NewImage(BlackImage, EPD_13IN3K_WIDTH/2, EPD_13IN3K_HEIGHT/2, 0, WHITE);  	
     Debug("Drawing\r\n");
     //1.Select Image
@@ -98,7 +98,7 @@ int EPD_13in3k_test(void)
     DEV_Delay_ms(3000);
 #endif
 
-#if 1
+#if 0
     Debug("Partial refresh\r\n");
     // If you didn't use the EPD_13IN3K_Display_Base() function to refresh the image before,
     // use the EPD_13IN3K_color_Base() function to refresh the background color, 
@@ -138,7 +138,7 @@ int EPD_13in3k_test(void)
     }
 #endif
     
-#if 1 // show image for array
+#if 0 // show image for array
     free(BlackImage);
     Debug("show Gray------------------------\r\n");
     Imagesize = ((EPD_13IN3K_WIDTH % 4 == 0)? (EPD_13IN3K_WIDTH / 4 ): (EPD_13IN3K_WIDTH / 4 + 1)) * EPD_13IN3K_HEIGHT;
@@ -182,9 +182,12 @@ int EPD_13in3k_test(void)
 	
     Debug("Goto Sleep...\r\n");
     EPD_13IN3K_Sleep();
+
+    Debug("free(BlackImage);\r\n");
     free(BlackImage);
+    Debug("BlackImage = NULL;\r\n");
     BlackImage = NULL;
-    DEV_Delay_ms(2000);//important, at least 2s
+    DEV_Delay_ms(3000);//important, at least 2s
     // close 5V
     Debug("close 5V, Module enters 0 power consumption ...\r\n");
     DEV_Module_Exit();
