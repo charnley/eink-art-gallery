@@ -75,25 +75,61 @@ there are 2 types of boards, set 13.3 to B type
 |------------|------------|
 | 🩶 Grey    | VCC/3.3v   |
 | 🟤 Brown   | GND        |
-| 🟡 Yellow  | CLK/SCK    |
 | 🔵 Blue    | DIN/MOSI   |
+| 🟡 Yellow  | CLK/SCK    |
 | 🟠 Orange  | CS         |
 | 🟢 Green   | DC         |
 | ⚪️ White   | RST        |
 | 🟣 Purple  | Busy       |
 | 🔴 Red     | PWR        |
 
+# DFRobot DFR0975 firebeetle-esp32-s3-wroom-1u wiring
 
-# firebeetle-esp32-s3-wroom-1u wiring
+product page: https://wiki.dfrobot.com/SKU_DFR0975_FireBeetle_2_Board_ESP32_S3
 
 | Wire Color | HAT Driver  | ESP32 Pin    |
 |------------|-------------|--------------|
 | 🩶 Grey    | VCC/3.3v    | 3V3          |
 | 🟤 Brown   | GND         | GND          |
-| 🟡 Yellow  | CLK/SCK     | D12 / IO12   |
 | 🔵 Blue    | DIN/MOSI    | A5  / IO11   |
+| 🟡 Yellow  | CLK/SCK     | D12 / IO12   |
 | 🟠 Orange  | CS          | A4  / IO10   |
 | 🟢 Green   | DC          | D7  / IO9    |
 | ⚪️ White   | RST         | A0  / IO4    |
 | 🟣 Purple  | Busy        | D5  / IO7    |
 | 🔴 Red     | PWR         | SCL / IO2    |
+
+![FireBeetle 2 Board ESP32-S3 Pinout](docs/dfr0975-board.jpg)
+
+# DFRobot DFR1140 firebeetle-esp32-s3-wroom-32e wiring
+> FireBeetle 2 ESP32-UE (N16R2) IoT Microcontroller (16MB Fl., 2MB PS., Supports Ext Antenna, Wi-Fi & Bluetooth)
+product page: 
+
+![FireBeetle 2 Board ESP32-S3- Pinout](docs/dfr1140-board.jpg)
+
+| Wire Color | HAT Driver  | FireBeetle ESP32-UE Pin (Left Side) |
+|------------|-------------|-------------------------------------|
+| 🩶 Grey    | VCC/3.3v    | 3V3                                |
+| 🟤 Brown   | GND         | GND                                |
+| 🔵 Blue    | DIN/MOSI    | GPIO23 (MOSI)                      |
+| 🟡 Yellow  | CLK/SCK     | GPIO18 (SCK)                       |
+| 🟠 Orange  | CS          | GPIO21 (SDA)                        |
+| 🟢 Green   | DC          | GPIO13 (D7)                       |
+| ⚪ White   | RST         | GPIO14 (D6)                        |
+| 🟣 Purple  | Busy        | GPIO26 (D3)                        |
+| 🔴 Red     | PWR         | GPIO25 (D2)                        |
+
+
+
+
+
+### accelerometer
+
+I2C Pin Connections:
+| ADXL345 Pin | ESP32 Pin      |
+|-------------|----------------|
+| VCC         | 3.3V          right side  |
+| GND         | GND           right side  |
+| SDA         | GPIO 21 (SDA) right side  |
+| SCL         | GPIO 18 (SCL) right side  |
+| CS          | VCC (to enable I2C) |
