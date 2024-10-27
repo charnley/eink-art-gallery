@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
 
 
 logger = logging.getLogger(__name__)
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 WIDTH = 960
 HEIGHT = 680
@@ -58,7 +58,7 @@ async def display_bitmap(file: UploadFile):
 
 
 @app.post("/display/image")
-async def display_image(file: UploadFile):
+async def display_image(file: UploadFile, useGrey:bool=False):
     """Upload pillow supported image"""
 
     filename = file.filename
@@ -75,7 +75,7 @@ async def display_image(file: UploadFile):
         raise HTTPException(status_code=400, detail=f"Bad input size '{width}x{height}'")
 
     picture_shower.init()
-    picture_shower.display(image)
+    picture_shower.display(image, use_grey=useGrey)
     picture_shower.sleep()
 
 
