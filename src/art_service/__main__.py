@@ -1,17 +1,11 @@
 import logging
 import warnings
 
-warnings.filterwarnings("ignore", category=UserWarning)
-
-from art_generator import (
-    get_picture_fast,
-    get_picture_slow,
-    preload_fast_model,
-    preload_slow_model,
-)
+from art_generator import load_flux_schnell, load_sd3, prompt_flux_schnell, prompt_sd3
 from art_utils import atkinson_dither
 from art_utils.network_utils import send_photo
 
+warnings.filterwarnings("ignore", category=UserWarning)
 logger = logging.getLogger(__name__)
 
 
@@ -24,28 +18,35 @@ def main(args=None):
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--prompt", type=str, default=None, nargs="+")
-    parser.add_argument("--fast", action=argparse.BooleanOptionalAction)
+    parser.add_argument("--method", type=str, default="SD3", choices=["SD3", "FluxSchnell"])
 
     args = parser.parse_args(args)
 
-    logger.info("Hello World")
-
     # Generate random prompt first
-    logger.info("Generating a random prompt")
     if args.prompt is None:
-        prompt = "Enchanted Forest, Mystical, Glowing Flora, Fauna, Magical Creatures, black and white, single lines, no background"
+        logger.info("Generating a random prompt")
+        prompt = "ink drawing, man yelling, with sign saying 'prompt not found'"
+
     else:
         prompt = " ".join(args.prompt)
 
     logger.info(f"prompt: {prompt}")
     logger.info("Generating a random photo")
 
-    if args.fast:
-        pipe = preload_fast_model()
-        image = get_picture_fast(pipe, prompt)
-    else:
-        pipe = preload_slow_model()
-        image = get_picture_slow(pipe, prompt)
+    if args.method == "SD3":
+        load_func = load_sd3
+        prompt_func = prompt_sd3
+
+    elif args.method == "FluxSchnell":
+        load_func = load_flux_schnell
+        prompt_func = prompt_flux_schnell
+
+    # okay
+    pipe = load_func()
+    image = prompt_func(pipe, prompt)
+
+    # Free GPU Mem
+    del pipe
 
     # Dither
     logger.info("dithering the picture")
@@ -53,6 +54,8 @@ def main(args=None):
 
     logger.info("Sending it to paper frame")
     send_photo(image, "http://192.168.1.26:8080/display/bitmap")
+
+    image.save("test.bmp")
 
 
 if __name__ == "__main__":

@@ -2,11 +2,18 @@ import logging
 from functools import cache
 
 import torch
-from diffusers import AutoPipelineForText2Image, DiffusionPipeline
+from diffusers import (
+    AutoPipelineForText2Image,
+    DiffusionPipeline,
+    FluxPipeline,
+    StableDiffusion3Pipeline,
+)
 
 from art_utils import constants
 
 logger = logging.getLogger(__name__)
+
+NEGATIVE_PROMPT = "paper, frame, picture frame, border, photorealistic, deformed, glitch, blurry, signature, signed, watermark, stamp"
 
 
 def health_check():
@@ -14,12 +21,12 @@ def health_check():
 
 
 @cache
-def preload_fast_model(straight_to_gpu=True):
-    """Return fast pipeline, e.i. stabilityai/sdxl-turbo"""
+def load_sd3(straight_to_gpu=True):
 
-    logger.info("Loading the fast model from disk...")
-    pipe = AutoPipelineForText2Image.from_pretrained(
-        "stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16"
+    logger.info("Loading the slow model from disk...")
+
+    pipe = StableDiffusion3Pipeline.from_pretrained(
+        "stabilityai/stable-diffusion-3-medium-diffusers", torch_dtype=torch.float16
     )
 
     logger.info("Loading the fast model from disk...")
@@ -31,73 +38,51 @@ def preload_fast_model(straight_to_gpu=True):
 
 
 @cache
-def preload_slow_model(straight_to_gpu=True):
-    """Return the slow and pretty model, e.i. stabilityai/stable-diffusion-xl-base-1.0"""
+def load_flux_schnell(straight_to_gpu=True, model_path="./models/flux1schnell"):
 
-    logger.info("Loading the slow model")
-
-    pipe = DiffusionPipeline.from_pretrained(
-        "stabilityai/stable-diffusion-xl-base-1.0",
-        torch_dtype=torch.float16,
-        use_safetensors=True,
-        variant="fp16",
-    )
-    if straight_to_gpu:
-        logger.info("Loading the model to GPU")
-        pipe.to("cuda")
+    pipe = FluxPipeline.from_pretrained(model_path, torch_dtype=torch.bfloat16)
+    # pipe.enable_model_cpu_offload()
+    pipe.enable_sequential_cpu_offload()  # offloads modules to CPU on a submodule level (rather than model level)
 
     return pipe
 
 
-def style_scanner(pipe, prompt, num_images_per_prompt=4):
+def prompt_flux_schnell(pipe, prompt, negative_prompt=NEGATIVE_PROMPT):
 
-    images = []
+    logger.info("Generating picture from prompt, using negative prompts")
 
-    # I need to do it one-at-a-time because I have low mem on my gpu
-    # for _ in range(num_images_per_prompt):
-
-    images += pipe(
-        prompt,
-        # negative_prompt=negative_prompt,
-        num_inference_steps=1,
-        guidance_scale=0.0,
-        num_images_per_prompt=num_images_per_prompt,
-    ).images
-
-    return images
-
-
-def get_picture_fast(pipe, prompt):
-
-    logger.info("Generating picture from prompt")
     image = pipe(
         prompt,
-        # negative_prompt=negative_prompt,
-        width=constants.WIDTH,
-        height=constants.HEIGHT,
-        num_inference_steps=1,
+        # negative_prompt=negative_prompt, # not supported
         guidance_scale=0.0,
-        num_images_per_prompt=1,
+        output_type="pil",
+        num_inference_steps=4,
+        max_sequence_length=256,
+        width=960,
+        height=688,
     ).images[0]
+
+    image = image.resize((constants.WIDTH, constants.HEIGHT))  # ensure right resolution
 
     return image
 
 
-def get_picture_slow(pipe, prompt):
+def prompt_sd3(pipe, prompt, negative_prompt=NEGATIVE_PROMPT):
 
     negative_prompt = "paper, frame, picture frame, border, photorealistic, deformed, glitch, blurry, noisy, off-center, picture-frame, poster, signature"
 
     logger.info("Generating picture from prompt, using negative prompts")
+
     image = pipe(
         prompt,
         negative_prompt=negative_prompt,
-        width=constants.WIDTH,
-        height=constants.HEIGHT,
+        num_inference_steps=28,
+        guidance_scale=7.0,
         num_images_per_prompt=1,
+        width=960,
+        height=688,
     ).images[0]
 
+    image = image.resize((constants.WIDTH, constants.HEIGHT))  # ensure right resolution
+
     return image
-
-
-def prompt_generator():
-    raise NotImplementedError()
