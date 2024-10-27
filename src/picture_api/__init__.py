@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
 
 
 logger = logging.getLogger(__name__)
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 WIDTH = 960
 HEIGHT = 680
