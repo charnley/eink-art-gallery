@@ -20,36 +20,44 @@ logging.info("epd13in3k Demo")
 # epd = epd13in3k.EPD()
 
 
-@cache
+#@cache
 def get_epd():
+    logger.info("epd loading")
     epd = epd13in3k.EPD()
     # epd = epaper.epaper("epd13in3k").EPD()
     return epd
 
 
 def sleep():
+    logger.info("display sleep")
     epd = get_epd()
     epd.sleep()
 
 
 def init():
-    logging.info("init display")
+    logging.info("display init")
     epd = get_epd()
     epd.init()
 
 
 def clear():
-    logging.info("clear display")
+    logging.info("display clear")
     epd = get_epd()
     epd.Clear()
 
 
-def display(image: Image.Image):
-    logging.info("display pillow")
+def display(image: Image.Image, use_grey=False):
+    logging.info(f"display pillow, using grey {use_grey}")
     epd = get_epd()
+
+    if use_grey:
+        epd.init_4GRAY()
+        epd.display_4Gray(epd.getbuffer_4Gray(image))
+        return
+
     epd.display(epd.getbuffer(image))
 
 
 def exit():
-    logging.info("exit epd")
+    logging.info("epd exit")
     epd13in3k.epdconfig.module_exit(cleanup=True)
