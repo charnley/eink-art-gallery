@@ -61,3 +61,8 @@ LAN cannot access the port because of Windows firewall
     [wsl2]
     networkingMode=mirrored
     vmIdleTimeout=-1
+
+
+## Auto start WSL2
+
+Create a shortcut for in %appdata%\Microsoft\Windows\Start Menu\Programs\Startup to wsl.exe
