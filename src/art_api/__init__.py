@@ -23,7 +23,7 @@ app = FastAPI()
 
 HERE = Path.cwd()
 
-config = {"picture_api": "http://192.168.1.26:8080/display/bitmap"}
+config = {"picture_api": "http://192.168.1.26:8080/display/image"}
 
 
 def get_ttl_hash(seconds=3600):

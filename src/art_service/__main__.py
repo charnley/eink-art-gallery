@@ -53,7 +53,7 @@ def main(args=None):
     image = atkinson_dither(image)
 
     logger.info("Sending it to paper frame")
-    send_photo(image, "http://192.168.1.26:8080/display/bitmap")
+    send_photo(image, "http://192.168.1.26:8080/display/image")
 
     image.save("test.bmp")
 
