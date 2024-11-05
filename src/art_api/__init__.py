@@ -35,11 +35,6 @@ class PromptPost(BaseModel):
     prompt: str
 
 
-@app.on_event("startup")
-def start_up():
-    pass
-
-
 @app.get("/status")
 async def get_status():
     # TODO Get if display is busy
@@ -95,6 +90,14 @@ def generate_random(ttl_hash=None):
     image.save(HERE / "cache.png")
 
     return image
+
+
+@app.get("/refresh_cache")
+async def generate_cache():
+    ttl_hash = get_ttl_hash()
+    logger.info(f"Generating random with ttl {ttl_hash}")
+    generate_random(ttl_hash=ttl_hash)  # saves cache
+    return {}, 200
 
 
 @app.get("/cache.png", responses={200: {"content": {"image/png": {}}}}, response_class=Response)
