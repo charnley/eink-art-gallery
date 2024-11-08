@@ -8,6 +8,9 @@
 - [ ] Use dithering
 - [ ] Convert to bitmap
 
+## Dithering
+
+ - https://nibnalin.me/dust-nib/analysing-image-dithering.html
 
 ## Generating pictures locally
 
