@@ -84,3 +84,22 @@ def atkinson_dither_with_palette(image: Image.Image, pallete: np.ndarray):
     set_atkinson_dither_array_palette(img, thresholds)
 
     return Image.fromarray(np.uint8(img))
+
+
+def image_split_red_channel(image: Image):
+
+    data = image.getdata()
+
+    r = [((d[0] - d[1] - d[2]), 0, 0) for d in data]
+    r = [(d[0], d[0], d[0]) for d in r]
+    gb = [(d[0], d[1], d[2]) for d in data]
+
+    gb = [(dgb[0] - dr[0], dgb[1], dgb[2]) for dr, dgb in zip(r, gb)]
+
+    image_r = image.copy()
+    image_r.putdata(r)
+
+    image_gb = image.copy()
+    image_gb.putdata(gb)
+
+    return image_r, image_gb

@@ -4,28 +4,21 @@ import sys
 from functools import cache
 from pathlib import Path
 
-import epaper
-from PIL import Image
-
-# import waveshare_epd
+from PIL.Image import Image
+from waveshare_epd import epd13in3b  # type: ignore
 from waveshare_epd import epd13in3k  # type: ignore
-
-# epaper_path = Path(site.getsitepackages()[0]) / "epaper/e-Paper/RaspberryPi_JetsonNano/python/lib"
-# sys.path.append(str(epaper_path))
-
 
 logger = logging.getLogger(__name__)
 
-logging.info("epd13in3k Demo")
-# epd = epd13in3k.EPD()
+logging.info("epd13in3(K/B) picture api")
 
 
-#@cache
-def get_epd():
+@cache
+def get_epd(use_red=False):
     logger.info("epd loading")
-    epd = epd13in3k.EPD()
-    # epd = epaper.epaper("epd13in3k").EPD()
-    return epd
+    if use_red:
+        return epd13in3b.EPD()
+    return epd13in3k.EPD()
 
 
 def sleep():
@@ -56,6 +49,12 @@ def display(image: Image.Image, use_grey=False):
         return
 
     epd.display(epd.getbuffer(image))
+
+
+def display_red(image_red: Image, image_black: Image):
+    logging.info("display pillow, using red")
+    epd = get_epd(use_red=True)
+    epd.display(epd.getbuffer(image_black), epd.getbuffer(image_red))
 
 
 def exit():
