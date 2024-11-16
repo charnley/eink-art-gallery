@@ -1,3 +1,4 @@
+import warnings
 import logging
 from contextlib import asynccontextmanager
 from io import BytesIO
@@ -10,21 +11,28 @@ import picture_shower
 
 logger = logging.getLogger(__name__)
 
+warnings.filterwarnings('ignore', message="No module named 'lgpio'")
+
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_: FastAPI):
     logger.info("Starting Picture API")
     # clear on boot
-    clear()
+    picture_shower.init()
+    picture_shower.clear()
+    picture_shower.sleep()
     # TODO Create text on display
+
     yield
     # clear on exit
     logger.info("Exiting Picture API")
-    clear()
+    picture_shower.init()
+    picture_shower.clear()
+    picture_shower.sleep()
 
 
 logger = logging.getLogger(__name__)
-app = FastAPI(lifespane=lifespan)
+app = FastAPI(lifespan=lifespan)
 
 WIDTH = 960
 HEIGHT = 680
@@ -53,6 +61,7 @@ async def display_image(file: UploadFile, useGrey: bool = False):
     width, height = image.size
 
     if width != WIDTH or height != HEIGHT:
+        logger.error("Wrong size")
         raise HTTPException(status_code=400, detail=f"Bad input size '{width}x{height}'")
 
     picture_shower.init()
@@ -67,11 +76,14 @@ async def display_red_image(redFile: UploadFile, blackFile: UploadFile):
     filename_red = redFile.filename
     filename_black = blackFile.filename
 
-    request_object_content = await filename_red.read()
+    request_object_content = await redFile.read()
     image_red = Image.open(BytesIO(request_object_content))
 
-    request_object_content = await filename_black.read()
+    request_object_content = await blackFile.read()
     image_black = Image.open(BytesIO(request_object_content))
+
+    print(image_red.size)
+    print(image_black.size)
 
     if image_red.size != image_black.size:
         raise HTTPException(
@@ -81,6 +93,7 @@ async def display_red_image(redFile: UploadFile, blackFile: UploadFile):
     width, height = image_red.size
 
     if width != WIDTH or height != HEIGHT:
+        logger.error("Wrong size")
         raise HTTPException(status_code=400, detail=f"Bad input size '{width}x{height}'")
 
     picture_shower.init()
