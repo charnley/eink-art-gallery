@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 logging.info("epd13in3(K/B) picture api")
 
 
-@cache
-def get_epd(use_red=False):
+def get_epd(use_red=True):
     logger.info("epd loading")
     if use_red:
         return epd13in3b.EPD()
@@ -39,7 +38,7 @@ def clear():
     epd.Clear()
 
 
-def display(image: Image.Image, use_grey=False):
+def display(image: Image, use_grey=False):
     logging.info(f"display pillow, using grey {use_grey}")
     epd = get_epd()
 
@@ -54,9 +53,9 @@ def display(image: Image.Image, use_grey=False):
 def display_red(image_red: Image, image_black: Image):
     logging.info("display pillow, using red")
     epd = get_epd(use_red=True)
-    epd.display(epd.getbuffer(image_black), epd.getbuffer(image_red))
+    epd.display(epd.getbuffer(image_red), epd.getbuffer(image_black))
 
 
-def exit():
-    logging.info("epd exit")
-    epd13in3k.epdconfig.module_exit(cleanup=True)
+# def exit():
+#    logging.info("epd exit")
+#    epd13in3k.epdconfig.module_exit(cleanup=True)
