@@ -15,15 +15,15 @@ from PIL import Image
 from pydantic import BaseModel
 
 from art_generator import load_sd3, prompt_sd3
-from art_utils import atkinson_dither
-from art_utils.network_utils import send_photo
+from art_utils import atkinson_dither, image_split_red_channel
+from art_utils.network_utils import send_photo, send_photo_red
 
 logger = logging.getLogger(__name__)
 app = FastAPI()
 
 HERE = Path.cwd()
 
-config = {"picture_api": "http://192.168.1.26:8080/display/image"}
+config = {"URL": "http://192.168.1.26:8080"}
 
 
 def get_ttl_hash(seconds=3600):
@@ -47,19 +47,28 @@ async def get_status():
 
 
 @app.post("/prompt")
-async def post_prompt(promptPost: PromptPost):
+async def post_prompt(promptPost: PromptPost, useRed=True):
 
     logger.info(f"Prompt: {promptPost}")
 
     pipe = load_sd3()
     image = prompt_sd3(pipe, str(promptPost.prompt))
 
-    # Dither
-    logger.info("dithering the picture")
-    image = atkinson_dither(image)
+    if useRed:
+        logger.info("splitting and dithering the picture")
+        image_r, image_b = image_split_red_channel(image)
+        image_r = atkinson_dither(image_r)
+        image_b = atkinson_dither(image_b)
+        logger.info("Sending it to red paper frame")
+        r = send_photo_red(image_b, image_r, f"{config['URL']}/display/redImage")
 
-    logger.info("Sending it to paper frame")
-    send_photo(image, config["picture_api"])
+    else:
+        logger.info("dithering the picture")
+        image = atkinson_dither(image)
+        logger.info("Sending it to paper frame")
+        r = send_photo(image, f"{config['URL']}/display/image")
+
+    logger.info(f"Got {r} after {r.elapsed.total_seconds()} seconds")
 
     # Free GPU Mem
     del pipe
