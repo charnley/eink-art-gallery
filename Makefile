@@ -65,8 +65,7 @@ start-art-jupyter:
 	HF_HOME=${ROOT_DIR}/models jupyter-lab
 
 start-art-service:
-	@# HF_HOME=${ROOT_DIR}/models ${python} -m art_service --prompt \"$$(shuf -n 1 ./assets/random_prompts.txt), $$(shuf -n 1 ./assets/random_styles.txt)\"
-	HF_HOME=${ROOT_DIR}/models ${python} -m art_service --prompt \"$$(shuf -n 1 ./assets/random_artists.txt)\"
+	HF_HOME=${ROOT_DIR}/models ${python} -m art_service --prompt \"$$(shuf -n 1 ./assets/random_artists.txt)\" --use-red
 
 start-art-api:
 	HF_HOME=${ROOT_DIR}/models \
