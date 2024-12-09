@@ -1,0 +1,8 @@
+fastapi
+sqlmodel
+matplotlib
+numpy
+pillow
+uvicorn
+pip
+setuptools
