@@ -3,11 +3,12 @@
 import logging
 import random
 import time
+import uuid
 from functools import cache
 from io import BytesIO
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, UploadFile
+from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_utilities import repeat_at, repeat_every
@@ -35,6 +36,24 @@ class PromptPost(BaseModel):
     prompt: str
 
 
+@cache
+def get_random_lines():
+
+    filename = Path(__file__) / "../../../assets/random_artists.txt"
+    filename = Path(__file__) / "../../../assets/random_christmas.txt"
+    filename = filename.resolve()
+
+    with open(filename) as f:
+        lines = f.read().splitlines()
+
+    return lines
+
+
+def get_random_line():
+    lines = get_random_lines()
+    return random.choice(lines).strip()
+
+
 @app.get("/status")
 async def get_status():
     # TODO Get if display is busy
@@ -51,8 +70,14 @@ async def post_prompt(promptPost: PromptPost, useRed=True):
 
     logger.info(f"Prompt: {promptPost}")
 
+    prompt = str(promptPost.prompt)
+    if prompt == "string" or prompt == "" or prompt is None or prompt == ",":
+        logger.info("actually, use a random prompt")
+        prompt = get_random_line()
+        logger.info(prompt)
+
     pipe = load_sd3()
-    image = prompt_sd3(pipe, str(promptPost.prompt))
+    image = prompt_sd3(pipe, prompt)
 
     if useRed:
         logger.info("splitting and dithering the picture")
@@ -68,18 +93,67 @@ async def post_prompt(promptPost: PromptPost, useRed=True):
         logger.info("Sending it to paper frame")
         r = send_photo(image, f"{config['URL']}/display/image")
 
-    logger.info(f"Got {r} after {r.elapsed.total_seconds()} seconds")
+    logger.info(f"Got {r} after {r.elapsed.total_seconds():.0f} seconds")
+
+    # Free GPU Mem
+    # del pipe # TODO Keep-Alive mode
+
+    return {}
+
+
+@repeat_at(cron="*/5 * * * *")
+def _generate_random_queue():
+    logger.info("Checking for queue")
+    filenames = list(dir.glob("**/*.png"))
+
+    if not len(filenames):
+        logger.info("Generating more images for the queue")
+        generate_queue("", n_images=10)
+
+
+def generate_queue(prompt, n_images=1):
+
+    dir = HERE / "queue"
+
+    logger.info(f"Prompt: {prompt}")
+
+    pipe = load_sd3()
+
+    for _ in range(n_images):
+
+        if prompt == "string" or prompt == "" or prompt is None:
+            _prompt = get_random_line()
+            logger.info("Use random prompt")
+        else:
+            _prompt = prompt
+
+        image = prompt_sd3(pipe, _prompt)
+        id = str(uuid.uuid4())
+
+        filename = (dir / id).with_suffix(".png")
+        image.save(filename, format="png")
 
     # Free GPU Mem
     del pipe
 
-    return {}
+    return
+
+
+@app.post("/images/generate")
+async def post_prompt_queue(promptPost: PromptPost, nImages: int = 1):
+
+    n_images = int(nImages)
+    prompt = str(promptPost.prompt)
+    generate_queue(prompt, n_images=n_images)
+
+    return
 
 
 # @cache
 def generate_random(ttl_hash=None):
 
     filename = Path(__file__) / "../../../assets/random_artists.txt"
+    filename = Path(__file__) / "../../../assets/random_christmas.txt"
     filename = filename.resolve()
 
     with open(filename) as f:
@@ -112,8 +186,37 @@ async def generate_cache():
 @app.get("/cache.png", responses={200: {"content": {"image/png": {}}}}, response_class=Response)
 async def _fetch_cache():
 
-    image = Image.open(HERE / "cache.png")
     logger.info(f"Loading cache from {HERE}")
+    image = Image.open(HERE / "cache.png")
+
+    with BytesIO() as buf:
+        image.save(buf, format="png")
+        image_bytes = buf.getvalue()
+
+    headers = {"Content-Disposition": 'inline; filename="image.png"'}
+    return Response(image_bytes, headers=headers, media_type="image/png")
+
+
+@app.get("/queue.png", responses={200: {"content": {"image/png": {}}}}, response_class=Response)
+async def _fetch_queue():
+
+    dir = HERE / "queue"
+
+    logger.info(f"Loading random from {dir}")
+
+    filenames = list(dir.glob("**/*.png"))
+
+    logger.info(f"Found {len(filenames)} random images")
+
+    if not len(filenames):
+        return None, 404
+
+    filename = random.choice(filenames)
+
+    image = Image.open(filename)
+    image = atkinson_dither(image)
+
+    filename.unlink()  # Delete
 
     with BytesIO() as buf:
         image.save(buf, format="png")
