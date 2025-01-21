@@ -1,0 +1,12 @@
+substitutions:
+  # Pin definitions for DFR1140 FireBeetle ESP32-UE
+  spi_clk_pin: "GPIO18"
+  spi_mosi_pin: "GPIO35"
+  display_cs_pin: "GPIO21"
+  display_dc_pin: "GPIO13"
+  display_busy_pin: "GPIO34"
+  display_reset_pin: "GPIO14"
+  battery_voltage_pin: "GPIO4"  # Using PWR pin for battery voltage
+
+# Include the base configuration
+<<: !include boards/firebeetle-esp32-s3-wroom-1u/online-image-13.3-ha.yaml

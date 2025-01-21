@@ -1,0 +1,23 @@
+substitutions:
+  spi_clk_pin: "GPIO18"
+  spi_mosi_pin: "GPIO35"
+  display_cs_pin: "GPIO21"
+  display_dc_pin: "GPIO12"
+  display_busy_pin: "GPIO34"
+  display_reset_pin: "GPIO39"
+
+<<: !include ../firebeetle-esp32-s3-wroom-1u/image-on-device-13.3.yaml
+
+esphome:
+  name: epaperdisplay
+
+  platformio_options:
+    platform: espressif32@6.9.0
+    board: dfrobot_firebeetle2_esp32e 
+    framework: arduino
+
+esp32:
+  board: dfrobot_firebeetle2_esp32e
+  framework:
+    type: arduino
+  variant: ESP32S3

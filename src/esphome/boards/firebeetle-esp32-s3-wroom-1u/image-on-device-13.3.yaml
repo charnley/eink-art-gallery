@@ -1,3 +1,11 @@
+substitutions:
+  spi_clk_pin: "12"
+  spi_mosi_pin: "11"
+  display_cs_pin: "10"
+  display_dc_pin: "9"
+  display_busy_pin: "7"
+  display_reset_pin: "4"
+
 esphome:
   name: epaperdisplay
   on_boot:
@@ -15,7 +23,7 @@ esp32:
 
 logger:
   baud_rate: 115200
-  level: VERY_VERBOSE
+  level: INFO
 
 debug:
   update_interval: 2s
@@ -26,6 +34,7 @@ sensor:
       name: "Heap Free"
     block:
       name: "Heap Max Block"
+
 image:
   - file: ../../images/960x680/test.png
     id: my_image
@@ -34,26 +43,23 @@ image:
     dither: FLOYDSTEINBERG
 
 spi:
-  clk_pin: 12  # SCK
-  mosi_pin: 11 # SPI DIN
+  clk_pin: ${spi_clk_pin}
+  mosi_pin: ${spi_mosi_pin}
 
 display:
   - platform: waveshare_epaper
     id: my_display
-
-    cs_pin: 10          # Chip Select (CS)
-    dc_pin: 9           # Data/Command (DC)
-    busy_pin: 7
-    reset_pin: 4        # Reset (RST)
+    cs_pin: ${display_cs_pin}
+    dc_pin: ${display_dc_pin}
+    busy_pin: ${display_busy_pin}
+    reset_pin: ${display_reset_pin}
     reset_duration: 300ms
-
     model: 13.3in-k
     update_interval: never
     lambda: |-
       it.image(0, 0, id(my_image));
-      ESP_LOGD("display", "Image displayed successfull");
+      ESP_LOGD("display", "Image displayed successfully");
 
 deep_sleep:
   run_duration: 20s
   sleep_duration: 1s
-

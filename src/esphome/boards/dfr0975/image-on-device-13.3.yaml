@@ -1,0 +1,9 @@
+substitutions:
+  spi_clk_pin: "12"
+  spi_mosi_pin: "11"
+  display_cs_pin: "10"
+  display_dc_pin: "9"
+  display_busy_pin: "7"
+  display_reset_pin: "4"
+
+<<: !include ../firebeetle-esp32-s3-wroom-1u/image-on-device-13.3.yaml

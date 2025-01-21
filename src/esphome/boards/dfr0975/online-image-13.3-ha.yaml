@@ -1,0 +1,12 @@
+substitutions:
+  # Pin definitions for the new model
+  spi_clk_pin: "12"
+  spi_mosi_pin: "11"
+  display_cs_pin: "10"
+  display_dc_pin: "9"
+  display_busy_pin: "7"
+  display_reset_pin: "4"
+  battery_voltage_pin: "GPIO1"
+
+# Include the base configuration
+<<: !include boards/firebeetle-esp32-s3-wroom-1u/online-image-13.3-ha.yaml

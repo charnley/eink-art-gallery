@@ -104,19 +104,19 @@ product page: https://wiki.dfrobot.com/SKU_DFR0975_FireBeetle_2_Board_ESP32_S3
 # DFRobot DFR1140 firebeetle-esp32-s3-wroom-32e wiring
 > FireBeetle 2 ESP32-UE (N16R2) IoT Microcontroller (16MB Fl., 2MB PS., Supports Ext Antenna, Wi-Fi & Bluetooth)
 product page: 
-
+https://wiki.dfrobot.com/_SKU_DFR1140_FireBeetle_2_ESP32_UE_N16R2_IoT_Microcontroller
 ![FireBeetle 2 Board ESP32-S3- Pinout](docs/dfr1140-board.jpg)
 
 | Wire Color | HAT Driver  | FireBeetle ESP32-UE Pin (Left Side) |
 |------------|-------------|-------------------------------------|
 | 🩶 Grey    | VCC/3.3v    | 3V3                                |
 | 🟤 Brown   | GND         | GND                                |
-| 🔵 Blue    | DIN/MOSI    | GPIO23 (MOSI)                      |
+| 🔵 Blue    | DIN/MOSI    | GPIO35 (A3)                        |
 | 🟡 Yellow  | CLK/SCK     | GPIO18 (SCK)                       |
-| 🟠 Orange  | CS          | GPIO21 (SDA)                        |
-| 🟢 Green   | DC          | GPIO13 (D7)                       |
+| 🟠 Orange  | CS          | GPIO21 (SDA)                       |
+| 🟢 Green   | DC          | GPIO13 (D7)                        |
 | ⚪ White   | RST         | GPIO14 (D6)                        |
-| 🟣 Purple  | Busy        | GPIO26 (D3)                        |
+| 🟣 Purple  | Busy        | GPIO34 (A2)                        |
 | 🔴 Red     | PWR         | GPIO25 (D2)                        |
 
 
@@ -133,3 +133,10 @@ I2C Pin Connections:
 | SDA         | GPIO 21 (SDA) right side  |
 | SCL         | GPIO 18 (SCL) right side  |
 | CS          | VCC (to enable I2C) |
+
+### on-off switch
+I2C
+| DFRobot1140 | Switch      |
+|-------------|-------------|
+| GND         | GND         |
+| Other       | GPIO 04 (D12) |
