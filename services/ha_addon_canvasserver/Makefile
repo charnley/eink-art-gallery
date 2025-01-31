@@ -20,6 +20,9 @@ dev:
 start-api:
 	${python} -m canvasserver
 
+init:
+	${python} -m canvasserver --init-db
+
 ## Docker
 
 docker-build:
