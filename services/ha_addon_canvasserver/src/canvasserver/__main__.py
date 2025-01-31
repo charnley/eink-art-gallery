@@ -21,8 +21,9 @@ def main(args=None):
     logging.basicConfig(level=logging.DEBUG)
 
     if args.init_db:
-        logger.info("Generating table")
+        logger.info("Generating table...")
         create_db_and_tables()
+        logger.info("Done")
         sys.exit(0)
 
     logger.info(f"Starting {__name__}")
