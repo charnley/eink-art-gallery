@@ -24,7 +24,7 @@ def get_item(id: str):
 
 
 @router.get("/{id}/images", response_model=Images)
-def get_item(id: str):
+def get_item_childs(id: str):
     session = get_session()
     item = session.get(Prompt, id)
     if not item:
@@ -58,7 +58,7 @@ def create_item(prompt: Prompt):
         session.commit()
         session.refresh(prompt)
 
-    except IntegrityError:
+    except ValueError:
         session.rollback()
 
         raise HTTPException(

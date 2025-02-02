@@ -3,15 +3,18 @@ import io
 import uuid
 from hashlib import sha256
 
-from PIL import Image
+from PIL import Image as PilImage
+from pydantic import model_serializer
 from sqlalchemy import event
 from sqlmodel import Field, LargeBinary
 from sqlmodel import SQLModel as Model
 from sqlmodel import TypeDecorator
 
+from ..constants import IMAGE_FORMAT
+
 
 def compress(s):
-    if type(s) == str:
+    if isinstance(s, str):
         s = s.encode()
     b = gzip.compress(s)
     return b
@@ -28,13 +31,13 @@ class ImageColumn(TypeDecorator):
     @staticmethod
     def save_image(image):
         output = io.BytesIO()
-        image.save(output, format="PNG")
+        image.save(output, format=IMAGE_FORMAT)
         hex_data = output.getvalue()
         return hex_data
 
     @staticmethod
     def load_image(hex_data):
-        image = Image.open(io.BytesIO(hex_data))
+        image = PilImage.open(io.BytesIO(hex_data))
         return image
 
     def process_bind_param(self, value, dialect):
@@ -47,25 +50,51 @@ class ImageColumn(TypeDecorator):
 class Image(Model, table=True):
     __tablename__ = "image"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    title: str = Field(max_length=255)
     prompt: str = Field(foreign_key="prompt.id", nullable=False, ondelete="CASCADE")
     image_data: bytes = Field(sa_column=LargeBinary)
+    # has_colors: bool = Field()
+    width: int = Field()
+    height: int = Field()
 
     @property
-    def image(self) -> Image.Image:
-        return Image.open(io.BytesIO(self.image_data))
+    def image(self) -> PilImage.Image:
+        return PilImage.open(io.BytesIO(self.image_data))
 
     @image.setter
-    def image(self, image: Image.Image) -> None:
+    def image(self, image: PilImage.Image) -> None:
         output = io.BytesIO()
-        image.save(output, format="PNG")
+        image.save(output, format=IMAGE_FORMAT)
         hex_data = output.getvalue()
         self.image_data = hex_data
+        self.width, self.height = image.size
+
+    @model_serializer
+    def ser_model(self) -> dict[str, str | float | int]:
+        return {
+            "id": str(self.id),
+            "prompt": str(self.prompt),
+            "width": self.width,
+            "height": self.height,
+        }
+
+    def __str__(self) -> str:
+        return f"Image(id={self.id},prompt={self.prompt})"
+
+    def __repr__(self) -> str:
+        return f"Image(id={self.id},prompt={self.prompt})"
 
 
 class Images(Model):
     images: list[Image]
     count: int
+
+
+class ImageCreate(Model):
+    prompt: str
+
+
+class ImageMeta(Model):
+    prompt: str
 
 
 class Prompt(Model, table=True):
@@ -83,7 +112,7 @@ class Prompt(Model, table=True):
 
 @event.listens_for(Prompt, "before_insert")
 def ensure_id_in_prompt(mapper, connection, target):
-    if not target.id is None:
+    if target.id is not None:
         return
 
     target.id = Prompt.generate_id(target.prompt)
@@ -99,6 +128,7 @@ class ReadingDevice(Model, table=True):
     id: str = Field(primary_key=True)
     ip: str = Field()
     name: str = Field()
+    color_support: str = Field()
 
 
 class Queue(Model):
