@@ -3,7 +3,9 @@ from canvasserver.routes import api_router
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-app = FastAPI(title=APP_NAME)
+from .version import __version__
+
+app = FastAPI(title=APP_NAME, version=__version__)
 
 # Set all CORS enabled origins
 app.add_middleware(

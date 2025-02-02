@@ -1,4 +1,5 @@
 fastapi
+python-multipart
 sqlmodel
 matplotlib
 numpy
@@ -6,3 +7,4 @@ pillow
 uvicorn
 pip
 setuptools
+numba
