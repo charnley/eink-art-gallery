@@ -3,6 +3,7 @@ APP_NAME = "CanvasServer"
 # Default Image format
 IMAGE_FORMAT = "PNG"
 IMAGE_EXTENSION = "png"
+IMAGE_CONTENT_TYPE = "image/png"
 
 # Default Image settings
 IMAGE_DPI = 96

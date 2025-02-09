@@ -5,23 +5,25 @@ from canvasserver.constants import IMAGE_EXTENSION, IMAGE_HEADER
 from canvasserver.image_utils import dithering, image_to_bytes
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
 from PIL import Image as PilImage
+from sqlalchemy.orm import Session
 
 from ..models.content import Image, ImageCreate, Images, Prompt
 from ..models.db import get_session
 
-router = APIRouter(prefix="/images", tags=["images"])
+prefix = "/images"
+router = APIRouter(prefix=prefix, tags=["images"])
+
+FILE_UPLOAD_KEY = "files"
 
 
 @router.get("/", response_model=Images)
-def read_items(limit=100):
-    session = get_session()
-    images = session.query(Image).all()
+def read_items(limit=100, session: Session = Depends(get_session)):
+    images = session.query(Image).limit(limit).all()
     return Images(images=images, count=len(images))
 
 
 @router.get("/{id}", response_model=Image)
-def read_item(id: uuid.UUID):
-    session = get_session()
+def read_item(id: uuid.UUID, session: Session = Depends(get_session)):
     item = session.get(Image, id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -33,9 +35,8 @@ def read_item(id: uuid.UUID):
     responses={200: {"content": {f"image/{IMAGE_EXTENSION}": {}}}},
     response_class=Response,
 )
-async def read_item_png(id: uuid.UUID):
+async def read_item_png(id: uuid.UUID, session: Session = Depends(get_session)):
 
-    session = get_session()
     item = session.get(Image, id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -48,7 +49,9 @@ async def read_item_png(id: uuid.UUID):
 
 @router.post("/")
 async def create_items(
-    base: ImageCreate = Depends(), files: list[UploadFile] = File(...)
+    base: ImageCreate = Depends(),
+    files: list[UploadFile] = File(...),
+    session: Session = Depends(get_session),
 ) -> Images:
 
     if base.prompt is None:
@@ -58,7 +61,6 @@ async def create_items(
         )
 
     id = base.prompt
-    session = get_session()
     prompt = session.get(Prompt, id)
     if prompt is None:
         raise HTTPException(
@@ -84,16 +86,16 @@ async def create_items(
     for image in images:
         session.add(image)
 
-    # try:
-    session.commit()
-    session.refresh(prompt)
+    try:
+        session.commit()
+        session.refresh(prompt)
 
-    # except:
-    #     session.rollback()
+    except:
+        session.rollback()
 
-    #     raise HTTPException(
-    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    #         detail="An error occurred while saving images.",
-    #     )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while saving images.",
+        )
 
     return Images(images=images, count=len(images))
