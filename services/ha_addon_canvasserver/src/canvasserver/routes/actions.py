@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 prefix = "/actions"
 router = APIRouter(prefix=prefix, tags=["actions"])
 
+endpoint_queue = "/queue.png"
+
 
 def _generate_image(prompt):
 
@@ -45,10 +47,17 @@ def set_items(promptId, session: Session = Depends(get_session)):
 
     task_status[task_id] = {"status": "processing", "image_url": None}
 
-    return
+    return Response()
 
 
-@router.get("/queue.png", responses={200: {"content": {"image/png": {}}}}, response_class=Response)
+@router.get(
+    endpoint_queue,
+    responses={
+        200: {"content": {"image/png": {}}},
+        404: {"content": {"image/png": {}}},
+    },
+    response_class=Response,
+)
 async def _get_queue(dry_run: bool = False, session: Session = Depends(get_session)):
 
     # Get the next image

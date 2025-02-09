@@ -15,6 +15,6 @@ def image_to_bytes(image: Image.Image):
     return image_bytes
 
 
-def bytes_to_image(bytes):
-
-    return
+def bytes_to_image(image_data) -> Image.Image:
+    image = Image.open(BytesIO(image_data))
+    return image
