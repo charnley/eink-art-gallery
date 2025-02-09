@@ -1,12 +1,15 @@
 from datetime import datetime
-from functools import cache
+from functools import lru_cache
+from io import BytesIO
 
-from ..constants import DATE_FORMAT, FONT_FAMILY, FONT_WEIGHT
+from PIL import Image
+
+from ..constants import DATE_FORMAT, FONT_FAMILY, FONT_WEIGHT, IMAGE_FORMAT
 from . import matplotlib_utils
 
 FONT = dict(
-    fontweight=FONT_WEIGHT,
-    fontfamily=FONT_FAMILY,
+    # fontweight=FONT_WEIGHT,
+    # fontfamily=FONT_FAMILY,
 )
 
 
@@ -43,6 +46,7 @@ def get_basic_text(text, alt_text=None, font=FONT):
     return image
 
 
+@lru_cache()
 def get_basic_404(text, font=FONT):
 
     now = datetime.now()
@@ -84,3 +88,10 @@ def get_basic_404(text, font=FONT):
     image = matplotlib_utils.plot_to_image(fig)
 
     return image
+
+
+# def image_to_bytes(image: Image.Image):
+#     byte_io = BytesIO()
+#     image.save(byte_io, IMAGE_FORMAT)
+#     byte_io.seek(0)
+#     return byte_io
