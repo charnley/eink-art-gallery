@@ -2,11 +2,14 @@ from uuid import uuid1
 
 from canvasserver.constants import IMAGE_CONTENT_TYPE
 from canvasserver.facades import get_basic_text
-from canvasserver.image_utils import image_to_bytes
+from canvasserver.image_utils import bytes_to_image, image_to_bytes
 from canvasserver.models.content import ImageCreate, Images, Prompt, Prompts
+from canvasserver.routes.actions import endpoint_queue
+from canvasserver.routes.actions import prefix as action_prefix
 from canvasserver.routes.images import FILE_UPLOAD_KEY
 from canvasserver.routes.images import prefix as image_prefix
 from canvasserver.routes.prompts import prefix as prompt_prefix
+from PIL import Image as PilImage
 
 
 def test_new_prompt_new_images(tmp_client):
@@ -18,7 +21,7 @@ def test_new_prompt_new_images(tmp_client):
     assert response0.json()["count"] == 0
 
     # Create prompt
-    prompt = Prompt(prompt="Test prompt", model="")
+    prompt = Prompt(prompt="New And Fancy Prompt For Images, drawing, black and white", model="")
     response1 = tmp_client.post(prompt_prefix, json=prompt.model_dump())
     print(response1.json())
     assert response1.status_code == 200
@@ -68,13 +71,28 @@ def test_new_prompt_new_images(tmp_client):
 
     # Read image that does exist
     one_image_id = images_respond3.images[0].id
-    response5 = tmp_client.get(image_prefix + f"/{one_image_id}")
-    assert response5.status_code == 200
+    response_5b = tmp_client.get(image_prefix + f"/{one_image_id}")
+    assert response_5b.status_code == 200
 
-    # TODO Read prompt images
+    # Fetch queue five times
+    for _ in range(n_new_images):
+        response_6a = tmp_client.get(action_prefix + endpoint_queue)
+        assert response_6a.status_code == 200
 
-    # TODO Fetch queue
+        # Assert that is is picture
+        image_6a = bytes_to_image(response_6a.content)
+        assert isinstance(image_6a, PilImage.Image)
 
-    # TODO Re-count
+    response_6b = tmp_client.get(action_prefix + endpoint_queue)
+    assert response_6b.status_code == 404
 
-    return
+    # Assert that is is picture
+    image_6b = bytes_to_image(response_6b.content)
+    assert isinstance(image_6b, PilImage.Image)
+
+    # Read images and count
+    response_7 = tmp_client.get(image_prefix)
+    print(response_7.json())
+    assert response_7.status_code == 200
+    images_respond_7 = Images(**response_7.json())
+    assert images_respond_7.count == 0
