@@ -1,22 +1,23 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 from sqlmodel import select
 
 from ..models.content import Images, Prompt, Prompts
 from ..models.db import get_session
 
-router = APIRouter(prefix="/prompts", tags=["prompt"])
+prefix = "/prompts"
+router = APIRouter(prefix=prefix, tags=["prompt"])
 
 
 @router.get("/", response_model=Prompts)
-def read_items(limit=100):
-    session = get_session()
+def read_items(limit=100, session: Session = Depends(get_session)):
     prompts = session.query(Prompt).limit(limit).all()
     return Prompts(prompts=prompts, count=len(prompts))
 
 
 @router.get("/{id}", response_model=Prompt)
-def get_item(id: str):
-    session = get_session()
+def get_item(id: str, session: Session = Depends(get_session)):
+
     item = session.get(Prompt, id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -24,8 +25,8 @@ def get_item(id: str):
 
 
 @router.get("/{id}/images", response_model=Images)
-def get_item_childs(id: str):
-    session = get_session()
+def get_item_childs(id: str, session: Session = Depends(get_session)):
+
     item = session.get(Prompt, id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -38,8 +39,7 @@ def get_item_childs(id: str):
 
 
 @router.post("/")
-def create_item(prompt: Prompt):
-    session = get_session()
+def create_item(prompt: Prompt, session: Session = Depends(get_session)):
 
     prompt.id = None
 

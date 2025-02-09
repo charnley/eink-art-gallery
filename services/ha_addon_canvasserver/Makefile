@@ -23,6 +23,9 @@ start-api:
 init:
 	${python} -m canvasserver --init-db
 
+test:
+	${python} -m pytest ./tests/
+
 ## Docker
 
 docker-build:
