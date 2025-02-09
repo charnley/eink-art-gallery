@@ -33,7 +33,7 @@ def _generate_image(prompt):
 
 
 @router.get("/fill_queue/{promptId}", response_model=None, tags=["actions"])
-def set_items(promptId, session: Session = Depends(get_session)):
+def _set_items(promptId, session: Session = Depends(get_session)):
 
     prompt = session.get(Prompt, id)
     if not prompt:
@@ -59,6 +59,9 @@ def set_items(promptId, session: Session = Depends(get_session)):
     response_class=Response,
 )
 async def _get_queue(dry_run: bool = False, session: Session = Depends(get_session)):
+
+    # TODO Check for reading_device, check for color and for size
+    # TODO Check for current active prompt
 
     # Get the next image
     image_obj = session.query(Image).order_by(func.random()).first()
@@ -87,3 +90,20 @@ async def _get_queue(dry_run: bool = False, session: Session = Depends(get_sessi
         media_type=IMAGE_CONTENT_TYPE,
         status_code=200 if not is_empty else 404,
     )
+
+
+@router.get("/clean_up", response_model=None, tags=["actions"])
+def _clean_up(session: Session = Depends(get_session)):
+
+    # TODO Check if prompts needs to be updated
+    # TODO Check if prompts are irrelevant
+
+    return
+
+
+@router.get("/queue_check", response_model=None, tags=["actions"])
+def _check_up(session: Session = Depends(get_session)):
+
+    # TODO Find prompt queues with less than 5 photos
+
+    return

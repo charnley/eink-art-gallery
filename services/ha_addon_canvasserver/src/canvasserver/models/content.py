@@ -69,7 +69,7 @@ class Image(Model, table=True):
         self.width, self.height = image.size
 
     @model_serializer
-    def ser_model(self) -> dict[str, str | float | int]:
+    def _ser(self) -> dict[str, str | float | int]:
         return {
             "id": str(self.id),
             "prompt": str(self.prompt),
@@ -103,6 +103,8 @@ class Prompt(Model, table=True):
     prompt: str = Field()
     model: str = Field()
 
+    # TODO Prompt needs a lifetime
+
     @staticmethod
     def generate_id(prompt_text: str) -> str:
         m = sha256()
@@ -121,6 +123,27 @@ def ensure_id_in_prompt(mapper, connection, target):
 class Prompts(Model):
     prompts: list[Prompt]
     count: int
+
+
+class Theme(Model, table=True):
+    __tablename__ = "theme"
+    id: str = Field(primary_key=True, default=None)
+    theme: str = Field()
+
+    # TODO Theme needs a lifetime
+
+    @staticmethod
+    def generate_id(text: str) -> str:
+        m = sha256()
+        m.update(text.encode())
+        return m.hexdigest()
+
+
+@event.listens_for(Theme, "before_insert")
+def ensure_id_in_theme(mapper, connection, target):
+    if target.id is not None:
+        return
+    target.id = Prompt.generate_id(target.theme)
 
 
 class ReadingDevice(Model, table=True):
