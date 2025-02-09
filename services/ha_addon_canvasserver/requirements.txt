@@ -8,3 +8,8 @@ uvicorn
 pip
 setuptools
 numba
+pytest
+httpx
+pydantic
+pydantic_settings
+rich
