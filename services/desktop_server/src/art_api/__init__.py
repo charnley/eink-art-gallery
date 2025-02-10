@@ -8,6 +8,9 @@ from functools import cache
 from io import BytesIO
 from pathlib import Path
 
+from art_generator import load_sd3, prompt_sd3
+from art_utils import atkinson_dither, image_split_red_channel
+from art_utils.network_utils import send_photo, send_photo_red
 from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -15,14 +18,11 @@ from fastapi_utilities import repeat_at, repeat_every
 from PIL import Image
 from pydantic import BaseModel
 
-from art_generator import load_sd3, prompt_sd3
-from art_utils import atkinson_dither, image_split_red_channel
-from art_utils.network_utils import send_photo, send_photo_red
-
 logger = logging.getLogger(__name__)
 app = FastAPI()
 
 HERE = Path.cwd()
+QUEUE_DIR = (HERE / "../../queue/").resolve()
 
 config = {"URL": "http://192.168.1.26:8080"}
 
@@ -39,8 +39,9 @@ class PromptPost(BaseModel):
 @cache
 def get_random_lines():
 
-    filename = Path(__file__) / "../../../assets/random_artists.txt"
+    # filename = Path(__file__) / "../../../assets/random_artists.txt"
     # filename = Path(__file__) / "../../../assets/random_christmas.txt"
+    filename = Path(__file__) / "../../../../assets/random_artists.txt"
     filename = filename.resolve()
 
     with open(filename) as f:
@@ -113,7 +114,7 @@ def _generate_random_queue():
 
 def generate_queue(prompt, n_images=1):
 
-    dir = HERE / "queue"
+    dir = QUEUE_DIR
 
     logger.info(f"Prompt: {prompt}")
 
@@ -200,7 +201,7 @@ async def _fetch_cache():
 @app.get("/queue.png", responses={200: {"content": {"image/png": {}}}}, response_class=Response)
 async def _fetch_queue():
 
-    dir = HERE / "queue"
+    dir = QUEUE_DIR
 
     logger.info(f"Loading random from {dir}")
 

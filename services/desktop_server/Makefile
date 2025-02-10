@@ -15,24 +15,26 @@ ${env}:
 	uv venv ${env} --python 3.12
 	uv pip install -r requirements.txt --python ./${env}/bin/python
 	uv pip install -e . --python ./${env}/bin/python
+	uv pip install -e ../shared/ --python ./${env}/bin/python
 
 ## Python
 
-start-art-service-push:
+start-push:
 	HF_HOME=${GIT_ROOT}/models \
 	${python} -m art_service --push --prompt \"$$(shuf -n 1 ${ROOT_DIR}/assets/random_artists.txt)\" --use-red
 
-start-art-service-refill:
+start-refill:
 	HF_HOME=${GIT_ROOT}/models \
 	${python} -m art_service --refill
 
-start-art-api:
+start:
 	HF_HOME=${GIT_ROOT}/models \
 	${python} -m uvicorn art_api:app \
 		--host 0.0.0.0 \
 		--port 8080 \
 		--log-config=${GIT_ROOT}/logging.yaml
 
+## Development
 
-start:
-	python -m ${package}
+start-jupyter:
+	${python} -m jupyterlab
