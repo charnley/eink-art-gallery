@@ -23,10 +23,22 @@ def read_items(limit=100, session: Session = Depends(get_session)):
 
 
 @router.get("/{id}", response_model=Image)
+def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
+    item = session.get(Image, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return item
+
+
+@router.delete("/{id}", response_model=Image)
 def read_item(id: uuid.UUID, session: Session = Depends(get_session)):
     item = session.get(Image, id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
+
+    session.delete(item)
+    session.commit()
+
     return item
 
 
