@@ -1,17 +1,16 @@
-import warnings
 import logging
+import warnings
 from contextlib import asynccontextmanager
 from io import BytesIO
 
+import picture_shower
 from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi_utilities import repeat_at
 from PIL import Image
 
-import picture_shower
-
 logger = logging.getLogger(__name__)
 
-warnings.filterwarnings('ignore', message="No module named 'lgpio'")
+warnings.filterwarnings("ignore", message="No module named 'lgpio'")
 
 
 @asynccontextmanager

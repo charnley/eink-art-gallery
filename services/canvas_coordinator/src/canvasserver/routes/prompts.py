@@ -44,6 +44,8 @@ def delete_item(id: str, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Item not found")
 
     session.delete(item)
+
+    # TODO Delete all Images to prompt also
     session.commit()
 
     return item
