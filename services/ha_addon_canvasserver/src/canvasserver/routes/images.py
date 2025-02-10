@@ -60,6 +60,8 @@ async def create_items(
             detail="You need to specify owner of image",
         )
 
+    # TODO Check disk-size limitations
+
     id = base.prompt
     prompt = session.get(Prompt, id)
     if prompt is None:
@@ -90,12 +92,12 @@ async def create_items(
         session.commit()
         session.refresh(prompt)
 
-    except:
+    except Exception as e:
         session.rollback()
 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while saving images.",
+            detail=f"An error occurred while saving images. {e}",
         )
 
     return Images(images=images, count=len(images))

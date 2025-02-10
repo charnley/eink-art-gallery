@@ -49,7 +49,7 @@ def get_basic_text(text, alt_text=None, font=FONT):
 @lru_cache()
 def get_basic_404(text, font=FONT):
 
-    now = datetime.now()
+    # now = datetime.now()
 
     (fig, ax) = matplotlib_utils.get_figure()
 
@@ -73,15 +73,15 @@ def get_basic_404(text, font=FONT):
         **font,
     )
 
-    ax.text(
-        0.5,
-        0.30,
-        now.strftime(DATE_FORMAT),
-        verticalalignment="center",
-        horizontalalignment="center",
-        fontsize=15,
-        **font,
-    )
+    # ax.text(
+    #     0.5,
+    #     0.30,
+    #     now.strftime(DATE_FORMAT),
+    #     verticalalignment="center",
+    #     horizontalalignment="center",
+    #     fontsize=15,
+    #     **font,
+    # )
 
     ax.axis("off")
 
