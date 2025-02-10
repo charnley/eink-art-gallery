@@ -2,9 +2,8 @@ import logging
 import time
 from pathlib import Path
 
-from PIL import Image
-
 import picture_shower
+from PIL import Image
 
 
 def main(args=None):

@@ -68,7 +68,7 @@ def get_basic_text(
             now.strftime(DATE_FORMAT),
             verticalalignment="center",
             horizontalalignment="right",
-            fontsize=12,
+            fontsize=14,
             bbox=dict(facecolor="black"),
             color="white",
             **FONT_MONO,
