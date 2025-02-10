@@ -5,9 +5,10 @@ FROM $BUILD_FROM
 WORKDIR /workdir
 
 # os dependencies
-RUN apk add gcc make
-RUN apk add g++ jpeg-dev zlib-dev libjpeg musl-dev
-RUN apk add --update --no-cache python3 py3-pip python3-dev
+RUN apk add --update --no-cache \
+    gcc make \
+    add g++ jpeg-dev zlib-dev libjpeg musl-dev \
+    python3 py3-pip python3-dev
 
 # Easier with make
 COPY ./Makefile .
