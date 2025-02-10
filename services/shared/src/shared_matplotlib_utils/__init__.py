@@ -10,6 +10,7 @@ from PIL import Image
 from shared_constants import (
     DATE_FORMAT,
     FONT_FAMILY,
+    FONT_FAMILY_MONO,
     FONT_WEIGHT,
     IMAGE_DPI,
     IMAGE_HEIGHT,
@@ -19,6 +20,11 @@ from shared_constants import (
 FONT = dict(
     fontweight=FONT_WEIGHT,
     fontfamily=FONT_FAMILY,
+)
+
+FONT_MONO = dict(
+    fontweight=FONT_WEIGHT,
+    fontfamily=FONT_FAMILY_MONO,
 )
 
 
@@ -57,13 +63,15 @@ def get_basic_text(
 
     if with_date:
         ax.text(
-            0.5,
-            0.45,
+            1.0,
+            0,
             now.strftime(DATE_FORMAT),
             verticalalignment="center",
-            horizontalalignment="center",
-            fontsize=15,
-            **font,
+            horizontalalignment="right",
+            fontsize=12,
+            bbox=dict(facecolor="black"),
+            color="white",
+            **FONT_MONO,
         )
 
     ax.axis("off")

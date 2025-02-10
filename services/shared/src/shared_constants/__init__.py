@@ -10,6 +10,7 @@ IMAGE_HEIGHT = 680
 
 # Default font config
 FONT_FAMILY = "Fira Sans"
+FONT_FAMILY_MONO = "DejaVu Sans Mono"
 FONT_WEIGHT = "bold"
 
 # Date format
@@ -22,7 +23,6 @@ IMAGE_HEADER = {"Content-Disposition": f'inline; filename="image.{IMAGE_EXTENSIO
 MAX_DISK_SIZE = 100  # mb
 MIN_PROMPTS_PER_THEME = 3
 MIN_IMAGES_PER_PROMPT = 2
-
 
 # APIs
 FILE_UPLOAD_KEY = "files"
