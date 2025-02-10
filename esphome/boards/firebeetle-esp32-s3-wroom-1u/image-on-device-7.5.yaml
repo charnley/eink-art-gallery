@@ -1,0 +1,60 @@
+esphome:
+  name: epaperdisplay
+  on_boot:
+    priority: -10
+    then:
+      - logger.log: "before my_display"
+      - component.update: my_display
+      - logger.log: "changed, hopefully"
+esp32:
+  board: dfrobot_firebeetle2_esp32s3
+  framework:
+    type: arduino
+    version: recommended
+
+logger:
+  baud_rate: 115200
+  level: DEBUG
+
+debug:
+  update_interval: 2s
+
+sensor:
+  - platform: debug
+    free:
+      name: "Heap Free"
+    block:
+      name: "Heap Max Block"
+image:
+  - file: ../../images/800x480/3.png
+    id: my_image
+    resize: 800x480
+    type: BINARY
+    dither: FLOYDSTEINBERG
+
+spi:
+  clk_pin: 12  # SCK
+  mosi_pin: 11 # SPI DIN
+
+display:
+  - platform: waveshare_epaper
+    id: my_display
+
+    cs_pin: 10          # Chip Select (CS)
+    dc_pin: 9           # Data/Command (DC)
+    busy_pin:
+      number: 7         # Busy
+      inverted: true
+    reset_pin: 4        # Reset (RST)
+
+    # model: 7.50inV2
+    model: 7.50inV2alt
+    reset_duration: 200ms
+    update_interval: never
+    lambda: |-
+      it.image(0, 0, id(my_image));
+      ESP_LOGD("display", "Image displayed successfull");
+
+deep_sleep:
+  run_duration: 15s
+  sleep_duration: 1s

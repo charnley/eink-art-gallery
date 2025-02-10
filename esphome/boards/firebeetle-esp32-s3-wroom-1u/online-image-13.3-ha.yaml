@@ -1,0 +1,129 @@
+http_request:
+  id: fetch_image_request
+  timeout: 5s
+  useragent: esphome/eink_display
+  verify_ssl: false
+
+substitutions:
+  device_id: "default_id"
+  wifi_ssid: "YourDefaultSSID"
+  wifi_password: "YourDefaultPassword"
+
+esphome:
+  name: eink_frame_${device_id}
+  friendly_name: "eink frame ${device_id}"
+
+esp32:
+  board: dfrobot_firebeetle2_esp32s3
+  framework:
+    type: arduino
+    version: recommended
+
+time:
+  - platform: sntp
+    id: sntp_time
+
+deep_sleep:
+  # run_duration: 40s
+  # sleep_duration: 60min
+  id: deep_sleep_control
+
+logger:
+  baud_rate: 115200
+  level: DEBUG
+
+wifi:
+  ssid: ${wifi_ssid}
+  password: ${wifi_password}
+  power_save_mode: light
+  on_connect:
+    - component.update: my_image
+
+captive_portal:
+
+online_image:
+  - url: http://homeassistant.local:8099/api/image.png
+    id: my_image
+    format: png
+    type: BINARY
+    on_download_finished:
+      then:
+        - component.update: my_display
+        - logger.log: "Downloaded image"
+    on_error:
+      then:
+        - logger.log: "Error downloading image"
+
+spi:
+  clk_pin: 12
+  mosi_pin: 11
+
+display:
+  - platform: waveshare_epaper
+    id: my_display
+    cs_pin: 10
+    dc_pin: 9
+    busy_pin: 7
+    reset_pin: 4
+    reset_duration: 200ms
+    model: 13.3in-k
+    update_interval: never
+    lambda: |-
+      it.image(0, 0, id(my_image), Color::BLACK, Color::WHITE);
+      ESP_LOGD("display", "Image displayed successfully");
+
+api:
+  on_client_connected:
+    then:
+      - sensor.template.publish:
+          id: battery_level
+          state: !lambda "return id(battery_level).state;"
+      - homeassistant.service:
+          service: binary_sensor.update
+          data:
+            entity_id: binary_sensor.${device_id}_status
+            state: "on"
+  services:
+    - service: update_image
+      then:
+        - button.press: update_image_button
+
+ota:
+  - platform: esphome
+
+sensor:
+  - platform: adc
+    pin: GPIO1
+    name: "Battery Voltage"
+    id: battery_voltage
+    update_interval: 60s
+    attenuation: 11db
+    filters:
+      - multiply: 2
+    unit_of_measurement: "V"
+    accuracy_decimals: 2
+
+  - platform: template
+    name: "Battery Level"
+    id: battery_level
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    lambda: |-
+      float voltage = id(battery_voltage).state;
+      if (voltage < 3.0) return 0;
+      if (voltage > 4.2) return 100;
+      return (voltage - 3.0) / (4.2 - 3.0) * 100.0;
+
+binary_sensor:
+  - platform: status
+    name: "${device_id} Status"
+    id: device_status
+
+button:
+  - platform: template
+    name: "Update Image"
+    id: update_image_button
+    on_press:
+      then:
+        - logger.log: "Image update triggered from HA"
+        - component.update: my_image
