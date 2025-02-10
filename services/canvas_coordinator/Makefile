@@ -1,3 +1,5 @@
+GIT_ROOT:=$(shell git rev-parse --show-toplevel)
+
 servername=canvasserver
 package=canvasserver
 env=env
@@ -17,18 +19,18 @@ ${env}:
 dev:
 	${python} -m ${package} --start --reload
 
-start-api:
+start:
 	${python} -m ${package} --start
 
 init:
-	${python} -m ${package} --init-db --prompts-filename ./assets/random_good_prompts.txt
+	${python} -m ${package} --init-db --prompts-filename ${GIT_ROOT}/assets/random_artists.txt
 
 test:
 	${python} -m pytest ./tests/
 
 types:
 	${python} -m monkeytype run `which pytest` ./tests/
-	${python} -m monkeytype list-modules | grep ${module} | xargs -n1 monkeytype apply
+	${python} -m monkeytype list-modules | grep ${package} | xargs -n1 monkeytype apply
 
 clean:
 	rm ./database.sqlite3

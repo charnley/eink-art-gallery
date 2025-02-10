@@ -4,6 +4,7 @@ from pathlib import Path
 
 import uvicorn
 from canvasserver.models.content import Prompt
+from rich.console import Console
 from rich.logging import RichHandler
 
 from .models.db import create_db_and_tables, get_session
@@ -26,7 +27,10 @@ def main(args=None):
 
     FORMAT = "%(message)s"
     logging.basicConfig(
-        level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
+        level=logging.INFO,
+        format=FORMAT,
+        datefmt="[%X]",
+        handlers=[RichHandler(console=Console(width=89))],
     )
 
     if args.init_db:

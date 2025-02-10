@@ -2,6 +2,7 @@ fastapi
 python-multipart
 sqlmodel
 matplotlib
+monkeytype
 numpy
 pillow
 uvicorn

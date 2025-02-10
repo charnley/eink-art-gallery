@@ -1,8 +1,10 @@
 from datetime import datetime
 from functools import lru_cache
 from io import BytesIO
+from typing import Any, Dict
 
 from PIL import Image
+from PIL.PngImagePlugin import PngImageFile
 
 from ..constants import DATE_FORMAT, FONT_FAMILY, FONT_WEIGHT, IMAGE_FORMAT
 from . import matplotlib_utils
@@ -13,7 +15,7 @@ FONT = dict(
 )
 
 
-def get_basic_text(text, alt_text=None, font=FONT):
+def get_basic_text(text: str, alt_text: None = None, font: Dict[Any, Any] = FONT) -> PngImageFile:
 
     now = datetime.now()
 
