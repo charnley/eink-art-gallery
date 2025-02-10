@@ -6,7 +6,7 @@ from ..models.content import Images, Prompt, Prompts
 from ..models.db import get_session
 
 prefix = "/prompts"
-router = APIRouter(prefix=prefix, tags=["prompt"])
+router = APIRouter(prefix=prefix, tags=["prompts"])
 
 
 @router.get("/", response_model=Prompts)
