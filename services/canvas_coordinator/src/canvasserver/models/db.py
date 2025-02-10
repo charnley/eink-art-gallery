@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from sqlalchemy.engine.base import Engine
 from sqlmodel import Session, create_engine
 
 from ..config import get_settings
@@ -15,7 +16,7 @@ def get_engine(get_settings=get_settings):
     return engine
 
 
-def create_db_and_tables(engine):
+def create_db_and_tables(engine: Engine):
     if engine is None:
         engine = get_engine()
     Model.metadata.create_all(engine)
