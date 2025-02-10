@@ -15,13 +15,13 @@ ${env}:
 ## Python
 
 dev:
-	${python} -m canvasserver --start --reload
+	${python} -m ${package} --start --reload
 
 start-api:
-	${python} -m canvasserver --start
+	${python} -m ${package} --start
 
 init:
-	${python} -m canvasserver --init-db --prompts-filename ./assets/random_good_prompts.txt
+	${python} -m ${package} --init-db --prompts-filename ./assets/random_good_prompts.txt
 
 test:
 	${python} -m pytest ./tests/

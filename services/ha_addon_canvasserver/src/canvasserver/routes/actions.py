@@ -13,35 +13,9 @@ from ..models.db import get_session
 logger = logging.getLogger(__name__)
 
 prefix = "/actions"
-router = APIRouter(prefix=prefix, tags=["actions"])
-
 endpoint_queue = "/queue.png"
 
-
-# def _generate_image(prompt):
-#     response = requests.post(external_api_url, json={"prompt": prompt})
-#     if response.status_code != 200:
-#         return None
-#     image_data = requests.get(image_url).content  # Get the image content
-#     return PilImage.Image
-
-
-# @router.get("/fill_images/{promptId}", response_model=None, tags=["actions"])
-# def _set_images(promptId, session: Session = Depends(get_session)):
-#     prompt = session.get(Prompt, id)
-#     if not prompt:
-#         raise HTTPException(status_code=404, detail="Item not found")
-#     text = prompt.prompt
-#     # Connect to model, and fetch. Really. Should I use redis queue?
-#     task_id = str(uuid.uuid4())  # Generate a unique task ID for this request
-#     background_tasks.add_task(_generate_image, prompt.prompt, task_id)
-#     task_status[task_id] = {"status": "processing", "image_url": None}
-#     return Response()
-
-
-@router.get("/fill_prompts/{themeId}", response_model=None, tags=["actions"])
-def _set_prompts(themeId, session: Session = Depends(get_session)):
-    return Response()
+router = APIRouter(prefix=prefix, tags=["actions"])
 
 
 @router.get(
@@ -56,6 +30,7 @@ async def _get_queue(dry_run: bool = False, session: Session = Depends(get_sessi
 
     # TODO Check for reading_device, check for color and for size
     # TODO Check for current active prompt
+    # TODO Set reading_device id as parameter for debugging
 
     # Get the next image
     image_obj = session.query(Image).order_by(func.random()).first()
@@ -63,7 +38,7 @@ async def _get_queue(dry_run: bool = False, session: Session = Depends(get_sessi
     is_empty = image_obj is None
 
     if is_empty:
-        image = get_basic_404("Queue is empty")
+        image = get_basic_404("")
     else:
         image = image_obj.image
 
@@ -71,7 +46,7 @@ async def _get_queue(dry_run: bool = False, session: Session = Depends(get_sessi
         session.delete(image_obj)
         session.commit()
         count_left = session.query(Image).count()
-        print(f"Qurrent queue has {count_left} images")
+        logger.info(f"Qurrent queue has {count_left} images")
 
     image = dithering.atkinson_dither(image)
     image_bytes = image_to_bytes(image)
@@ -94,7 +69,7 @@ def _clean_up(session: Session = Depends(get_session)):
 
 
 @router.get("/queue_check", response_model=Prompts, tags=["actions"])
-def _check_up(session: Session = Depends(get_session)):
+def _check_prompts(session: Session = Depends(get_session)):
     MIN_IMAGES = 5
     query = (
         session.query(Prompt)
@@ -104,3 +79,8 @@ def _check_up(session: Session = Depends(get_session)):
     )
     prompts = query.all()
     return Prompts(prompts=prompts, count=len(prompts))
+
+
+@router.get("/theme_check", response_model=None, tags=["actions"])
+def _check_themes(session: Session = Depends(get_session)):
+    return Response()
