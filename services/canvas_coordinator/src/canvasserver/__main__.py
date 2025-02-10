@@ -25,7 +25,9 @@ def main(args=None):
     args = parser.parse_args(args)
 
     FORMAT = "%(message)s"
-    logging.basicConfig(level="NOTSET", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
+    logging.basicConfig(
+        level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
+    )
 
     if args.init_db:
         logger.info("Generating table...")
