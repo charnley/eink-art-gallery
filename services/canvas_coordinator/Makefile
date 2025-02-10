@@ -1,6 +1,6 @@
 servername=canvasserver
 package=canvasserver
-env=venv
+env=env
 python=${env}/bin/python
 
 all: ${env}
@@ -25,6 +25,10 @@ init:
 
 test:
 	${python} -m pytest ./tests/
+
+types:
+	${python} -m monkeytype run `which pytest` ./tests/
+	${python} -m monkeytype list-modules | grep ${module} | xargs -n1 monkeytype apply
 
 clean:
 	rm ./database.sqlite3
