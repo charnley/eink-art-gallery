@@ -34,6 +34,8 @@ def load_sd3(straight_to_gpu=True):
         logger.info("Loading the model to GPU")
         pipe.to("cuda")
 
+    pipe.set_progress_bar_config(disable=True)  # Disable tdqm
+
     return pipe
 
 
