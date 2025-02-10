@@ -1,12 +1,9 @@
+
+./models/
+./queue/
+
 *.out
 *.git
-./src/waveshare_epd/
-src/waveshare_epd
-env_*
-./models/
-
-# esphome
-src/esphome/secrets.yaml
 
 # annoying mac stuff
 .DS_Store

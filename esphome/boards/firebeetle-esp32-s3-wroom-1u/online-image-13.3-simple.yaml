@@ -1,0 +1,61 @@
+http_request:
+  id: fetch_image_request
+  timeout: 5s
+  useragent: esphome/example_device
+  verify_ssl: false
+
+esphome:
+  name: epaperdisplay
+esp32:
+  board: dfrobot_firebeetle2_esp32s3
+  framework:
+    type: arduino
+    version: recommended
+
+deep_sleep:
+  run_duration: 60s
+  sleep_duration: 1s
+
+logger:
+  baud_rate: 115200
+  level: DEBUG
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  on_connect:
+    - component.update: my_image
+
+online_image:
+  - url: http://homeassistant.local:8099/api/image.png
+    id: my_image
+    format: png
+    type: BINARY
+    on_download_finished:
+      then:
+        - component.update: my_display
+        - logger.log: "Downloaded image"
+    on_error:
+      then:
+        - logger.log: "Error downloading image"
+
+spi:
+  clk_pin: 12
+  mosi_pin: 11
+
+display:
+  - platform: waveshare_epaper
+    id: my_display
+
+    cs_pin: 10
+    dc_pin: 9
+    busy_pin: 7
+    reset_pin: 4
+    reset_duration: 200ms
+
+    model: 13.3in-k
+    update_interval: never
+    # the colors are inverted, i have no idea why
+    lambda: |-
+      it.image(0, 0, id(my_image), Color::BLACK, Color::WHITE);
+      ESP_LOGD("display", "Image displayed successfully");
