@@ -40,7 +40,7 @@ class PromptPost(BaseModel):
 def get_random_lines():
 
     filename = Path(__file__) / "../../../assets/random_artists.txt"
-    filename = Path(__file__) / "../../../assets/random_christmas.txt"
+    # filename = Path(__file__) / "../../../assets/random_christmas.txt"
     filename = filename.resolve()
 
     with open(filename) as f:
@@ -153,7 +153,7 @@ async def post_prompt_queue(promptPost: PromptPost, nImages: int = 1):
 def generate_random(ttl_hash=None):
 
     filename = Path(__file__) / "../../../assets/random_artists.txt"
-    filename = Path(__file__) / "../../../assets/random_christmas.txt"
+    # filename = Path(__file__) / "../../../assets/random_christmas.txt"
     filename = filename.resolve()
 
     with open(filename) as f:
@@ -226,8 +226,8 @@ async def _fetch_queue():
     return Response(image_bytes, headers=headers, media_type="image/png")
 
 
-@app.on_event("startup")
-@repeat_at(cron="0 */5 * * *")
+# @app.on_event("startup")
+# @repeat_at(cron="0 */5 * * *")
 def _generate_random():
     ttl_hash = get_ttl_hash()
     logger.info(f"Generating random with ttl {ttl_hash}")
