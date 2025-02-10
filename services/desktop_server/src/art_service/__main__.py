@@ -4,13 +4,13 @@ import warnings
 from io import BytesIO
 
 import requests
-from PIL import Image
-from rich.console import Console
-from rich.logging import RichHandler
-
 from art_generator import load_flux_schnell, load_sd3, prompt_flux_schnell, prompt_sd3
 from art_utils import atkinson_dither, image_split_red_channel
 from art_utils.network_utils import send_photo, send_photo_red
+from PIL import Image
+from rich.console import Console
+from rich.logging import RichHandler
+from shared_constants import FILE_UPLOAD_KEY, IMAGE_CONTENT_TYPE, IMAGE_FORMAT
 
 warnings.filterwarnings("ignore", category=UserWarning)
 logger = logging.getLogger(__name__)
@@ -20,18 +20,6 @@ PUSH_URL = "http://192.168.1.26:8080"
 QUEUE_URL = "http://localhost:8000"
 ENDPOINT_CHECK = "/actions/queue_check"
 ENDPOINT_UPLOAD = "/images"
-
-
-# Default Image format
-IMAGE_FORMAT = "PNG"
-IMAGE_EXTENSION = "png"
-IMAGE_CONTENT_TYPE = "image/png"
-FILE_UPLOAD_KEY = "files"
-
-# Default Image settings
-IMAGE_DPI = 96
-IMAGE_WIDTH = 960
-IMAGE_HEIGHT = 680
 
 
 def image_to_bytes(image: Image.Image):

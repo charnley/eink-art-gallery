@@ -1,4 +1,5 @@
 fastapi
+fastapi_utilities
 httpx
 ipywidgets
 jinja2
