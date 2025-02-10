@@ -31,8 +31,7 @@ def get_item_childs(id: str, session: Session = Depends(get_session)):
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    # Find images
-    # TODO
+    # TODO Find images and return
     images = []
 
     return Images(images=images, count=len(images))

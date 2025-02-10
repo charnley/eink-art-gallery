@@ -1,15 +1,13 @@
 import logging
-import uuid
 
 from canvasserver.facades import get_basic_404
 from canvasserver.image_utils import dithering, image_to_bytes
-from fastapi import APIRouter, Depends, HTTPException, Response
-from PIL import Image
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
 from ..constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER
-from ..models.content import Image, Prompt
+from ..models.content import Image, Prompt, Prompts
 from ..models.db import get_session
 
 logger = logging.getLogger(__name__)
@@ -20,33 +18,29 @@ router = APIRouter(prefix=prefix, tags=["actions"])
 endpoint_queue = "/queue.png"
 
 
-def _generate_image(prompt):
-
-    response = requests.post(external_api_url, json={"prompt": prompt})
-
-    if response.status_code != 200:
-        return None
-
-    image_data = requests.get(image_url).content  # Get the image content
-
-    return Image.Image
+# def _generate_image(prompt):
+#     response = requests.post(external_api_url, json={"prompt": prompt})
+#     if response.status_code != 200:
+#         return None
+#     image_data = requests.get(image_url).content  # Get the image content
+#     return PilImage.Image
 
 
-@router.get("/fill_queue/{promptId}", response_model=None, tags=["actions"])
-def _set_items(promptId, session: Session = Depends(get_session)):
+# @router.get("/fill_images/{promptId}", response_model=None, tags=["actions"])
+# def _set_images(promptId, session: Session = Depends(get_session)):
+#     prompt = session.get(Prompt, id)
+#     if not prompt:
+#         raise HTTPException(status_code=404, detail="Item not found")
+#     text = prompt.prompt
+#     # Connect to model, and fetch. Really. Should I use redis queue?
+#     task_id = str(uuid.uuid4())  # Generate a unique task ID for this request
+#     background_tasks.add_task(_generate_image, prompt.prompt, task_id)
+#     task_status[task_id] = {"status": "processing", "image_url": None}
+#     return Response()
 
-    prompt = session.get(Prompt, id)
-    if not prompt:
-        raise HTTPException(status_code=404, detail="Item not found")
-    text = prompt.prompt
 
-    # Connect to model, and fetch. Really. Should I use redis queue?
-    task_id = str(uuid.uuid4())  # Generate a unique task ID for this request
-
-    background_tasks.add_task(_generate_image, prompt.prompt, task_id)
-
-    task_status[task_id] = {"status": "processing", "image_url": None}
-
+@router.get("/fill_prompts/{themeId}", response_model=None, tags=["actions"])
+def _set_prompts(themeId, session: Session = Depends(get_session)):
     return Response()
 
 
@@ -94,16 +88,19 @@ async def _get_queue(dry_run: bool = False, session: Session = Depends(get_sessi
 
 @router.get("/clean_up", response_model=None, tags=["actions"])
 def _clean_up(session: Session = Depends(get_session)):
-
     # TODO Check if prompts needs to be updated
     # TODO Check if prompts are irrelevant
-
     return
 
 
-@router.get("/queue_check", response_model=None, tags=["actions"])
+@router.get("/queue_check", response_model=Prompts, tags=["actions"])
 def _check_up(session: Session = Depends(get_session)):
-
-    # TODO Find prompt queues with less than 5 photos
-
-    return
+    MIN_IMAGES = 5
+    query = (
+        session.query(Prompt)
+        .outerjoin(Image, Image.prompt == Prompt.id)
+        .group_by(Prompt.id)
+        .having(func.count(Image.id) < MIN_IMAGES)
+    )
+    prompts = query.all()
+    return Prompts(prompts=prompts, count=len(prompts))
