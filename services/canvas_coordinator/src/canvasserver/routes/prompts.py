@@ -37,6 +37,18 @@ def get_item_childs(id: str, session: Session = Depends(get_session)):
     return Images(images=images, count=len(images))
 
 
+@router.delete("/{id}", response_model=Prompt)
+def delete_item(id: str, session: Session = Depends(get_session)):
+    item = session.get(Prompt, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    session.delete(item)
+    session.commit()
+
+    return item
+
+
 @router.post("/")
 def create_item(prompt: Prompt, session: Session = Depends(get_session)):
 
