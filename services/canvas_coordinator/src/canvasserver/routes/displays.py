@@ -5,7 +5,7 @@ from canvasserver.models.content import Image
 from canvasserver.models.db import get_session
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
-from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_EXTENSION, IMAGE_HEADER
+from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER
 from shared_matplotlib_utils import get_basic_404, get_basic_text
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
@@ -19,13 +19,13 @@ router = APIRouter(prefix=prefix, tags=["displays"])
 
 
 @router.get(
-    "/status.png", responses={200: {"content": {"image/png": {}}}}, response_class=Response
+    "/status.png", responses={200: {"content": {IMAGE_CONTENT_TYPE: {}}}}, response_class=Response
 )
 async def _get_status():
     image = get_basic_text("I am alive")
-    image = dithering.atkinson_dither(image)
+    # image = dithering.atkinson_dither(image)
     image_bytes = image_to_bytes(image)
-    return Response(image_bytes, headers=IMAGE_HEADER, media_type=f"image/{IMAGE_EXTENSION}")
+    return Response(image_bytes, headers=IMAGE_HEADER, media_type=IMAGE_CONTENT_TYPE)
 
 
 @router.get("/404.png", responses={200: {"content": {"image/png": {}}}}, response_class=Response)
@@ -39,8 +39,8 @@ async def _get_404():
 @router.get(
     endpoint_queue,
     responses={
-        200: {"content": {"image/png": {}}},
-        404: {"content": {"image/png": {}}},
+        200: {"content": {IMAGE_CONTENT_TYPE: {}}},
+        404: {"content": {IMAGE_CONTENT_TYPE: {}}},
     },
     response_class=Response,
 )
