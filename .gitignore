@@ -3,7 +3,7 @@
 ./src/waveshare_epd/
 src/waveshare_epd
 env_*
-models/
+./models/
 
 # esphome
 src/esphome/secrets.yaml
