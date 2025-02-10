@@ -30,7 +30,7 @@ def main(args=None):
         level=logging.INFO,
         format=FORMAT,
         datefmt="[%X]",
-        handlers=[RichHandler(console=Console(width=89))],
+        handlers=[RichHandler(console=Console(width=120))],
     )
 
     if args.init_db:
