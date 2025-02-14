@@ -12,8 +12,7 @@ all: ${env}
 ${env}:
 	uv venv ${env} --python 3.12
 	uv pip install -r requirements.txt --python ./${env}/bin/python
-
-dev:
+	uv pip install -r requirements-dev.txt --python ./${env}/bin/python
 	uv pip install -e . --python ./${env}/bin/python
 	uv pip install -e ../shared/ --python ./${env}/bin/python
 
@@ -40,11 +39,11 @@ clean:
 
 ## Docker
 
-shared_folder:
-	ln -s ../shared/src/ ./shared_folder
-
 docker-build: shared_folder
 	docker build -t ${servername} -f ./docker/service.Dockerfile .
 
 docker-run:
+	docker run -t ${servername}
+
+docker-run-bash:
 	docker run -t ${servername}

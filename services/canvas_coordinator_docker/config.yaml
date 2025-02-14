@@ -1,7 +1,7 @@
-name: "Canvas Server"
+name: "Canvas Coordinator"
 description: "Server for generating and selecting images for e-ink displays"
 version: "1.0.0"
-slug: "canvas_server"
+slug: "canvas_coordinator"
 init: false
 arch:
   - aarch64
