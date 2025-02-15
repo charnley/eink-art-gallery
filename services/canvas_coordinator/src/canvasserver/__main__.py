@@ -1,5 +1,4 @@
 import argparse
-import json
 import logging
 from pathlib import Path
 
@@ -9,7 +8,7 @@ from canvasserver.models.content import Prompt
 from rich.console import Console
 from rich.logging import RichHandler
 
-from .models.db import create_db_and_tables, get_session
+from .models.db import create_db_and_tables, get_engine, get_session, has_tables
 from .version import __version__
 
 logger = logging.getLogger(__name__)
@@ -34,19 +33,18 @@ def main(args=None):
         handlers=[RichHandler(console=Console(width=120))],
     )
 
-    options = None
-    if args.options is not None and args.options.is_file():
-        with open(args.options, "r") as f:
-            options = json.load(f)
-
-    logger.info(f"options: {options}")
-
     # If database is not defined
     settings = get_settings()
     database_path = settings.database_path
 
     if not database_path.is_file():
-        logger.info("Database does not exist, generating table...")
+        logger.info("Database file does not exist, generating table...")
+        create_db_and_tables(None)
+
+    # Check database has schema
+    engine = get_engine()
+    if not has_tables(engine):
+        logger.info("There is a file, but no tables found, generating tables...")
         create_db_and_tables(None)
 
     # Read prompt file and put into database
