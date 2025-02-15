@@ -1,5 +1,3 @@
-# TODO Service that HomeAssistant can call to generate art with prompt
-
 import logging
 import random
 import time
@@ -8,15 +6,15 @@ from functools import cache
 from io import BytesIO
 from pathlib import Path
 
-from art_generator import load_sd3, prompt_sd3
-from art_utils import atkinson_dither, image_split_red_channel
-from art_utils.network_utils import send_photo, send_photo_red
+from desktop_server.art_generator import load_sd3, prompt_sd3
+from desktop_server.network_utils import send_photo, send_photo_red
 from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi_utilities import repeat_at, repeat_every
 from PIL import Image
 from pydantic import BaseModel
+from shared_image_utils.dithering import atkinson_dither, image_split_red_channel
 
 logger = logging.getLogger(__name__)
 app = FastAPI()
@@ -24,6 +22,7 @@ app = FastAPI()
 HERE = Path.cwd()
 QUEUE_DIR = (HERE / "../../queue/").resolve()
 
+# TODO Should be options.json or settings
 config = {"URL": "http://192.168.1.26:8080"}
 
 
@@ -39,9 +38,8 @@ class PromptPost(BaseModel):
 @cache
 def get_random_lines():
 
-    # filename = Path(__file__) / "../../../assets/random_artists.txt"
-    # filename = Path(__file__) / "../../../assets/random_christmas.txt"
-    filename = Path(__file__) / "../../../../assets/random_artists.txt"
+    # TODO Should be parameter
+    filename = Path(__file__) / "../../../../../assets/random_artists.txt"
     filename = filename.resolve()
 
     with open(filename) as f:
@@ -153,8 +151,8 @@ async def post_prompt_queue(promptPost: PromptPost, nImages: int = 1):
 # @cache
 def generate_random(ttl_hash=None):
 
-    filename = Path(__file__) / "../../../assets/random_artists.txt"
-    # filename = Path(__file__) / "../../../assets/random_christmas.txt"
+    # TODO get from settings
+    filename = Path(__file__) / "../../../../../assets/random_artists.txt"
     filename = filename.resolve()
 
     with open(filename) as f:
@@ -229,38 +227,38 @@ async def _fetch_queue():
 
 # @app.on_event("startup")
 # @repeat_at(cron="0 */5 * * *")
-def _generate_random():
-    ttl_hash = get_ttl_hash()
-    logger.info(f"Generating random with ttl {ttl_hash}")
-    image = generate_random(ttl_hash=ttl_hash)
-    return image
+# def _generate_random():
+#     ttl_hash = get_ttl_hash()
+#     logger.info(f"Generating random with ttl {ttl_hash}")
+#     image = generate_random(ttl_hash=ttl_hash)
+#     return image
 
 
-@app.get("/image.png", responses={200: {"content": {"image/png": {}}}}, response_class=Response)
-def get_image():
+# @app.get("/image.png", responses={200: {"content": {"image/png": {}}}}, response_class=Response)
+# def get_image():
 
-    filename = Path.cwd() / "images/960x680/test.png"
-    image = Image.open(filename)
+#     filename = Path.cwd() / "images/960x680/test.png"
+#     image = Image.open(filename)
 
-    with BytesIO() as buf:
-        image.save(buf, format="png")
-        image_bytes = buf.getvalue()
+#     with BytesIO() as buf:
+#         image.save(buf, format="png")
+#         image_bytes = buf.getvalue()
 
-    headers = {"Content-Disposition": 'inline; filename="image.png"'}
+#     headers = {"Content-Disposition": 'inline; filename="image.png"'}
 
-    return Response(image_bytes, headers=headers, media_type="image/png")
+#     return Response(image_bytes, headers=headers, media_type="image/png")
 
 
-@app.get("/test.png", responses={200: {"content": {"image/png": {}}}}, response_class=Response)
-def get_test_image():
+# @app.get("/test.png", responses={200: {"content": {"image/png": {}}}}, response_class=Response)
+# def get_test_image():
 
-    filename = Path.cwd() / "images/960x680/test.png"
-    image = Image.open(filename)
+#     filename = Path.cwd() / "images/960x680/test.png"
+#     image = Image.open(filename)
 
-    with BytesIO() as buf:
-        image.save(buf, format="png")
-        image_bytes = buf.getvalue()
+#     with BytesIO() as buf:
+#         image.save(buf, format="png")
+#         image_bytes = buf.getvalue()
 
-    headers = {"Content-Disposition": 'inline; filename="test.png"'}
+#     headers = {"Content-Disposition": 'inline; filename="test.png"'}
 
-    return Response(image_bytes, headers=headers, media_type="image/png")
+#     return Response(image_bytes, headers=headers, media_type="image/png")

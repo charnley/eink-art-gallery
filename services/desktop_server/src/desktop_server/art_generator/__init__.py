@@ -8,10 +8,11 @@ from diffusers import (
     FluxPipeline,
     StableDiffusion3Pipeline,
 )
-
-from art_utils import constants
+from shared_constants import IMAGE_HEIGHT, IMAGE_WIDTH
 
 logger = logging.getLogger(__name__)
+
+# TODO Image width and height should be parameter
 
 NEGATIVE_PROMPT = "paper, frame, picture frame, border, photorealistic, deformed, glitch, blurry, signature, signed, watermark, stamp"
 
@@ -64,7 +65,7 @@ def prompt_flux_schnell(pipe, prompt, negative_prompt=NEGATIVE_PROMPT):
         height=688,
     ).images[0]
 
-    image = image.resize((constants.WIDTH, constants.HEIGHT))  # ensure right resolution
+    image = image.resize((IMAGE_WIDTH, IMAGE_HEIGHT))  # ensure right resolution
 
     return image
 
@@ -85,6 +86,6 @@ def prompt_sd3(pipe, prompt, negative_prompt=NEGATIVE_PROMPT):
         height=688,
     ).images[0]
 
-    image = image.resize((constants.WIDTH, constants.HEIGHT))  # ensure right resolution
+    image = image.resize((IMAGE_WIDTH, IMAGE_HEIGHT))  # ensure right resolution
 
     return image
