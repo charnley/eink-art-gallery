@@ -3,8 +3,8 @@ import warnings
 from pathlib import Path
 
 import requests
-from art_generator import load_sd3, prompt_sd3
 from desktop_server import network_utils
+from desktop_server.art_generator import load_sd3, prompt_sd3
 from rich.console import Console
 from rich.logging import RichHandler
 from shared_constants import FILE_UPLOAD_KEY, IMAGE_CONTENT_TYPE
