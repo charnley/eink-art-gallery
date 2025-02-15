@@ -16,6 +16,9 @@ goto /config/logs
 
 Choose supervisor in top right corner
 
+the failed build logs will appear here
+
+Note: Naming matters. HA will look for config.yaml and Dockerfile in any folder in addons. So don't copy all your resources with it, or it will be hard to know where the docker is being build.
 
 # Docker
 

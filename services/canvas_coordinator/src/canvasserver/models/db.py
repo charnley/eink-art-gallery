@@ -16,7 +16,7 @@ def get_engine(get_settings=get_settings):
     return engine
 
 
-def create_db_and_tables(engine: Engine):
+def create_db_and_tables(engine: Engine | None):
     if engine is None:
         engine = get_engine()
     Model.metadata.create_all(engine)

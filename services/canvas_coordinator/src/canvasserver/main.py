@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+
     # startup
     _ = get_settings()
-    logger.info("Hello")
     yield
 
     # shutdown
@@ -26,6 +26,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=APP_NAME, version=__version__, lifespan=lifespan, dependencies=[Depends(get_settings)]
 )
+
 
 # Set all CORS enabled origins
 app.add_middleware(

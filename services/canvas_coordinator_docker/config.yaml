@@ -1,7 +1,7 @@
 name: "Canvas Coordinator"
 description: "Server for generating and selecting images for e-ink displays"
-version: "1.0.0"
-slug: "canvas_coordinator"
+version: "1.2.10"
+slug: "canvas_coordinator_prime"
 init: false
 arch:
   - aarch64
@@ -10,12 +10,9 @@ arch:
   - armv7
   - i386
 options:
-  username: "email"
-  password: "password"
-  wait_time: 60
   log_level: INFO
 schema:
-  username: str
-  password: password
-  wait_time: int
   log_level: list(TRACE|DEBUG|INFO|WARN|ERROR)
+ports:
+  8080/tcp: null
+webui: "http://[HOST]:[PORT:8080]"

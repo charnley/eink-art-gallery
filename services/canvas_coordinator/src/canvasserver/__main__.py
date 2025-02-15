@@ -1,8 +1,10 @@
 import argparse
+import json
 import logging
 from pathlib import Path
 
 import uvicorn
+from canvasserver.config import get_settings
 from canvasserver.models.content import Prompt
 from rich.console import Console
 from rich.logging import RichHandler
@@ -15,13 +17,12 @@ logger = logging.getLogger(__name__)
 
 def main(args=None):
 
-    # TODO Parameterize the database path (Needed for the docker anyway)
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--version", action="version", version=__version__)
     parser.add_argument("--reload", action="store_true")
     parser.add_argument("--start", action="store_true")
     parser.add_argument("--init-db", action="store_true")
+    parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--prompts-filename", type=Path)
     args = parser.parse_args(args)
 
@@ -33,10 +34,20 @@ def main(args=None):
         handlers=[RichHandler(console=Console(width=120))],
     )
 
-    if args.init_db:
-        logger.info("Generating table...")
+    options = None
+    if args.options is not None and args.options.is_file():
+        with open(args.options, "r") as f:
+            options = json.load(f)
+
+    logger.info(f"options: {options}")
+
+    # If database is not defined
+    settings = get_settings()
+    database_path = settings.database_path
+
+    if not database_path.is_file():
+        logger.info("Database does not exist, generating table...")
         create_db_and_tables(None)
-        logger.info("Generated")
 
     # Read prompt file and put into database
     if args.prompts_filename is not None:
@@ -68,7 +79,7 @@ def main(args=None):
         uvicorn.run(
             "canvasserver.main:app",
             host="0.0.0.0",
-            port=8000,
+            port=args.port,
             reload=args.reload,
             log_level=None,
             log_config=log_config,
