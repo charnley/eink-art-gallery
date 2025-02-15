@@ -4,6 +4,7 @@ servername=canvasserver
 package=canvasserver
 env=env
 python=${env}/bin/python
+port=8080
 
 all: ${env}
 
@@ -19,13 +20,13 @@ ${env}:
 ## Python
 
 dev:
-	${python} -m ${package} --start --reload
+	${python} -m ${package} --start --port ${port} --reload
 
 start:
-	${python} -m ${package} --start
+	${python} -m ${package} --start --port ${port}
 
 init:
-	${python} -m ${package} --init-db --prompts-filename ${GIT_ROOT}/assets/random_artists.txt
+	${python} -m ${package} --prompts-filename ${GIT_ROOT}/assets/random_artists.txt
 
 test:
 	${python} -m pytest ./tests/

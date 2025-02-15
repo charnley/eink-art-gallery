@@ -31,10 +31,7 @@ RUN pip install --no-cache-dir -r ./requirements.txt
 COPY ./canvas_coordinator/ ./canvas_coordinator
 COPY ./shared/ ./shared
 
-COPY ./canvas_coordinator_docker/run.sh ./run.sh
-
 RUN pip install --no-cache-dir -e ./canvas_coordinator
 RUN pip install --no-cache-dir -e ./shared
 
-# CMD [ "python", "-m", "canvasserver", "--start"  ]
-CMD ["sh", "./run.sh"]
+CMD [ "python", "-m", "canvasserver", "--start", "--options", "${CONFIG_PATH}" ]

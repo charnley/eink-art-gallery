@@ -1,6 +1,6 @@
 GIT_ROOT:=$(shell git rev-parse --show-toplevel)
 
-servername=canvascoordinator
+servername=canvascoordinator_prime
 ha_hostname=
 ha_username=root
 build_dir=_tmp_build
@@ -17,12 +17,13 @@ install_ha_addon:
 	rm -fr ${build_dir}
 	mkdir -p ${build_dir}
 	git ls-files \
-		./canvas_coordinator_docker/ \
 		./canvas_coordinator/ \
 		./shared/ \
 		| xargs -I {} cp --parents "{}" ${build_dir}
+	cp ./canvas_coordinator/requirements.txt ${build_dir}
 	cp ./canvas_coordinator_docker/Dockerfile ${build_dir}
 	cp ./canvas_coordinator_docker/config.yaml ${build_dir}
+	cp ./canvas_coordinator_docker/run.sh ${build_dir}
 	scp -r ${build_dir}/* ${ha_username}@${ha_hostname}:/addons/${servername}/
 
 docker-build:

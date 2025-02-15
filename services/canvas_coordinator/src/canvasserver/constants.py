@@ -24,3 +24,7 @@ IMAGE_HEADER = {"Content-Disposition": f'inline; filename="image.{IMAGE_EXTENSIO
 MAX_DISK_SIZE = 100  # mb
 MIN_PROMPTS_PER_THEME = 3
 MIN_IMAGES_PER_PROMPT = 2
+
+# Environ keys
+ENV_CONFIG_PATH = "CONFIG_PATH"
+ENV_DATA_PATH = "STORAGE"
