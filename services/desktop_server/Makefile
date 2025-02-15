@@ -1,11 +1,12 @@
 ROOT_DIR:=$(realpath $(shell dirname $(firstword $(MAKEFILE_LIST))))
 GIT_ROOT:=$(shell git rev-parse --show-toplevel)
 
-
 package=desktop_server
 env=env
 python=${env}/bin/python
 model_dir=${GIT_ROOT}/models
+refill_server=
+push_server=
 
 all: ${env}
 
@@ -20,19 +21,30 @@ ${env}:
 ## Python
 
 start-push:
+	test ! -z "${push_server}"
 	HF_HOME=${GIT_ROOT}/models \
-	${python} -m art_service --push --prompt \"$$(shuf -n 1 ${ROOT_DIR}/assets/random_artists.txt)\" --use-red
+	${python} -m ${package}.push \
+	--url ${push_server} \
+	--prompt \"$$(shuf -n 1 ${GIT_ROOT}/assets/random_artists.txt)\" \
+	--use-red \
 
 start-refill:
+	test ! -z "${refill_server}"
 	HF_HOME=${GIT_ROOT}/models \
-	${python} -m art_service --refill
+	${python} -m ${package}.refill \
+	--server-url ${refill_server} \
+	--refill-prompts \
+	--refill-images
 
-start:
+start-api:
+	test ! -z "${push_server}"
+	test ! -z "${refill_server}"
 	HF_HOME=${GIT_ROOT}/models \
-	${python} -m uvicorn art_api:app \
-		--host 0.0.0.0 \
-		--port 8080 \
-		--log-config=${GIT_ROOT}/logging.yaml
+	${python} -m ${package}.api --start --port 8080
+	# ${python} -m uvicorn art_api:app \
+	# 	--host 0.0.0.0 \
+	# 	--port 8080 \
+	# 	--log-config=${GIT_ROOT}/logging.yaml
 
 ## Development
 
