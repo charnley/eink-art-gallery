@@ -23,7 +23,7 @@ router = APIRouter(prefix=prefix, tags=["displays"])
 )
 async def _get_status():
     image = get_basic_text("I am alive")
-    # image = dithering.atkinson_dither(image)
+    image = dithering.atkinson_dither(image)
     image_bytes = image_to_bytes(image)
     return Response(image_bytes, headers=IMAGE_HEADER, media_type=IMAGE_CONTENT_TYPE)
 

@@ -21,7 +21,7 @@ def _clean_up(session: Session = Depends(get_session)):
     return
 
 
-@router.get("/queue_check", response_model=Prompts, tags=["actions"])
+@router.get("/prompts_check", response_model=Prompts, tags=["actions"])
 def _check_prompts(session: Session = Depends(get_session)):
     MIN_IMAGES = 5
     query = (
