@@ -1,8 +1,13 @@
 import logging
 import warnings
 
-from art_generator import load_flux_schnell, load_sd3, prompt_flux_schnell, prompt_sd3
 from desktop_server import network_utils
+from desktop_server.art_generator import (
+    load_flux_schnell,
+    load_sd3,
+    prompt_flux_schnell,
+    prompt_sd3,
+)
 from rich.console import Console
 from rich.logging import RichHandler
 from shared_image_utils.dithering import atkinson_dither, image_split_red_channel
