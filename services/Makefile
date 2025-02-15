@@ -20,7 +20,8 @@ install_ha_addon:
 		./canvas_coordinator/ \
 		./shared/ \
 		| xargs -I {} cp --parents "{}" ${build_dir}
-	cp ./canvas_coordinator/requirements.txt ${build_dir}
+	mkdir ${build_dir}/canvas_coordinator_docker
+	cp --parents ./canvas_coordinator_docker/install_fonts.sh ${build_dir}
 	cp ./canvas_coordinator_docker/Dockerfile ${build_dir}
 	cp ./canvas_coordinator_docker/config.yaml ${build_dir}
 	cp ./canvas_coordinator_docker/run.sh ${build_dir}
