@@ -1,0 +1,27 @@
+substitutions:
+  device_id: "example_e"
+  wifi_ssid: !secret wifi_ssid
+  wifi_password: !secret wifi_password
+  wake_up_time: "04:00:00"
+  image_url: "http://homeassistant.local:8090/displays/queue.png"
+
+  clk_pin: "GPIO18"
+  mosi_pin: "GPIO23"
+  cs_pin: "GPIO15"
+  dc_pin: "GPIO13"
+  busy_pin: "GPIO04"
+  reset_pin: "GPIO14"
+
+  waveshare_model: "13.3in-k" # or another waveshare model
+
+esp32:
+  board: esp32dev # dfrobot_firebeetle2_esp32e
+  framework:
+    type: arduino
+    version: recommended
+
+esphome:
+  name: eink-frame-${device_id}
+  friendly_name: "eink frame ${device_id}"
+  platformio_options:
+    build_flags: "-DBOARD_HAS_PSRAM"

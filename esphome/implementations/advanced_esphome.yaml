@@ -1,0 +1,119 @@
+http_request:
+  id: fetch_image_request
+  timeout: 5s
+  useragent: esphome/eink_display
+  verify_ssl: false
+
+deep_sleep:
+  id: deep_sleep_control
+  run_duration: 2min
+  # sleep_duration: 24h  # Fallback duration if 'until' doesn't work
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+logger:
+  baud_rate: 115200
+  level: DEBUG
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  power_save_mode: light
+  on_connect:
+    - logger.log: WiFi is connected!
+    - logger.log: "Trying to download ${image_url}"
+    - component.update: my_image
+
+captive_portal:
+
+online_image:
+  - url: $image_url
+    id: my_image
+    format: png
+    type: BINARY
+    on_download_finished:
+      then:
+        - logger.log: "Downloaded image, updating display"
+        - display.page.show: page1
+        - component.update: my_display
+        - delay: 7s
+        - deep_sleep.enter:
+            id: deep_sleep_control
+            until: "${wake_up_time}"
+            time_id: homeassistant_time
+    on_error:
+      then:
+        - logger.log: "Error downloading image $(image_url)"
+        - display.page.show: page2
+        - component.update: my_display
+        - delay: 7s
+        - deep_sleep.enter:
+            id: deep_sleep_control
+            until: "${wake_up_time}"
+            time_id: homeassistant_time
+
+spi:
+  clk_pin: $clk_pin
+  mosi_pin: $mosi_pin
+
+display:
+  - platform: waveshare_epaper
+    id: my_display
+    cs_pin: $cs_pin
+    dc_pin: $dc_pin
+    busy_pin: $busy_pin
+    reset_pin: $reset_pin
+    reset_duration: 200ms
+    model: $waveshare_model
+    update_interval: never
+    pages:
+      - id: page1
+        lambda: |-
+          it.image(0, 0, id(my_image), Color::BLACK, Color::WHITE);
+          ESP_LOGD("display", "Image displayed successfully");
+      - id: page2
+        lambda: |-
+          it.line(0, 0, 50, 50);
+          it.line(0, 50, 50, 0);
+          ESP_LOGD("display", "Error Image displayed successfully");
+
+api:
+#   on_client_connected:
+#     then:
+#       - sensor.template.publish:
+#           id: battery_level
+#           state: !lambda "return id(battery_level).state;"
+#       - sensor.template.publish:
+#           id: battery_voltage
+#           state: !lambda "return id(battery_voltage).state;"
+
+ota:
+  - platform: esphome
+
+# sensor:
+#   - platform: adc
+#     pin: VDD
+#     name: "Battery Voltage"
+#     id: battery_voltage
+#     update_interval: 60s
+#     attenuation: auto
+#     unit_of_measurement: "V"
+#     accuracy_decimals: 2
+
+#   - platform: template
+#     name: "Battery Level"
+#     id: battery_level
+#     unit_of_measurement: "%"
+#     accuracy_decimals: 0
+#     lambda: |-
+#       float voltage = id(battery_voltage).state;
+#       if (voltage < 3.0) return 0;
+#       if (voltage > 4.2) return 100;
+#       return (voltage - 3.0) / (4.2 - 3.0) * 100.0;
+
+binary_sensor:
+  - platform: status
+    name: "${device_id} Status"
+    id: device_status
