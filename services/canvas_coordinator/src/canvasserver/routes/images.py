@@ -19,12 +19,14 @@ FILE_UPLOAD_KEY = "files"
 @router.get("/", response_model=Images)
 def read_items(limit=100, session: Session = Depends(get_session)):
     images = session.query(Image).limit(limit).all()
+    session.close()
     return Images(images=images, count=len(images))
 
 
 @router.get("/{id}", response_model=Image)
 def read_item(id: uuid.UUID, session: Session = Depends(get_session)):
     item = session.get(Image, id)
+    session.close()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     return item
@@ -38,6 +40,7 @@ def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
 
     session.delete(item)
     session.commit()
+    session.close()
 
     return item
 
@@ -50,6 +53,7 @@ def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
 async def read_item_png(id: uuid.UUID, session: Session = Depends(get_session)):
 
     item = session.get(Image, id)
+    session.close()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -85,19 +89,13 @@ async def create_items(
     images: list[Image] = []
 
     for file in files:
-        # content = await file.read()
-
         readable = BytesIO(file.file.read())
         image_image = PilImage.open(readable)
 
-        image = Image(
-            prompt=prompt.id,
-        )
+        image = Image(prompt=prompt.id)
         image.image = image_image
 
         images.append(image)
-
-    for image in images:
         session.add(image)
 
     try:

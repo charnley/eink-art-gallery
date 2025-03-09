@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def get_engine(get_settings=get_settings):
     settings = get_settings()
     sqlite_url = f"sqlite:///{settings.database_path}"
-    connect_args = {"check_same_thread": False}
+    connect_args = dict(check_same_thread=False)
     engine = create_engine(sqlite_url, connect_args=connect_args)
     return engine
 

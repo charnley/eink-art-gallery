@@ -9,7 +9,6 @@ from sqlalchemy.sql import func
 logger = logging.getLogger(__name__)
 
 prefix = "/actions"
-endpoint_queue = "/queue.png"
 
 router = APIRouter(prefix=prefix, tags=["actions"])
 
