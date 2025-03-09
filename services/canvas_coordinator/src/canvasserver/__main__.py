@@ -18,18 +18,20 @@ def main(args=None):
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--version", action="version", version=__version__)
-    parser.add_argument("--reload", action="store_true")
-    parser.add_argument("--start", action="store_true")
+
     parser.add_argument("--init-db", action="store_true")
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--prompts-filename", type=Path)
+    parser.add_argument("--reload", action="store_true")
+    parser.add_argument("--start", action="store_true")
+    parser.add_argument("--workers", type=int, default=4)
     args = parser.parse_args(args)
 
     FORMAT = "%(message)s"
     logging.basicConfig(
         level=logging.INFO,
         format=FORMAT,
-        datefmt="[%X]",
+        datefmt="[%Y-%m-%d %H:%I]",
         handlers=[RichHandler(console=Console(width=120))],
     )
 
@@ -81,6 +83,7 @@ def main(args=None):
             reload=args.reload,
             log_level=None,
             log_config=log_config,
+            workers=args.workers,
         )
 
 
