@@ -7,6 +7,28 @@ esphome:
       - component.update: my_display
       - logger.log: "changed, hopefully"
 
+# Add global variables
+globals:
+  - id: show_qr
+    type: bool
+    initial_value: 'false'
+
+# Add button configuration
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO27
+      mode: INPUT_PULLUP
+    name: "Display Toggle"
+    id: toggle_button
+    on_press:
+      then:
+        - logger.log: "Button pressed, toggling display"
+        - globals.set:
+            id: show_qr
+            value: !lambda "return !id(show_qr);"
+        - component.update: my_display
+
 spi:
   clk_pin: $clk_pin # SCK
   mosi_pin: $mosi_pin # SPI DIN
@@ -31,6 +53,11 @@ image:
     resize: 960x680
     type: BINARY
     dither: FLOYDSTEINBERG
+  - file: images/960x680/wifi_setup.png
+    id: wifi_setup_image
+    resize: 960x680
+    type: BINARY
+    dither: FLOYDSTEINBERG
 
 display:
   - platform: waveshare_epaper
@@ -46,5 +73,15 @@ display:
     model: $waveshare_model
     update_interval: never
     lambda: |-
-      it.image(0, 0, id(my_image), Color::BLACK, Color::WHITE);
-      ESP_LOGD("display", "Image displayed successfull");
+      if (id(show_qr)) {
+        it.image(0, 0, id(wifi_setup_image), Color::BLACK, Color::WHITE);
+        ESP_LOGD("display", "WiFi setup image displayed");
+      } else {
+        it.image(0, 0, id(my_image), Color::BLACK, Color::WHITE);
+        ESP_LOGD("display", "Main image displayed successfully");
+      }
+
+font:
+  - file: "gfonts://Roboto"
+    id: display_font
+    size: 20

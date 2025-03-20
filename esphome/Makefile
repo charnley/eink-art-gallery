@@ -7,10 +7,19 @@ ${env}:
 	uv venv ${env} --python 3.12
 	uv pip install -r requirements.txt --python ./${env}/bin/python
 
+# Install additional dependencies for QR code generation
+.PHONY: install-qr-deps
+install-qr-deps: ${env}
+	uv pip install qrcode pillow --python ./${env}/bin/python
+
+# Generate WiFi QR setup image
+images/960x680/wifi_setup.png: install-qr-deps scripts/generate_wifi_qr.py
+	${python} scripts/generate_wifi_qr.py images/960x680/wifi_setup.png
+
 # Example: make run implementation=my_device.yaml [board=my_board.yaml]
 # Run a specific configuration
 # If board is provided, it will be used as overrides
-run: ${env}
+run: ${env} images/960x680/wifi_setup.png
 	@if [ -z "$(implementation)" ]; then \
 		echo "Usage: make run implementation=<implementation.yaml> [board=<board.yaml>]"; \
 		exit 1; \
@@ -28,7 +37,7 @@ run: ${env}
 # Example: make compile implementation=my_device.yaml [board=my_board.yaml]
 # Compile a specific configuration
 # If board is provided, it will be used as overrides
-compile: ${env}
+compile: ${env} images/960x680/wifi_setup.png
 	@if [ -z "$(implementation)" ]; then \
 		echo "Usage: make compile implementation=<implementation.yaml> [board=<board.yaml>]"; \
 		exit 1; \
