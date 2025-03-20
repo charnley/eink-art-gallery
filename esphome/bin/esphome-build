@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Check if we have the correct number of arguments
+if [ "$#" -lt 2 ]; then
+    echo "Usage: $0 <action> <implementation> [board]"
+    echo "  action: run or compile"
+    echo "  implementation: path to implementation yaml"
+    echo "  board: optional path to board yaml"
+    exit 1
+fi
+
+ACTION=$1
+IMPLEMENTATION=$2
+BOARD=$3
+ENV_DIR="../env"
+PYTHON="${ENV_DIR}/bin/python"
+
+# Create virtual environment if it doesn't exist
+if [ ! -d "$ENV_DIR" ]; then
+    uv venv "$ENV_DIR" --python 3.12
+    uv pip install -r ../requirements.txt --python "$PYTHON"
+fi
+
+# If we have a board file, create a temporary combined config
+if [ -n "$BOARD" ]; then
+    TMPFILE=".tmp.$(date +%s).yaml"
+    trap 'rm -f "$TMPFILE"' EXIT
+    echo "<<: !include $IMPLEMENTATION" > "$TMPFILE"
+    echo "<<: !include $BOARD" >> "$TMPFILE"
+    CONFIG="$TMPFILE"
+else
+    CONFIG="$IMPLEMENTATION"
+fi
+
+# Run the requested action
+case "$ACTION" in
+    run)
+        "$PYTHON" -m esphome run "$CONFIG"
+        ;;
+    compile)
+        "$PYTHON" -m esphome compile "$CONFIG"
+        ;;
+    *)
+        echo "Unknown action: $ACTION"
+        echo "Valid actions are: run, compile"
+        exit 1
+        ;;
+esac 

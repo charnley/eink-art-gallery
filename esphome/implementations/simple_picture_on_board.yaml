@@ -1,0 +1,50 @@
+esphome:
+  name: epaperdisplay
+  on_boot:
+    priority: -10
+    then:
+      - logger.log: "before my_display"
+      - component.update: my_display
+      - logger.log: "changed, hopefully"
+
+spi:
+  clk_pin: $clk_pin # SCK
+  mosi_pin: $mosi_pin # SPI DIN
+
+logger:
+  baud_rate: 115200
+  level: VERY_VERBOSE
+
+debug:
+  update_interval: 2s
+
+sensor:
+  - platform: debug
+    free:
+      name: "Heap Free"
+    block:
+      name: "Heap Max Block"
+
+image:
+  - file: images/960x680/test.png
+    id: my_image
+    resize: 960x680
+    type: BINARY
+    dither: FLOYDSTEINBERG
+
+display:
+  - platform: waveshare_epaper
+    id: my_display
+
+    cs_pin: $cs_pin          # Chip Select (CS)
+    dc_pin: $dc_pin            # Data/Command (DC)
+    busy_pin: $busy_pin
+    reset_pin: $reset_pin         # Reset (RST)
+
+    reset_duration: 200ms
+
+    model: $waveshare_model
+    update_interval: never
+    lambda: |-
+      it.image(0, 0, id(my_image), Color::BLACK, Color::WHITE);
+      ESP_LOGD("display", "Image displayed successfull");
