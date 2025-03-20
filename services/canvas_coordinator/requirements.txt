@@ -1,0 +1,11 @@
+fastapi
+python-multipart
+sqlmodel
+matplotlib
+numpy
+pillow
+uvicorn
+numba
+pydantic
+pydantic_settings
+rich

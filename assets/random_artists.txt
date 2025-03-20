@@ -1,24 +1,12 @@
-by Alexandre Deschaumes
-by Agnes Cecile
-by Peder Balke
-by Charles-Francois Daubigny
-by Alex Andreev
-by Jesper Ejsing
-by Warren Ellis
-by James R. Eads, Bright, Dayligt
-by Chris Friel
-by Glenn Fabry
-by Arthur Adams
-by Mario Giacomelli
-landscape by Norman Ackroyd, bw, sharp contrast
+water ink painting by Agnes Cecile, Watercolor, ink, expressive, abstract, portraiture, vibrant, fluid, emotive, surreal, mixed media, contemporary, delicate, dynamic, spontaneous, atmospheric.
+painting by Charles-Francois Daubigny, bw
+by Alex Andreev++, Surreal, Futuristic, Sci-fi, Dreamlike, Digital, Imaginative, Atmospheric, Abstract, Dystopian, Ethereal, Conceptual, Vivid, Fantasy, Otherworldly, Innovative, bw
+landscape by Norman Ackroyd++, Monochromatic, etching, landscapes, detailed, atmospheric, moody, textural, coastal, British, minimalist, evocative, natural, serene, intricate, timeless, contemplative, traditional, marine, expressive, tonal.
 by Sidney Sime, mysterious, moon, forest, bw
 by Hugh Ferriss, epic, urban, bw
-by Matt Mahurin, fine lines, moody, detailed, landscapes, bw, white background
-by Thomas Barbey, bw surreal, urban, clouds
 by Mark Riddick, dark, bw, detailed, fine lines, scenes, skeleton
 by Stephen Wiltshire, fine lines, detailed, urban, bw, white background
-by H. R. Giger, dark, bw, subdued, detailed, scifi, pencil
-by Junji Ito, fine lines, detailed, bw, dark, surreal, horror
+Rough sketch by H. r. Giger++, Biomechanical, surreal, dark, futuristic, intricate, grotesque, nightmarish, dystopian, detailed, erotic, monochromatic, atmospheric, unsettling, organic, visionary
 by Yang Yongliang, landscape, dreamy, realistic, bw, painting
 by M. C. Escher, surreal, dark, bw, geometric, detailed
 By Dan Hillier, fine lines, bw, surreal floral, drawing, white background
@@ -30,13 +18,14 @@ by Andreas Vesalius, fine lines, gloomy, detailed, madness, classical, bw
 by mcbess, detailed, bw, fine lines, dark, comic style
 by Stephen Gammell, dark, bw, madness, expressive, fine lines, white background
 by Will Eisner, fine lines, bw, comic, detailed, urban, white background
-by Kazuo Umezu, horror, scream, detailed, madness fine lines, surreal, bw, white background
 landscape by Dariusz Klimczak, surreal, bw
 cute creature by Alex Pardee, exspressive, surreal, bw, white background
 by Ton Dubbeldam, landscape, urban, moody, cute, bw, white background
-cute character by Doug Hyde, moody, illustrative
-animal, cartoon, cute, landscape, cute, vivid
-character by Anton Semenov, dark, subdued, cute, bw, high contrast
+sketch by Doug Hyde, Whimsical, bw, heartwarming, cheerful, playful, emotive, charming, uplifting, sentimental, simplistic, joyful, contemporary, friendly, illustrative, childlike, vibrant, tender, positive, endearing.
 cartoon by Mo Willems, cute, detailed animal, fine lines, bw, white background
 landscape by Jon Klassen, minimalist, animals, subdued, bw
 landscape by Olly Moss, moody, fantasy, dark, bw
+cute fantasy animal by Arthur Adams, fine lines, detailed, BW, psychedelic
+comic by Junji+ Ito++, Horror, manga, macabre, eerie, detailed, unsettling, grotesque, psychological, dark, nightmarish, twisted, black-and-white, suspenseful, intense, supernatural, disturbing, intricate, chilling, haunting.
+comic by kazuo+ Umezu++,Horror, manga, eccentric, surreal, eerie, grotesque, psychological, dark, twisted, detailed, unsettling, black-and-white, disturbing, bizarre, intense, supernatural, expressive, chilling, nightmarish
+painting by Zhang+ Daqian++, Traditional, vibrant, detailed, fluid, expressive, landscape, dynamic, textured, versatile, intricate, modern interpretation, natural scenes, elegant, spontaneous, rich, classical techniques, innovative
