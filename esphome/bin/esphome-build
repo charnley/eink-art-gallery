@@ -1,48 +1,139 @@
 #!/bin/bash
 
-# Check if we have the correct number of arguments
-if [ "$#" -lt 2 ]; then
-    echo "Usage: $0 <action> <implementation> [board]"
-    echo "  action: run or compile"
-    echo "  implementation: path to implementation yaml"
-    echo "  board: optional path to board yaml"
+# Colors and formatting
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+# Get the absolute path to the directory containing this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+cd "$ROOT_DIR"
+
+# Display usage instructions if no arguments provided or help requested
+if [ $# -lt 4 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+    echo -e "${BLUE}${BOLD}ESPHome Build Tool${NC}"
+    echo "Usage: $0 <command> <implementation_yaml> <board_yaml> <display_yaml>"
+    echo ""
+    echo "This script combines multiple YAML configuration files using ESPHome's packages feature"
+    echo "and then runs ESPHome on the combined configuration."
+    echo ""
+    echo "Arguments:"
+    echo "  <command>              ESPHome command to execute (compile, run, etc.)"
+    echo "  <implementation_yaml>  Path to the implementation configuration file"
+    echo "  <board_yaml>           Path to the board configuration file"
+    echo "  <display_yaml>         Path to the display configuration file"
+    echo ""
+    echo "Example:"
+    echo "  $0 compile implementations/simple_picture_on_board.yaml boards/dfrobot_firebeetle2_esp32ue.yaml displays/13-3in-k.yaml"
+    echo ""
+    echo -e "${YELLOW}Tip: Use esphome-wizard for a guided selection interface${NC}"
     exit 1
 fi
 
-ACTION=$1
-IMPLEMENTATION=$2
-BOARD=$3
-ENV_DIR="../env"
-PYTHON="${ENV_DIR}/bin/python"
+# Function to create virtual environment if it doesn't exist
+ensure_venv() {
+    # Check if uv is installed
+    if ! command -v uv &> /dev/null; then
+        echo -e "${RED}uv not found. Please install uv with: pip install uv${NC}"
+        echo -e "${YELLOW}Falling back to using pip and venv...${NC}"
+        if [ ! -d "$ROOT_DIR/venv" ]; then
+            echo -e "${YELLOW}Creating virtual environment with venv...${NC}"
+            python3 -m venv "$ROOT_DIR/venv"
+            source "$ROOT_DIR/venv/bin/activate"
+            pip install -r "$ROOT_DIR/requirements.txt"
+        else
+            source "$ROOT_DIR/venv/bin/activate"
+        fi
+        return
+    fi
 
-# Create virtual environment if it doesn't exist
-if [ ! -d "$ENV_DIR" ]; then
-    uv venv "$ENV_DIR" --python 3.12
-    uv pip install -r ../requirements.txt --python "$PYTHON"
+    if [ ! -d "$ROOT_DIR/.venv" ]; then
+        echo -e "${YELLOW}Creating virtual environment with uv...${NC}"
+        uv venv "$ROOT_DIR/.venv"
+        source "$ROOT_DIR/.venv/bin/activate"
+        uv pip install -r "$ROOT_DIR/requirements.txt"
+    else
+        source "$ROOT_DIR/.venv/bin/activate"
+    fi
+}
+
+# Parse arguments
+COMMAND=$1
+IMPLEMENTATION_FILE="$ROOT_DIR/$2"
+BOARD_FILE="$ROOT_DIR/$3"
+DISPLAY_FILE="$ROOT_DIR/$4"
+
+# Check if files exist
+if [ ! -f "$IMPLEMENTATION_FILE" ]; then
+    echo -e "${RED}Error: Implementation file not found at $IMPLEMENTATION_FILE${NC}"
+    exit 1
 fi
 
-# If we have a board file, create a temporary combined config
-if [ -n "$BOARD" ]; then
-    TMPFILE=".tmp.$(date +%s).yaml"
-    trap 'rm -f "$TMPFILE"' EXIT
-    echo "<<: !include $IMPLEMENTATION" > "$TMPFILE"
-    echo "<<: !include $BOARD" >> "$TMPFILE"
-    CONFIG="$TMPFILE"
-else
-    CONFIG="$IMPLEMENTATION"
+if [ ! -f "$BOARD_FILE" ]; then
+    echo -e "${RED}Error: Board file not found at $BOARD_FILE${NC}"
+    exit 1
 fi
 
-# Run the requested action
-case "$ACTION" in
-    run)
-        "$PYTHON" -m esphome run "$CONFIG"
-        ;;
-    compile)
-        "$PYTHON" -m esphome compile "$CONFIG"
-        ;;
-    *)
-        echo "Unknown action: $ACTION"
-        echo "Valid actions are: run, compile"
-        exit 1
-        ;;
-esac 
+if [ ! -f "$DISPLAY_FILE" ]; then
+    echo -e "${RED}Error: Display file not found at $DISPLAY_FILE${NC}"
+    exit 1
+fi
+
+# Create a timestamp for the temp file
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+TMP_DIR="$ROOT_DIR/tmp"
+mkdir -p "$TMP_DIR"
+
+# Create the temporary configuration file
+CONFIG="$TMP_DIR/config-$TIMESTAMP.yaml"
+echo -e "${GREEN}Creating configuration file: $CONFIG${NC}"
+
+# Copy secrets.yaml to tmp directory if it exists
+if [ -f "$ROOT_DIR/secrets.yaml" ]; then
+    echo "Copying secrets.yaml to tmp directory"
+    cp "$ROOT_DIR/secrets.yaml" "$TMP_DIR/"
+fi
+
+# Copy images directory to tmp directory if it exists
+if [ -d "$ROOT_DIR/images" ]; then
+    echo "Copying images directory to tmp directory"
+    cp -r "$ROOT_DIR/images" "$TMP_DIR/"
+fi
+
+# Create a YAML file that uses ESPHome's packages feature to include the other files
+cat > "$CONFIG" << EOL
+# Combined configuration by esphome-build
+# Generated at: $(date)
+
+# Using ESPHome's packages feature to include files
+packages:
+  board: !include ${BOARD_FILE}
+  display: !include ${DISPLAY_FILE}
+  implementation: !include ${IMPLEMENTATION_FILE}
+EOL
+
+echo "Configuration saved to: $CONFIG"
+
+# Ensure virtual environment is active
+ensure_venv
+
+# Change to the tmp directory before running the command
+cd "$TMP_DIR"
+
+# Run the esphome command with the specified action on the configuration
+echo -e "${BLUE}Running: $COMMAND on $(basename "$CONFIG")${NC}"
+esphome $COMMAND "$(basename "$CONFIG")"
+
+# Check if the command was successful
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Command failed! You can inspect the configuration at: $CONFIG${NC}"
+    echo "Config content:"
+    cat "$CONFIG"
+    exit 1
+fi
+
+echo -e "${GREEN}Command completed successfully.${NC}" 

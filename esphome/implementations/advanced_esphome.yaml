@@ -63,7 +63,9 @@ display:
     id: my_display
     cs_pin: $cs_pin
     dc_pin: $dc_pin
-    busy_pin: $busy_pin
+    busy_pin:
+      number: $busy_pin
+      inverted: $busy_pin_inverted
     reset_pin: $reset_pin
     reset_duration: 200ms
     model: $waveshare_model

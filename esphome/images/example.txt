@@ -1,0 +1,14 @@
+This is a test file for the mDNS image server.
+
+For actual use, you should place real image files (JPG, PNG) in this directory.
+
+Example usage in ESPHome configuration:
+
+```yaml
+image:
+  - file: "http://eink-frame-test.local/images/your_real_image.jpg"
+    id: main_image
+    resize: 960x680  # Match your display resolution
+```
+
+You can access the web interface at: http://eink-frame-test.local/ 

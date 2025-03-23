@@ -1,66 +1,101 @@
 env=env
 python=${env}/bin/python
 
-# Example: make
-# Creates a Python virtual environment and installs dependencies
+# Create Python virtual environment and install dependencies
 ${env}:
 	uv venv ${env} --python 3.12
 	uv pip install -r requirements.txt --python ./${env}/bin/python
-
-# Install additional dependencies for QR code generation
-.PHONY: install-qr-deps
-install-qr-deps: ${env}
 	uv pip install qrcode pillow --python ./${env}/bin/python
 
 # Generate WiFi QR setup image
-images/960x680/wifi_setup.png: install-qr-deps scripts/generate_wifi_qr.py
-	${python} scripts/generate_wifi_qr.py images/960x680/wifi_setup.png
+.PHONY: generate-qr
+generate-qr: ${env}
+	@echo "Generating WiFi QR setup image..."
+	@mkdir -p images/960x680
+	@${python} scripts/generate_wifi_qr.py images/960x680/wifi_setup.png
+	@echo "Generated QR code at images/960x680/wifi_setup.png"
 
-# Example: make run implementation=my_device.yaml [board=my_board.yaml]
-# Run a specific configuration
-# If board is provided, it will be used as overrides
-run: ${env} images/960x680/wifi_setup.png
-	@if [ -z "$(implementation)" ]; then \
-		echo "Usage: make run implementation=<implementation.yaml> [board=<board.yaml>]"; \
+# Quick shortcut to run the wizard interface
+.PHONY: wizard
+wizard: ${env}
+	@chmod +x bin/esphome-wizard
+	@bin/esphome-wizard
+
+# Shortcut to run with specific implementation and board
+.PHONY: run
+run: ${env} generate-qr
+	@if [ -z "$(implementation)" ] || [ -z "$(board)" ]; then \
+		echo "Usage: make run implementation=<implementation.yaml> board=<board.yaml> [display=<display.yaml>]"; \
 		exit 1; \
 	fi; \
-	if [ -n "$(board)" ]; then \
-		TMPFILE=.tmp.$$(date +%s).yaml; \
-		trap 'rm -f "$$TMPFILE"' EXIT; \
-		echo "<<: !include $(implementation)" > "$$TMPFILE"; \
-		echo "<<: !include $(board)" >> "$$TMPFILE"; \
-		${python} -m esphome run "$$TMPFILE"; \
+	chmod +x bin/esphome-build; \
+	if [ -n "$(display)" ]; then \
+		bin/esphome-build run $(implementation) $(board) $(display); \
 	else \
-		${python} -m esphome run "$(implementation)"; \
+		bin/esphome-build run $(implementation) $(board); \
 	fi
 
-# Example: make compile implementation=my_device.yaml [board=my_board.yaml]
-# Compile a specific configuration
-# If board is provided, it will be used as overrides
-compile: ${env} images/960x680/wifi_setup.png
-	@if [ -z "$(implementation)" ]; then \
-		echo "Usage: make compile implementation=<implementation.yaml> [board=<board.yaml>]"; \
+# Shortcut to compile with specific implementation and board
+.PHONY: compile
+compile: ${env} generate-qr
+	@if [ -z "$(implementation)" ] || [ -z "$(board)" ]; then \
+		echo "Usage: make compile implementation=<implementation.yaml> board=<board.yaml> [display=<display.yaml>]"; \
 		exit 1; \
 	fi; \
-	if [ -n "$(board)" ]; then \
-		TMPFILE=.tmp.$$(date +%s).yaml; \
-		trap 'rm -f "$$TMPFILE"' EXIT; \
-		echo "<<: !include $(implementation)" > "$$TMPFILE"; \
-		echo "<<: !include $(board)" >> "$$TMPFILE"; \
-		${python} -m esphome compile "$$TMPFILE"; \
+	chmod +x bin/esphome-build; \
+	if [ -n "$(display)" ]; then \
+		bin/esphome-build compile $(implementation) $(board) $(display); \
 	else \
-		${python} -m esphome compile "$(implementation)"; \
+		bin/esphome-build compile $(implementation) $(board); \
 	fi
 
-# Example: make clean implementation=my_device.yaml
-# Clean a specific configuration
+# Shortcut to view logs
+.PHONY: logs
+logs: ${env}
+	@if [ -z "$(implementation)" ] || [ -z "$(board)" ]; then \
+		echo "Usage: make logs implementation=<implementation.yaml> board=<board.yaml> [display=<display.yaml>]"; \
+		exit 1; \
+	fi; \
+	chmod +x bin/esphome-build; \
+	if [ -n "$(display)" ]; then \
+		bin/esphome-build logs $(implementation) $(board) $(display); \
+	else \
+		bin/esphome-build logs $(implementation) $(board); \
+	fi
+
+# Shortcut to clean a specific configuration
+.PHONY: clean
 clean: ${env}
-	@if [ -z "$(implementation)" ]; then \
-		echo "Usage: make clean implementation=<implementation.yaml>"; \
+	@if [ -z "$(implementation)" ] || [ -z "$(board)" ]; then \
+		echo "Usage: make clean implementation=<implementation.yaml> board=<board.yaml> [display=<display.yaml>]"; \
 		exit 1; \
 	fi; \
-	${python} -m esphome clean "$(implementation)"
+	chmod +x bin/esphome-build; \
+	if [ -n "$(display)" ]; then \
+		bin/esphome-build clean $(implementation) $(board) $(display); \
+	else \
+		bin/esphome-build clean $(implementation) $(board); \
+	fi
 
-.PHONY: run compile clean
+# Default task, shows help info
+.PHONY: help
+help:
+	@echo "ESPHome Build System"
+	@echo ""
+	@echo "Available commands:"
+	@echo "  make wizard                           - Run the interactive wizard"
+	@echo "  make run impl board [display]         - Run an implementation with a board"
+	@echo "  make compile impl board [display]     - Compile an implementation with a board"
+	@echo "  make logs impl board [display]        - View logs for a device"
+	@echo "  make clean impl board [display]       - Clean a configuration"
+	@echo "  make generate-qr                      - Generate WiFi QR code setup image"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make wizard"
+	@echo "  make generate-qr"
+	@echo "  make compile implementation=implementations/simple_picture_on_board.yaml board=boards/dfrobot_firebeetle2_esp32ue.yaml"
+	@echo "  make run implementation=implementations/simple_picture_on_board.yaml board=boards/dfrobot_firebeetle2_esp32ue.yaml display=displays/13-3k.yaml"
+
+.DEFAULT_GOAL := help
 
 

@@ -1,5 +1,5 @@
 substitutions:
-  device_id: "eink-frame"
+  device_nickname: "test"
   wifi_ssid: !secret wifi_ssid
   wifi_password: !secret wifi_password
   wake_up_time: "04:00:00"
@@ -13,8 +13,6 @@ substitutions:
   reset_pin: "GPIO14"
   # power_pin: "3v3"
 
-  waveshare_model: "13.3in-k"
-
 esp32:
   board: esp32dev # dfrobot_firebeetle2_esp32e
   framework:
@@ -22,7 +20,7 @@ esp32:
     version: recommended
 
 esphome:
-  name: eink-frame-${device_id}
-  friendly_name: "eink frame ${device_id}"
+  name: eink-frame-${device_nickname}
+  friendly_name: "eink frame ${device_nickname}"
   platformio_options:
     build_flags: "-DBOARD_HAS_PSRAM"
