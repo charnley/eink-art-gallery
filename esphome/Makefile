@@ -7,14 +7,6 @@ ${env}:
 	uv pip install -r requirements.txt --python ./${env}/bin/python
 	uv pip install qrcode pillow --python ./${env}/bin/python
 
-# Generate WiFi QR setup image
-.PHONY: generate-qr
-generate-qr: ${env}
-	@echo "Generating WiFi QR setup image..."
-	@mkdir -p images/960x680
-	@${python} scripts/generate_wifi_qr.py images/960x680/wifi_setup.png
-	@echo "Generated QR code at images/960x680/wifi_setup.png"
-
 # Quick shortcut to run the wizard interface
 .PHONY: wizard
 wizard: ${env}
@@ -23,7 +15,7 @@ wizard: ${env}
 
 # Shortcut to run with specific implementation and board
 .PHONY: run
-run: ${env} generate-qr
+run: ${env}
 	@if [ -z "$(implementation)" ] || [ -z "$(board)" ]; then \
 		echo "Usage: make run implementation=<implementation.yaml> board=<board.yaml> [display=<display.yaml>]"; \
 		exit 1; \
@@ -37,7 +29,7 @@ run: ${env} generate-qr
 
 # Shortcut to compile with specific implementation and board
 .PHONY: compile
-compile: ${env} generate-qr
+compile: ${env}
 	@if [ -z "$(implementation)" ] || [ -z "$(board)" ]; then \
 		echo "Usage: make compile implementation=<implementation.yaml> board=<board.yaml> [display=<display.yaml>]"; \
 		exit 1; \
