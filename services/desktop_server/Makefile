@@ -8,6 +8,7 @@ model_dir=${GIT_ROOT}/models
 
 refill_server=
 push_server=
+token=
 
 all: ${env}
 
@@ -19,7 +20,15 @@ ${env}:
 	uv pip install -e . --python ./${env}/bin/python
 	uv pip install -e ../shared/ --python ./${env}/bin/python
 
+login:
+	@# https://huggingface.co/settings/tokens/new?tokenType=read
+	${python} -c "from huggingface_hub import login; login()"
+
 ## Python
+
+start:
+	make start-push push_server=${push_server}
+	make start-refill refill_server=${refill_server}
 
 start-push:
 	test ! -z "${push_server}"
