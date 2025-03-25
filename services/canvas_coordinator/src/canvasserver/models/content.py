@@ -156,3 +156,8 @@ class ReadingDevice(Model, table=True):
 
 class Queue(Model):
     id: str = Field(primary_key=True)
+
+
+class Settings(Model):
+    key: str = Field(primary_key=True)
+    value: str = Field()

@@ -1,11 +1,12 @@
+apscheduler
 fastapi
-python-multipart
-sqlmodel
 matplotlib
+numba
 numpy
 pillow
-uvicorn
-numba
 pydantic
 pydantic_settings
+python-multipart
 rich
+sqlmodel
+uvicorn

@@ -1,5 +1,4 @@
 import logging
-from contextlib import asynccontextmanager
 
 from canvasserver.config import get_settings
 from canvasserver.constants import APP_NAME
@@ -9,14 +8,21 @@ from starlette.middleware.cors import CORSMiddleware
 
 from .version import __version__
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+logger = logging.getLogger("uvicorn.info")
 
 
-@asynccontextmanager
+# @asynccontextmanager
 async def lifespan(app: FastAPI):
 
     # startup
-    _ = get_settings()
+    logger.info("Initialize settings")
+    settings = get_settings()
+
+    # Read the cron jobs
+    # - rotate active prompt
+    # - send to push devices
+
     yield
 
     # shutdown
