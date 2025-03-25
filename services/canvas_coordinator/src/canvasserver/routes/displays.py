@@ -50,12 +50,16 @@ async def _get_queue(dry_run: bool = False, session: Session = Depends(get_sessi
     # TODO Check for current active prompt
     # TODO Set reading_device id as parameter for debugging
 
+    logger.info("Fetching from queue")
+
     # Get the next image
     image_obj = session.query(Image).order_by(func.random()).first()
 
     is_empty = image_obj is None
 
     if is_empty:
+        # Get 404 image, but still return 200, otherwise ESP32 will react to
+        # the error code
         image = get_basic_404("")
     else:
         image = image_obj.image
@@ -71,9 +75,11 @@ async def _get_queue(dry_run: bool = False, session: Session = Depends(get_sessi
 
     # TODO Check if ESPHome accepts files from 404
 
+    session.close()
+
     return Response(
         image_bytes,
         headers=IMAGE_HEADER,
         media_type=IMAGE_CONTENT_TYPE,
-        status_code=200 if not is_empty else 404,
+        status_code=200,
     )

@@ -70,9 +70,12 @@ def prompt_flux_schnell(pipe, prompt, negative_prompt=NEGATIVE_PROMPT):
     return image
 
 
-def prompt_sd3(pipe, prompt, negative_prompt=NEGATIVE_PROMPT):
+# problem 960x688
+def closest_divisible_by_16(value):
+    return round(value / 16) * 16
 
-    negative_prompt = "paper, frame, picture frame, border, photorealistic, deformed, glitch, blurry, noisy, off-center, picture-frame, poster, signature"
+
+def prompt_sd3(pipe, prompt, negative_prompt=NEGATIVE_PROMPT, width=960, height=680):
 
     logger.info("Generating picture from prompt, using negative prompts")
 
@@ -82,10 +85,10 @@ def prompt_sd3(pipe, prompt, negative_prompt=NEGATIVE_PROMPT):
         num_inference_steps=28,
         guidance_scale=7.0,
         num_images_per_prompt=1,
-        width=960,
-        height=688,
+        width=closest_divisible_by_16(width),
+        height=closest_divisible_by_16(height),
     ).images[0]
 
-    image = image.resize((IMAGE_WIDTH, IMAGE_HEIGHT))  # ensure right resolution
+    image = image.resize((width, height))  # ensure right resolution
 
     return image

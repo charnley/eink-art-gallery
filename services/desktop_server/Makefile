@@ -33,6 +33,7 @@ start-refill:
 	HF_HOME=${GIT_ROOT}/models \
 	${python} -m ${package}.refill \
 	--server-url ${refill_server} \
+	--fill-count 1 \
 	--refill-prompts \
 	--refill-images
 
@@ -41,12 +42,9 @@ start-api:
 	test ! -z "${refill_server}"
 	HF_HOME=${GIT_ROOT}/models \
 	${python} -m ${package}.api --start --port 8080
-	# ${python} -m uvicorn art_api:app \
-	# 	--host 0.0.0.0 \
-	# 	--port 8080 \
-	# 	--log-config=${GIT_ROOT}/logging.yaml
 
 ## Development
 
 start-jupyter:
+	HF_HOME=${GIT_ROOT}/models \
 	${python} -m jupyterlab

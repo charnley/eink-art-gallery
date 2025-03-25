@@ -72,6 +72,11 @@ def main(args=None):
         log_config["loggers"]["uvicorn.error"] = {"handlers": []}
         log_config["loggers"]["uvicorn.access"] = {"handlers": []}
 
+        # Note
+        # uvicorn_log_config = uvicorn.config.LOGGING_CONFIG
+        # del uvicorn_log_config["loggers"][""]
+        # uvicorn.run(app, log_config=uvicorn_log_config)
+
         logger.info(f"Starting {__name__}")
         logger.info(f"Version {__version__}")
 

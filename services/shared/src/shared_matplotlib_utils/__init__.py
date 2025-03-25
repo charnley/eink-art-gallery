@@ -3,6 +3,7 @@ from functools import lru_cache
 from io import BytesIO
 from typing import Any
 
+from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -26,6 +27,9 @@ FONT_MONO = dict(
     fontweight=FONT_WEIGHT,
     fontfamily=FONT_FAMILY_MONO,
 )
+
+# path_effects=[OUTLINE]
+OUTLINE = patheffects.withStroke(linewidth=4, foreground="w")
 
 
 def get_figure(
