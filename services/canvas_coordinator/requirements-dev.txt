@@ -3,3 +3,4 @@ monkeytype
 pip
 pytest
 setuptools
+pre-commit
