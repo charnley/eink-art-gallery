@@ -6,7 +6,7 @@ from hashlib import sha256
 from PIL import Image as PilImage
 from pydantic import model_serializer
 from sqlalchemy import event
-from sqlmodel import DateTime, Field, LargeBinary
+from sqlmodel import Field, LargeBinary
 from sqlmodel import SQLModel as Model
 from sqlmodel import TypeDecorator
 
@@ -103,15 +103,23 @@ class Prompt(Model, table=True):
     prompt: str = Field()
     model: str = Field()
 
-    active: bool = Field()
+    active: bool = Field(default=False)
     theme_id: str = Field(foreign_key="theme.id", nullable=True)
-    lifetime: DateTime = Field()  # TODO Implement lifetime
+
+    # lifetime: DateTime = Field()  # TODO Implement lifetime
+    # lifetime: DateTime = Field(nullable=True, default=func.now()) # + one month or so
 
     @staticmethod
     def generate_id(prompt_text: str) -> str:
         m = sha256()
         m.update(prompt_text.encode())
         return m.hexdigest()
+
+    def __repr__(self) -> str:
+        return f"Prompt(id={self.id:20s},active={self.active})"
+
+    def __str__(self) -> str:
+        return f"Prompt(id={self.id:20s},active={self.active})"
 
 
 @event.listens_for(Prompt, "before_insert")

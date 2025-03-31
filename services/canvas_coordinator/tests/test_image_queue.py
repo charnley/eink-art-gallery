@@ -1,7 +1,6 @@
 from uuid import uuid1
 
 from canvasserver.constants import IMAGE_CONTENT_TYPE
-from canvasserver.facades import get_basic_text
 from canvasserver.image_utils import bytes_to_image, image_to_bytes
 from canvasserver.models.content import ImageCreate, Images, Prompt, Prompts
 from canvasserver.routes.displays import endpoint_queue
@@ -10,6 +9,7 @@ from canvasserver.routes.images import FILE_UPLOAD_KEY
 from canvasserver.routes.images import prefix as image_prefix
 from canvasserver.routes.prompts import prefix as prompt_prefix
 from PIL import Image as PilImage
+from shared_matplotlib_utils import get_basic_text
 
 
 def test_new_prompt_new_images(tmp_client):

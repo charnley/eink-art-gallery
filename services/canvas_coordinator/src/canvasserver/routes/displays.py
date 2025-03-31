@@ -1,7 +1,8 @@
 import logging
 
-from canvasserver.application import get_current_prompt
+import numpy as np
 from canvasserver.image_utils import dithering, image_to_bytes
+from canvasserver.jobs import get_active_prompts
 from canvasserver.models.content import Image
 from canvasserver.models.db import get_session
 from fastapi import APIRouter, Depends
@@ -62,23 +63,29 @@ async def _get_queue(
         image_obj = session.query(Image).order_by(func.random()).first()
 
     else:
-        prompt_id = get_current_prompt()
-        image_obj = session.query(Image).filter(Image.prompt == prompt_id)
+        prompt_ids = get_active_prompts()
+        prompt_id = np.random.choice(prompt_ids)
+
+        logger.info(f"Query active prompt {prompt_id}")
+
+        image_obj = (
+            session.query(Image).filter(Image.prompt == prompt_id).order_by(func.random()).first()
+        )
 
     is_empty = image_obj is None
 
     if is_empty:
         # Get 404 image, but still return 200, otherwise ESP32 will react to
         # the error code
+        logger.error("Could not find image")
         image = get_basic_404("")
+
     else:
         image = image_obj.image
 
     if not dry_run and not is_empty:
         session.delete(image_obj)
         session.commit()
-        count_left = session.query(Image).count()
-        logger.info(f"Qurrent queue has {count_left} images")
 
     image = dithering.atkinson_dither(image)
     image_bytes = image_to_bytes(image)

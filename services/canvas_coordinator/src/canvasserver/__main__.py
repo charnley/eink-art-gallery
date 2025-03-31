@@ -7,26 +7,12 @@ import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from canvasserver.config import get_settings
-from canvasserver.models.content import Prompt
+from canvasserver.jobs import refresh_active_prompt, send_images_to_push_devices
 
-from .models.db import create_db_and_tables, get_engine, get_session, has_tables
+from .models.db import create_db_and_tables, get_engine, has_tables
 from .version import __version__
 
-# from canvasserver.jobs import refresh_active_prompt, send_images_to_push_devices
-
 logger = logging.getLogger(__name__)
-
-
-def job1():
-    logger.info("Job 1")
-
-    return
-
-
-def job2():
-    logger.info("Job 1")
-
-    return
 
 
 def main(args=None):
@@ -34,9 +20,6 @@ def main(args=None):
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-v", "--version", action="version", version=__version__)
-
-    parser.add_argument("--init-db", action="store_true")
-    parser.add_argument("--prompts-filename", type=Path)
 
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--reload", action="store_true")
@@ -67,23 +50,6 @@ def main(args=None):
         logger.info("There is a file, but no tables found, generating tables...")
         create_db_and_tables(None)
 
-    # Read prompt file and put into database
-    if args.prompts_filename is not None:
-
-        logger.info("Reading pre-defined prompts...")
-
-        with get_session() as session, open(args.prompts_filename, "r") as f:
-            lines = f.readlines()
-            lines = [line.strip() for line in lines]
-
-            for line in lines:
-                prompt = Prompt(prompt=line, model="SD3")
-                session.add(prompt)
-
-            session.commit()
-
-            logger.info(f"Database enriched with {len(lines)} prompts")
-
     if args.start:
 
         logger.info(f"Version {__version__}")
@@ -91,11 +57,13 @@ def main(args=None):
         # Load background jobs
         scheduler = BackgroundScheduler()
 
-        cron = "*/10 * * * *"
-        cron = "*/1 * * * *"
+        cron_nightly = "0 4 * * *"
 
-        scheduler.add_job(job1, CronTrigger.from_crontab(cron))
-        scheduler.add_job(job2, CronTrigger.from_crontab("0 4 * * *"))
+        cron_prompt_switch = "*/10 * * * *"
+        cron_prompt_switch = "*/1 * * * *"
+
+        scheduler.add_job(refresh_active_prompt, CronTrigger.from_crontab(cron_prompt_switch))
+        scheduler.add_job(send_images_to_push_devices, CronTrigger.from_crontab(cron_nightly))
 
         logger.info("Starting background jobs")
         scheduler.start()
