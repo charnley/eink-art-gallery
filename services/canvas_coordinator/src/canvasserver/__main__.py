@@ -32,15 +32,18 @@ def job2():
 def main(args=None):
 
     parser = argparse.ArgumentParser()
+
     parser.add_argument("-v", "--version", action="version", version=__version__)
 
     parser.add_argument("--init-db", action="store_true")
-    parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--prompts-filename", type=Path)
+
+    parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--reload", action="store_true")
     parser.add_argument("--start", action="store_true")
     parser.add_argument("--workers", type=int, default=2)
     parser.add_argument("--logging-config", type=Path, default=Path("logging_config.yaml"))
+
     args = parser.parse_args(args)
 
     # Enable logging
@@ -97,7 +100,6 @@ def main(args=None):
         logger.info("Starting background jobs")
         scheduler.start()
 
-        # Run Uvicorn server
         uvicorn.run(
             "canvasserver.main:app",
             host="0.0.0.0",
@@ -107,6 +109,7 @@ def main(args=None):
             log_config=str(Path("./logging_config.yaml")),
             workers=args.workers,
         )
+
         scheduler.shutdown()
 
 

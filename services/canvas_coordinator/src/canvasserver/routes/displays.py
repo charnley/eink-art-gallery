@@ -1,5 +1,6 @@
 import logging
 
+from canvasserver.application import get_current_prompt
 from canvasserver.image_utils import dithering, image_to_bytes
 from canvasserver.models.content import Image
 from canvasserver.models.db import get_session
@@ -61,7 +62,7 @@ async def _get_queue(
         image_obj = session.query(Image).order_by(func.random()).first()
 
     else:
-        prompt_id = select_current_prompt()
+        prompt_id = get_current_prompt()
         image_obj = session.query(Image).filter(Image.prompt == prompt_id)
 
     is_empty = image_obj is None

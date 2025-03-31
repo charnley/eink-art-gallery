@@ -6,7 +6,7 @@ from hashlib import sha256
 from PIL import Image as PilImage
 from pydantic import model_serializer
 from sqlalchemy import event
-from sqlmodel import Field, LargeBinary
+from sqlmodel import DateTime, Field, LargeBinary
 from sqlmodel import SQLModel as Model
 from sqlmodel import TypeDecorator
 
@@ -52,7 +52,6 @@ class Image(Model, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     prompt: str = Field(foreign_key="prompt.id", nullable=False, ondelete="CASCADE")
     image_data: bytes = Field(sa_column=LargeBinary)
-    # has_colors: bool = Field()
     width: int = Field()
     height: int = Field()
 
@@ -99,11 +98,14 @@ class ImageMeta(Model):
 
 class Prompt(Model, table=True):
     __tablename__ = "prompt"
+
     id: str = Field(primary_key=True, default=None)
     prompt: str = Field()
     model: str = Field()
 
-    # TODO Prompt needs a lifetime
+    active: bool = Field()
+    theme_id: str = Field(foreign_key="theme.id", nullable=True)
+    lifetime: DateTime = Field()  # TODO Implement lifetime
 
     @staticmethod
     def generate_id(prompt_text: str) -> str:
@@ -129,6 +131,7 @@ class Theme(Model, table=True):
     __tablename__ = "theme"
     id: str = Field(primary_key=True, default=None)
     theme: str = Field()
+    active: str = Field()
 
     # TODO Theme needs a lifetime
 
