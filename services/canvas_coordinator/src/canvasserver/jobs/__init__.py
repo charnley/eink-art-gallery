@@ -44,8 +44,6 @@ def refresh_active_prompt(session):
 def get_active_prompts(session):
     prompts: list[tuple[Prompt,]] = session.execute(select(Prompt).filter(Prompt.active)).all()
 
-    print(prompts)
-
     if len(prompts) == 0:
         logger.warning("No active prompts, returning all")
         prompts: list[tuple[Prompt,]] = session.execute(select(Prompt)).all()

@@ -87,7 +87,6 @@ async def _get_queue(
         image = get_basic_404("")
 
     else:
-        print(_image_obj)
         image = _image_obj[0].image
 
     if not dry_run and not is_empty:
