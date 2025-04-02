@@ -43,8 +43,7 @@ start-refill:
 	HF_HOME=${GIT_ROOT}/models \
 	${python} -m ${package}.refill \
 	--server-url ${refill_server} \
-	--fill-count 1 \
-	--refill-prompts \
+	--fill-count 6 \
 	--refill-images
 
 start-api:
@@ -52,6 +51,16 @@ start-api:
 	test ! -z "${refill_server}"
 	HF_HOME=${GIT_ROOT}/models \
 	${python} -m ${package}.api --start --port 8080
+
+fill-default-themes:
+	test ! -z "${refill_server}"
+	HF_HOME=${GIT_ROOT}/models \
+	${python} -m ${package}.themes \
+	--server-url ${refill_server} \
+	--prompts-filenames \
+	../../assets/prompts_cute.txt \
+	../../assets/prompts_landscape.txt \
+	../../assets/prompts_artists_bw.txt
 
 ## Development
 
