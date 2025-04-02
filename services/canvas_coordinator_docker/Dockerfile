@@ -32,4 +32,6 @@ COPY ./shared/ ./shared
 RUN pip install --no-cache-dir -e ./canvas_coordinator
 RUN pip install --no-cache-dir -e ./shared
 
-CMD [ "python", "-m", "canvasserver", "--start" ]
+COPY ./canvas_coordinator/logging_config.yaml ./logging_config.yaml
+
+CMD [ "python", "-m", "canvasserver", "--start", "--logging-config", "./logging_config.yaml" ]

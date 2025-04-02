@@ -20,10 +20,10 @@ ${env}:
 ## Python
 
 dev:
-	${python} -m ${package} --start --port ${port} --reload
+	${python} -m ${package} --start --port ${port} --reload --logging-config ./logging_config.yaml
 
 start:
-	${python} -m ${package} --start --port ${port}
+	${python} -m ${package} --start --port ${port} --logging-config ./logging_config.yaml
 
 init:
 	${python} -m ${package}.example --prompts-filename ${GIT_ROOT}/assets/random_artists.txt
