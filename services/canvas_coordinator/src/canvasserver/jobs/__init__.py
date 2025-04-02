@@ -3,51 +3,59 @@ import logging
 from canvasserver.models.content import Image, Prompt
 from canvasserver.models.db import get_session
 from sqlalchemy import func
+from sqlmodel import select
 
 logger = logging.getLogger(__name__)
 
 
-def refresh_active_prompt():
+def refresh_active_prompt(session):
 
     no_frames = 6  # TODO Should be number of fitting reading_devices
 
     logger.info("Resetting active prompt")
 
-    session = get_session()
-
     # TODO Which theme is active?
 
     (session.query(Prompt).update({Prompt.active: False}, synchronize_session=False))
 
-    prompt = (
-        session.query(Prompt)
+    _prompt = session.execute(
+        select(Prompt)
         .join(Image, Image.prompt == Prompt.id)
         .group_by(Prompt.id)
         .having(func.count(Image.id) >= no_frames)
         .order_by(func.random())
-        .first()
-    )
+    ).first()
 
-    if prompt is None:
+    if _prompt is None:
+        logger.warning("No prompts fulfilled the critia for active status")
         # TODO Some service is lazy with the image refill
-        return
+        return None
 
+    prompt = _prompt[0]
     prompt.active = True
 
     session.commit()
 
-    logger.info(f"Setting {prompt}")
+    logger.info(f"Setting active prompt: {prompt}")
 
-    return
+    return prompt
 
 
-def get_active_prompts():
-    session = get_session()
-    prompts = session.query(Prompt).filter(Prompt.active).all()
-    prompt_ids = [str(prompt.id) for prompt in prompts]
+def get_active_prompts(session):
+    prompts: list[tuple[Prompt,]] = session.execute(select(Prompt).filter(Prompt.active)).all()
+
+    print(prompts)
+
+    if len(prompts) == 0:
+        logger.warning("No active prompts, returning all")
+        prompts: list[tuple[Prompt,]] = session.execute(select(Prompt)).all()
+
+    _prompts: list[Prompt] = [x[0] for x in prompts]
+    prompt_ids = [str(prompt.id) for prompt in _prompts]
+
     return prompt_ids
 
 
-def send_images_to_push_devices():
+def send_images_to_push_devices(session):
 
     return

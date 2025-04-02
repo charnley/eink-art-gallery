@@ -23,13 +23,22 @@ class Settings(BaseSettings):
     min_images_per_prompt: int = MIN_IMAGES_PER_PROMPT
     min_prompts_per_theme: int = MIN_PROMPTS_PER_THEME
 
+    log_level: str = "INFO"
+    cron_update_push: str | None = None
+    cron_update_prompt: str | None = None
+
 
 @lru_cache
-def get_settings():
+def get_settings(storage: Path | None = None, config_path: Path | None = None):
+
+    here = Path("./")
 
     # Read environ stuff
-    storage = Path(os.environ.get(ENV_DATA_PATH, "./"))
-    config_path = os.environ.get(ENV_CONFIG_PATH)
+    if storage is None:
+        storage = Path(os.environ.get(ENV_DATA_PATH, here))
+
+    if config_path is None:
+        config_path = Path(os.environ.get(ENV_CONFIG_PATH, here / "options.json"))
 
     assert storage.is_dir(), "Storage directory is wrong"
 
@@ -44,6 +53,11 @@ def get_settings():
 
     logger.info(f"Setting database to {database_path}")
 
-    s = Settings(database_path=database_path)
-    logger.info(f"config: {s}")
-    return s
+    if options is None:
+        options = dict(database_path=database_path)
+    else:
+        options["database_path"] = database_path
+
+    settings = Settings(**options)
+    logger.info(f"config: {settings}")
+    return settings

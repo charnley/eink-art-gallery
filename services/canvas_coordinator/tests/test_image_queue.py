@@ -21,9 +21,11 @@ def test_new_prompt_new_images(tmp_client):
     assert response0.json()["count"] == 0
 
     # Create prompt
-    prompt = Prompt(prompt="New And Fancy Prompt For Images, drawing, black and white", model="")
+    prompt = Prompt(
+        prompt="New And Fancy Prompt For Images, drawing, black and white", model="", theme_id=None
+    )
     response1 = tmp_client.post(prompt_prefix, json=prompt.model_dump())
-    print(response1.json())
+    print("response1", response1.json())
     assert response1.status_code == 200
     assert response1.json()
 
@@ -76,6 +78,7 @@ def test_new_prompt_new_images(tmp_client):
 
     # Fetch queue five times
     for _ in range(n_new_images):
+        # Fetch, not caring about active prompts
         response_6a = tmp_client.get(displays_prefix + endpoint_queue)
         assert response_6a.status_code == 200
 
@@ -84,7 +87,7 @@ def test_new_prompt_new_images(tmp_client):
         assert isinstance(image_6a, PilImage.Image)
 
     response_6b = tmp_client.get(displays_prefix + endpoint_queue)
-    assert response_6b.status_code == 404
+    assert response_6b.status_code == 200  # Empty, but still returns 200
 
     # Assert that is is picture
     image_6b = bytes_to_image(response_6b.content)

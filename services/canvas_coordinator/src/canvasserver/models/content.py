@@ -104,7 +104,7 @@ class Prompt(Model, table=True):
     model: str = Field()
 
     active: bool = Field(default=False)
-    theme_id: str = Field(foreign_key="theme.id", nullable=True)
+    theme_id: str | None = Field(foreign_key="theme.id", nullable=True)
 
     # lifetime: DateTime = Field()  # TODO Implement lifetime
     # lifetime: DateTime = Field(nullable=True, default=func.now()) # + one month or so
@@ -133,6 +133,10 @@ def ensure_id_in_prompt(mapper, connection, target):
 class Prompts(Model):
     prompts: list[Prompt]
     count: int
+
+
+class PromptQuery(Model):
+    prompts: list[str]
 
 
 class Theme(Model, table=True):

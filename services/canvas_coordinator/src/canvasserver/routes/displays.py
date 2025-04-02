@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import numpy as np
 from canvasserver.image_utils import dithering, image_to_bytes
@@ -9,6 +10,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import Response
 from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER
 from shared_matplotlib_utils import get_basic_404, get_basic_text
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
@@ -58,21 +60,25 @@ async def _get_queue(
 
     logger.info("Fetching from queue")
 
+    # TODO If no active prompt, fetch from any
+
+    _image_obj: Any  # Type of execute .first is inconsistent None | Tuple[Item]
+
     # Get the next image
     if random:
-        image_obj = session.query(Image).order_by(func.random()).first()
+        _image_obj = session.execute(select(Image).order_by(func.random())).first()
 
     else:
-        prompt_ids = get_active_prompts()
+        prompt_ids = get_active_prompts(session)
         prompt_id = np.random.choice(prompt_ids)
 
-        logger.info(f"Query active prompt {prompt_id}")
+        logger.info(f"Query prompt {prompt_id}")
 
-        image_obj = (
-            session.query(Image).filter(Image.prompt == prompt_id).order_by(func.random()).first()
-        )
+        _image_obj = session.execute(
+            select(Image).filter(Image.prompt == prompt_id).order_by(func.random())
+        ).first()
 
-    is_empty = image_obj is None
+    is_empty = _image_obj is None
 
     if is_empty:
         # Get 404 image, but still return 200, otherwise ESP32 will react to
@@ -81,9 +87,11 @@ async def _get_queue(
         image = get_basic_404("")
 
     else:
-        image = image_obj.image
+        print(_image_obj)
+        image = _image_obj[0].image
 
     if not dry_run and not is_empty:
+        image_obj = _image_obj[0]
         session.delete(image_obj)
         session.commit()
 

@@ -9,7 +9,7 @@ from apscheduler.triggers.cron import CronTrigger
 from canvasserver.config import get_settings
 from canvasserver.jobs import refresh_active_prompt, send_images_to_push_devices
 
-from .models.db import create_db_and_tables, get_engine, has_tables
+from .models.db import create_db_and_tables, get_engine, get_session, has_tables
 from .version import __version__
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ def main(args=None):
     parser.add_argument("--reload", action="store_true")
     parser.add_argument("--start", action="store_true")
     parser.add_argument("--workers", type=int, default=2)
-    parser.add_argument("--logging-config", type=Path, default=Path("logging_config.yaml"))
+    parser.add_argument("--logging-config", type=Path, default=Path("./logging_config.yaml"))
 
     args = parser.parse_args(args)
 
@@ -54,16 +54,21 @@ def main(args=None):
 
         logger.info(f"Version {__version__}")
 
-        # Load background jobs
         scheduler = BackgroundScheduler()
 
-        cron_nightly = "0 4 * * *"
+        if settings.cron_update_push:
+            session = get_session()
+            scheduler.add_job(
+                lambda: send_images_to_push_devices(session),
+                CronTrigger.from_crontab(settings.cron_update_push),
+            )
 
-        cron_prompt_switch = "*/10 * * * *"
-        cron_prompt_switch = "*/1 * * * *"
-
-        scheduler.add_job(refresh_active_prompt, CronTrigger.from_crontab(cron_prompt_switch))
-        scheduler.add_job(send_images_to_push_devices, CronTrigger.from_crontab(cron_nightly))
+        if settings.cron_update_prompt:
+            session = get_session()
+            scheduler.add_job(
+                lambda: refresh_active_prompt(session),
+                CronTrigger.from_crontab(settings.cron_update_prompt),
+            )
 
         logger.info("Starting background jobs")
         scheduler.start()
@@ -74,10 +79,11 @@ def main(args=None):
             port=args.port,
             reload=args.reload,
             log_level=None,
-            log_config=str(Path("./logging_config.yaml")),
+            log_config=str(args.logging_config),
             workers=args.workers,
         )
 
+        logger.info("Killing background jobs")
         scheduler.shutdown()
 
 
