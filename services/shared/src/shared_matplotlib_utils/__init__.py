@@ -47,6 +47,10 @@ def plot_to_image(fig: Figure, dpi: int = IMAGE_DPI) -> Image.Image:
     return img
 
 
+def close():
+    plt.close()
+
+
 def get_basic_text(
     text: str, alt_text: None = None, with_date: bool = True, font: dict[Any, Any] = FONT
 ) -> Image.Image:
@@ -61,7 +65,8 @@ def get_basic_text(
         text,
         verticalalignment="center",
         horizontalalignment="center",
-        fontsize=22,
+        fontsize=18,
+        wrap=True,
         **font,
     )
 
@@ -81,6 +86,8 @@ def get_basic_text(
     ax.axis("off")
 
     image = plot_to_image(fig)
+
+    close()
 
     return image
 
@@ -113,5 +120,7 @@ def get_basic_404(text, font=FONT):
     ax.axis("off")
 
     image = plot_to_image(fig)
+
+    close()
 
     return image
