@@ -9,7 +9,7 @@ The write-up can be found at [https://charnley.github.io/blog/2025/04/02/e-ink-a
 The different services can be found `/services/*`.
 
 ```mermaid
-graph LR
+graph TD
 
     subgraph Desktop [Desktop Computer]
       direction RL
@@ -18,8 +18,8 @@ graph LR
       gpucron --> GPU
     end
 
-    subgraph HA [Home Assistant / Raspberry Pi]
-      database@{ shape: db, label: "Image\n.sqlite" }
+    subgraph HA [Home Assistant]
+      database@{ shape: db, label: ".sqlite" }
       canvasserver@{ shape: rounded, label: "Picture\nServer" }
       canvasserver --> database
     end
@@ -33,10 +33,10 @@ graph LR
             rpieink@{ shape: rounded, label: "E-Ink\nDisplay" }
         end
 
-    end
+        canvasserver -- "POST image" --> rpi
+        esp32 -- GET image --> canvasserver
 
-    canvasserver -- "POST image" --> rpi
-    esp32 -- GET image --> canvasserver
+    end
 
     gpucron -- "GET status" --> canvasserver
     gpucron -- POST image(s) --> canvasserver
