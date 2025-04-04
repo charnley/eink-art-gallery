@@ -35,7 +35,7 @@ start-push:
 	HF_HOME=${GIT_ROOT}/models \
 	${python} -m ${package}.push \
 	--url ${push_server} \
-	--prompt \"$$(shuf -n 1 ${GIT_ROOT}/assets/random_artists.txt)\" \
+	--prompt \"$$(shuf -n 1 ${GIT_ROOT}/assets/random_cute.txt)\" \
 	--use-red \
 
 start-refill:
