@@ -1,0 +1,147 @@
+#!/bin/bash
+
+# Terminal colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+# Get the absolute path to the directory containing this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+cd "$ROOT_DIR"
+
+# Command variable - declare early so it's accessible from the trap
+COMMAND=""
+
+# Handle Ctrl+C gracefully
+trap 'echo -e "\n${YELLOW}Wizard cancelled by user.${NC}"; if [ ! -z "$COMMAND" ]; then echo -e "\n${BLUE}${BOLD}Command that was interrupted:${NC}\n${GREEN}${COMMAND}${NC}"; fi; exit 1' INT
+
+# Check if uv is installed
+if ! command -v uv &> /dev/null; then
+    echo -e "${YELLOW}Note: For better performance, consider installing 'uv':${NC}"
+    echo -e "${YELLOW}      pip install uv${NC}"
+    echo ""
+fi
+
+# Function to list files in a directory
+get_files() {
+    local dir=$1
+    local ext=$2
+    find "${ROOT_DIR}/${dir}" -type f -name "*${ext}" -exec basename {} \; | sort
+}
+
+# Simple numbered menu function
+show_menu() {
+    local items=("$@")
+    local i=0
+    local TITLE=${TITLE:-"Select an option:"}
+    local choice=""
+
+    # Display menu options
+    echo -e "${BLUE}${BOLD}${TITLE}${NC}"
+    for item in "${items[@]}"; do
+        echo -e "  ${BOLD}$((i+1)).${NC} ${item}"
+        ((i++))
+    done
+
+    # Get user input
+    while true; do
+        echo -en "\n${BOLD}Enter your choice (1-${#items[@]}):${NC} "
+        read -r choice
+        
+        # Check if choice is a number and within range
+        if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#items[@]}" ]; then
+            return $((choice-1))
+        else
+            echo -e "${RED}Invalid selection. Please enter a number between 1 and ${#items[@]}.${NC}"
+        fi
+    done
+}
+
+# Step 1: Select a board
+TITLE="Select a board:"
+# Using a more compatible approach instead of mapfile
+board_files=()
+while IFS= read -r line; do
+    board_files+=("$line")
+done < <(get_files "boards" ".yaml")
+
+if [ ${#board_files[@]} -eq 0 ]; then
+    echo -e "${RED}No board configurations found in boards/ directory.${NC}"
+    exit 1
+fi
+
+show_menu "${board_files[@]}"
+board_index=$?
+BOARD="boards/${board_files[$board_index]}"
+echo -e "Selected board: ${GREEN}${board_files[$board_index]}${NC}\n"
+
+# Step 2: Select a display
+TITLE="Select a display:"
+# Using a more compatible approach instead of mapfile
+display_files=()
+while IFS= read -r line; do
+    display_files+=("$line")
+done < <(get_files "displays" ".yaml")
+
+if [ ${#display_files[@]} -eq 0 ]; then
+    echo -e "${RED}No display configurations found in displays/ directory.${NC}"
+    exit 1
+fi
+
+show_menu "${display_files[@]}"
+display_index=$?
+DISPLAY="displays/${display_files[$display_index]}"
+echo -e "Selected display: ${GREEN}${display_files[$display_index]}${NC}\n"
+
+# Step 3: Select an implementation
+TITLE="Select an implementation:"
+# Using a more compatible approach instead of mapfile
+impl_files=()
+while IFS= read -r line; do
+    impl_files+=("$line")
+done < <(get_files "implementations" ".yaml")
+
+if [ ${#impl_files[@]} -eq 0 ]; then
+    echo -e "${RED}No implementation configurations found in implementations/ directory.${NC}"
+    exit 1
+fi
+
+show_menu "${impl_files[@]}"
+impl_index=$?
+IMPLEMENTATION="implementations/${impl_files[$impl_index]}"
+echo -e "Selected implementation: ${GREEN}${impl_files[$impl_index]}${NC}\n"
+
+# Step 4: Select action
+TITLE="Select action:"
+actions=("compile" "run" "logs" "clean")
+show_menu "${actions[@]}"
+action_index=$?
+ACTION=${actions[$action_index]}
+echo -e "Selected action: ${GREEN}${ACTION}${NC}\n"
+
+# Define the command to run
+COMMAND="${SCRIPT_DIR}/esphome-build ${ACTION} ${IMPLEMENTATION} ${BOARD} ${DISPLAY}"
+
+# Output the command that will be used
+echo -e "${BLUE}${BOLD}Running Command:${NC}"
+echo -e "${GREEN}${COMMAND}${NC}"
+
+# Run the command
+$COMMAND
+RESULT=$?
+
+# Display result and command for reference
+if [ $RESULT -eq 0 ]; then
+    echo -e "\n${GREEN}Command completed successfully.${NC}"
+else
+    echo -e "\n${RED}Command failed with exit code: ${RESULT}${NC}"
+fi
+
+echo -e "\n${BLUE}${BOLD}Command used:${NC}"
+echo -e "${GREEN}${COMMAND}${NC}"
+echo -e "You can run this command directly next time if you want to skip the wizard." 
