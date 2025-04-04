@@ -9,14 +9,17 @@ from starlette.middleware.cors import CORSMiddleware
 
 from .version import __version__
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+logger = logging.getLogger("uvicorn.info")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
     # startup
+    logger.info("Initialize settings")
     _ = get_settings()
+
     yield
 
     # shutdown

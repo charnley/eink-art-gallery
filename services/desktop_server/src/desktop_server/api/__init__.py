@@ -100,7 +100,7 @@ async def post_prompt(promptPost: PromptPost, useRed=True):
     return {}
 
 
-@repeat_at(cron="*/5 * * * *")
+# @repeat_at(cron="*/5 * * * *")
 def _generate_random_queue():
     logger.info("Checking for queue")
     filenames = list(dir.glob("**/*.png"))

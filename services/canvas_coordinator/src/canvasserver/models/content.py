@@ -52,7 +52,6 @@ class Image(Model, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     prompt: str = Field(foreign_key="prompt.id", nullable=False, ondelete="CASCADE")
     image_data: bytes = Field(sa_column=LargeBinary)
-    # has_colors: bool = Field()
     width: int = Field()
     height: int = Field()
 
@@ -99,17 +98,28 @@ class ImageMeta(Model):
 
 class Prompt(Model, table=True):
     __tablename__ = "prompt"
+
     id: str = Field(primary_key=True, default=None)
     prompt: str = Field()
     model: str = Field()
 
-    # TODO Prompt needs a lifetime
+    active: bool = Field(default=False)
+    theme_id: str | None = Field(foreign_key="theme.id", nullable=True)
+
+    # lifetime: DateTime = Field()  # TODO Implement lifetime
+    # lifetime: DateTime = Field(nullable=True, default=func.now()) # + one month or so
 
     @staticmethod
     def generate_id(prompt_text: str) -> str:
         m = sha256()
         m.update(prompt_text.encode())
         return m.hexdigest()
+
+    def __repr__(self) -> str:
+        return f"Prompt(id={self.id:20s},active={self.active})"
+
+    def __str__(self) -> str:
+        return f"Prompt(id={self.id:20s},active={self.active})"
 
 
 @event.listens_for(Prompt, "before_insert")
@@ -125,10 +135,15 @@ class Prompts(Model):
     count: int
 
 
+class PromptQuery(Model):
+    prompts: list[str]
+
+
 class Theme(Model, table=True):
     __tablename__ = "theme"
     id: str = Field(primary_key=True, default=None)
     theme: str = Field()
+    active: str = Field()
 
     # TODO Theme needs a lifetime
 
@@ -156,3 +171,8 @@ class ReadingDevice(Model, table=True):
 
 class Queue(Model):
     id: str = Field(primary_key=True)
+
+
+class Settings(Model):
+    key: str = Field(primary_key=True)
+    value: str = Field()

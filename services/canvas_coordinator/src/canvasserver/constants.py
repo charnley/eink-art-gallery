@@ -28,3 +28,8 @@ MIN_IMAGES_PER_PROMPT = 2
 # Environ keys
 ENV_CONFIG_PATH = "CONFIG_PATH"
 ENV_DATA_PATH = "STORAGE"
+
+# Options keys
+LOG_LEVEL = "log_level"
+CRON_UPDATE_PUSH = "cron_update_push"
+CRON_UPDATE_PROMPT = "cron_update_prompt"

@@ -1,6 +1,5 @@
 import logging
 import warnings
-from pathlib import Path
 
 import requests
 from desktop_server import network_utils
@@ -14,9 +13,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 logger = logging.getLogger(__name__)
 
 ENDPOINT_CHECK_PROMPTS = "/actions/prompts_check"
-ENDPOINT_CHECK_THEMES = "/actions/theme_check"
-ENDPOINT_UPLOAD_IMAGES = "/images"
-ENDPOINT_UPLOAD_PROMPTS = "/prompts"
+ENDPOINT_UPLOAD_IMAGES = "/images/"
 
 
 def refill_images(args):
@@ -66,29 +63,6 @@ def refill_images(args):
         )
 
 
-def refill_prompts(args):
-
-    # TODO auto-generated picture prompts
-
-    # Read prompt file and put into database
-
-    if args.prompts_filename is not None:
-
-        logger.info("Reading pre-defined prompts...")
-
-        with open(args.prompts_filename, "r") as f:
-            lines = f.readlines()
-            lines = [line.strip() for line in lines]
-
-            prompts = [{"prompt": value, "model": "SD3"} for value in lines]
-
-            for prompt in prompts:
-                response = requests.post(args.server_url + ENDPOINT_UPLOAD_PROMPTS, json=prompt)
-                logger.info(f"{response.status_code} {prompt}")
-
-            logger.info(f"Database enriched with {len(lines)} prompts")
-
-
 def main(args=None):
 
     import argparse
@@ -103,23 +77,17 @@ def main(args=None):
 
     parser = argparse.ArgumentParser()
 
+    # TODO fill-count should be based on image-server
+
     parser.add_argument("--refill-images", action="store_true")
-    parser.add_argument("--refill-prompts", action="store_true")
     parser.add_argument("--server-url", type=str)
-
     parser.add_argument("--fill-count", type=int, default=2)
-
-    parser.add_argument("--prompts-filename", type=Path)
 
     args = parser.parse_args(args)
 
     assert args.server_url, "Need a server url to fetch and push to"
 
-    if args.refill_prompts:
-        refill_prompts(args)
-
-    if args.refill_images:
-        refill_images(args)
+    refill_images(args)
 
 
 if __name__ == "__main__":

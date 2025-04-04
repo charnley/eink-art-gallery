@@ -1,13 +1,13 @@
+abstract simplistic line art
 assembly drawing
 brush pen drawing, white background
 circut diagram
-abstract simplistic line art
-one line, black and white, drawing
 coloring book page, white background
 coloring-in sheet, white background
 elevation drawing
 ink drawing, white background
 one line art
+one line, black and white, drawing
 parametric drawing
 pen drawing, white background
 schematics

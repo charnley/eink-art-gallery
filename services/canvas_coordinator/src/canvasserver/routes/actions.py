@@ -1,8 +1,9 @@
 import logging
 
+from canvasserver.jobs import refresh_active_prompt
 from canvasserver.models.content import Image, Prompt, Prompts
 from canvasserver.models.db import get_session
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 
@@ -36,3 +37,18 @@ def _check_prompts(session: Session = Depends(get_session)):
 @router.get("/theme_check", response_model=None, tags=["actions"])
 def _check_themes(session: Session = Depends(get_session)):
     return Response()
+
+
+@router.get("/prompts_active", response_model=Prompts, tags=["actions"])
+def _refresh_active_prompts(session: Session = Depends(get_session)):
+
+    # TODO Set manual active prompt
+
+    prompt = refresh_active_prompt(session)
+
+    if prompt is None:
+        raise HTTPException(status_code=404, detail="No prompt setting is possible")
+
+    prompts = [prompt]
+
+    return Prompts(prompts=prompts, count=len(prompts))

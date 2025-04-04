@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlmodel import select
 
-from ..models.content import Images, Prompt, Prompts
+from ..models.content import Image, Images, Prompt, Prompts
 from ..models.db import get_session
 
 prefix = "/prompts"
@@ -29,13 +29,13 @@ def get_item(id: str, session: Session = Depends(get_session)):
 @router.get("/{id}/images", response_model=Images)
 def get_item_childs(id: str, session: Session = Depends(get_session)):
 
-    item = session.get(Prompt, id)
-    session.close()
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
+    prompt = session.get(Prompt, id)
 
-    # TODO Find images and return
-    images = []
+    if prompt is None:
+        raise HTTPException(status_code=404, detail="Prompt not found")
+
+    images = session.query(Image).filter(Image.prompt == prompt.id).all()
+    session.close()
 
     return Images(images=images, count=len(images))
 
@@ -51,6 +51,7 @@ def delete_item(id: str, session: Session = Depends(get_session)):
 
     # TODO Delete all Images to prompt also
     session.commit()
+    session.close()
 
     return item
 
