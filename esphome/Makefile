@@ -19,9 +19,12 @@ wizard: ${env}
 	@chmod +x bin/esphome-wizard
 	@bin/esphome-wizard
 
-run2: .tmp.build.yaml
+run-device: .tmp.build.yaml
 	test ! -z "${device}"
 	esphome run --device ${device} $<
+
+run-ota: .tmp.build.yaml
+	esphome run  $<
 
 .tmp.build.yaml:
 	test ! -z "${device_id}"
