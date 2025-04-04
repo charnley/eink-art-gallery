@@ -1,3 +1,20 @@
+# Setup ESPHome ESP32 devices for art gallery
+
+## Setup working environment
+
+  make env
+  source ./env/bin/activate
+
+## Compile and flash device
+
+  make run-device board=<choose board> display=<choose display> implementation=<choose implementation> device_id=<choose a name>
+
+where the choices for board, display and implementation are in `yaml` files in the directories.
+And `device_id` is a unique name on your local network.
+
+# NOTES:
+
+
 # Hardware
 - [13.3 inch K epaper from waveshare](https://www.waveshare.com/product/raspberry-pi/displays/e-paper/13.3inch-e-paper-hat-k.htm)
 - [Universal e-Paper Raw Panel Driver HAT](https://www.waveshare.com/e-paper-driver-hat.htm)
