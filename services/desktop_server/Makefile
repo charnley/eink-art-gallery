@@ -5,7 +5,6 @@ package=desktop_server
 env=env
 python=${env}/bin/python
 model_dir=${GIT_ROOT}/models
-
 refill_server=
 push_server=
 token=

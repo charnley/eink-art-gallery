@@ -1,0 +1,93 @@
+# ESPHome configuration to load images from mDNS server
+# This file should be combined with a board and display configuration
+
+http_request:
+  id: fetch_image_request
+  timeout: 5s
+  useragent: esphome/eink_display
+  verify_ssl: false
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  on_connect:
+    - component.update: eink_image
+
+logger:
+  baud_rate: 115200
+  level: DEBUG
+  logs:
+    display: DEBUG
+    online_image: DEBUG
+
+# Use a binary sensor (button) to trigger image refresh
+binary_sensor:
+  - platform: gpio
+    pin: 
+      number: GPIO27  # Adjust this to match your board's button pin
+      mode: INPUT_PULLUP
+    name: "Display Refresh Button"
+    id: display_button
+    filters:
+      - delayed_on: 50ms
+    on_press:
+      then:
+        - logger.log: "Button pressed, refreshing image from mDNS server"
+        - component.update: eink_image
+
+# Load image from mDNS server using online_image
+online_image:
+  # The $resolution substitution from the display config (e.g. 960x680) is used in the URL
+  # This allows you to organize images by resolution or use a single image file named after your display's resolution
+  # Make sure such a file exists on your server (e.g., 960x680.png)
+  # - url: http://eink-frame-test.local:6000/images/${resolution}/test.png
+  - url: http://eink-frame-test.local:6000/images/lion.png
+    id: eink_image
+    format: PNG
+    resize: ${resolution}
+    type: BINARY
+    on_download_finished:
+      then:
+        - component.update: my_display
+        - logger.log: "Downloaded image from mDNS server"
+    on_error:
+      then:
+        - logger.log: "Error downloading image from mDNS server"
+spi:
+  clk_pin: $clk_pin
+  mosi_pin: $mosi_pin
+
+# Add a font for the text overlay - increased size for better visibility
+font:
+  - file: "gfonts://Roboto"
+    id: font_roboto
+    size: 60  # Larger font size for better visibility
+
+# Main display configuration and logic
+display:
+  - platform: waveshare_epaper  # This is a placeholder, actual platform comes from display config
+    id: my_display
+    cs_pin: $cs_pin
+    dc_pin: $dc_pin
+    busy_pin:
+      number: $busy_pin
+      inverted: $busy_pin_inverted
+    reset_pin: $reset_pin
+    reset_duration: 200ms
+    model: $waveshare_model
+    update_interval: never
+    lambda: |-
+      // First draw the main image
+      it.image(0, 0, id(eink_image), Color::BLACK, Color::WHITE);
+      
+      // Add "Lion" text in the center of the image
+      // Use CENTER_HORIZONTAL and CENTER_VERTICAL alignment
+      it.print(it.get_width() / 2, it.get_height() / 2, id(font_roboto), Color::BLACK, TextAlign::CENTER, "Lion");
+      
+      ESP_LOGD("display", "Image from mDNS server displayed successfully with centered text");
+
+# Optional: Set up deep sleep to conserve battery
+# Uncomment and adjust as needed
+# deep_sleep:
+#   run_duration: 60s
+#   sleep_duration: 3600s  # 1 hour 
