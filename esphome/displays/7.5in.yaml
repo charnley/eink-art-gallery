@@ -1,4 +1,3 @@
-substitutions:
   waveshare_model: "7.50inV2alt"
   busy_pin_inverted: true
   resolution: 800x480

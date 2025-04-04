@@ -1,5 +1,17 @@
+esp32:
+  board: esp32dev # dfrobot_firebeetle2_esp32ue
+  framework:
+    type: arduino
+    version: recommended
+
+esphome:
+  name: eink-frame-${device_nickname}
+  friendly_name: "eink frame ${device_nickname}"
+  platformio_options:
+    build_flags: "-DBOARD_HAS_PSRAM"
+
 substitutions:
-  device_nickname: "test"
+  device_id: "DEVICE_ID"
   wifi_ssid: !secret wifi_ssid
   wifi_password: !secret wifi_password
   wake_up_time: "04:00:00"
@@ -12,15 +24,3 @@ substitutions:
   busy_pin: "GPIO04"
   reset_pin: "GPIO14"
   # power_pin: "3v3"
-
-esp32:
-  board: esp32dev # dfrobot_firebeetle2_esp32e
-  framework:
-    type: arduino
-    version: recommended
-
-esphome:
-  name: eink-frame-${device_nickname}
-  friendly_name: "eink frame ${device_nickname}"
-  platformio_options:
-    build_flags: "-DBOARD_HAS_PSRAM"

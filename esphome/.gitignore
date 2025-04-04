@@ -5,3 +5,4 @@
 secrets.yaml
 /test/README
 /tmp
+*.tmp*

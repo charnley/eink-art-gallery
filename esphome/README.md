@@ -27,6 +27,8 @@ pip install "pillow==10.2.0"
 - run `esphome run src/esphome/boards/firebeetle-esp32-s3-wroom-1u/online-image-13.3-simple.yaml`
 - wait until you see output and it changes
 
+- use `--device /dev/ttyUSB0` where it could be mounted `/dev/ttyUSB0` or `/dev/ttyACM0` 1-2
+
 # HA support
 
 run
@@ -35,7 +37,6 @@ esphome -s device_id living_room -s wifi_ssid yourssid -s wifi_password yourpass
 ```
 eink_frame will be prefixed on the name so it becomes `eink_frame_living_room`, it must be unique.
 
-##
 # useful links
 
 ## esphome
@@ -60,40 +61,7 @@ eink_frame will be prefixed on the name so it becomes `eink_frame_living_room`, 
 
 - https://www.home-assistant.io/integrations/http/#hosting-files
 
-# settings
+# Notes
 
-CLK and SCK is the same thing:
-> in SPI (Serial Peripheral Interface), CLK (Clock) and SCK (Serial Clock) refer to the same signal.
-DIN = MOSI
-
-## e-paper Driver HAT
-there are 2 types of boards, set 13.3 to B type
-- Display Config: B
-- Interface Config: 0
-
-| Wire Color | Connection |
-|------------|------------|
-| 🩶 Grey    | VCC/3.3v   |
-| 🟤 Brown   | GND        |
-| 🟡 Yellow  | CLK/SCK    |
-| 🔵 Blue    | DIN/MOSI   |
-| 🟠 Orange  | CS         |
-| 🟢 Green   | DC         |
-| ⚪️ White   | RST        |
-| 🟣 Purple  | Busy       |
-| 🔴 Red     | PWR        |
-
-
-# firebeetle-esp32-s3-wroom-1u wiring
-
-| Wire Color | HAT Driver  | ESP32 Pin    |
-|------------|-------------|--------------|
-| 🩶 Grey    | VCC/3.3v    | 3V3          |
-| 🟤 Brown   | GND         | GND          |
-| 🟡 Yellow  | CLK/SCK     | D12 / IO12   |
-| 🔵 Blue    | DIN/MOSI    | A5  / IO11   |
-| 🟠 Orange  | CS          | A4  / IO10   |
-| 🟢 Green   | DC          | D7  / IO9    |
-| ⚪️ White   | RST         | A0  / IO4    |
-| 🟣 Purple  | Busy        | D5  / IO7    |
-| 🔴 Red     | PWR         | SCL / IO2    |
+- CLK and SCK is the same thing: > in SPI (Serial Peripheral Interface), CLK (Clock) and SCK (Serial Clock) refer to the same signal.
+- DIN = MOSI

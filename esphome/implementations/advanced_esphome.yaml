@@ -6,12 +6,14 @@ http_request:
 
 deep_sleep:
   id: deep_sleep_control
-  run_duration: 2min
-  # sleep_duration: 24h  # Fallback duration if 'until' doesn't work
+  run_duration: 1min
 
 time:
-  - platform: homeassistant
-    id: homeassistant_time
+  - platform: sntp
+    id: time_sntp
+    on_time_sync:
+      then:
+        - logger.log: "Synchronized system clock"
 
 logger:
   baud_rate: 115200
@@ -42,7 +44,7 @@ online_image:
         - deep_sleep.enter:
             id: deep_sleep_control
             until: "${wake_up_time}"
-            time_id: homeassistant_time
+            time_id: time_sntp
     on_error:
       then:
         - logger.log: "Error downloading image $(image_url)"
@@ -52,7 +54,7 @@ online_image:
         - deep_sleep.enter:
             id: deep_sleep_control
             until: "${wake_up_time}"
-            time_id: homeassistant_time
+            time_id: time_sntp
 
 spi:
   clk_pin: $clk_pin

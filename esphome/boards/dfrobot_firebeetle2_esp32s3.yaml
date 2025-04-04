@@ -1,5 +1,11 @@
+esp32:
+  board: dfrobot_firebeetle2_esp32s3
+  framework:
+    type: arduino
+    version: recommended
+
 substitutions:
-  device_id: "example_s"
+  device_id: "DEVICE_ID"
   wifi_ssid: !secret wifi_ssid
   wifi_password: !secret wifi_password
   wake_up_time: "04:00:00"
@@ -12,10 +18,3 @@ substitutions:
   busy_pin: "GPIO7"
   reset_pin: "GPIO4"
 
-  waveshare_model: "13.3in-k" # or another waveshare model
-
-esp32:
-  board: dfrobot_firebeetle2_esp32s3
-  framework:
-    type: arduino
-    version: recommended
