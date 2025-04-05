@@ -1,11 +1,8 @@
 import logging
-from pathlib import Path
-import logging
 import time
 from pathlib import Path
 
 from PIL import Image
-
 from PIL.Image import Image as PilImage
 from waveshare_epd import epd13in3b  # type: ignore
 from waveshare_epd import epd13in3k  # type: ignore
@@ -62,6 +59,7 @@ def display_red(image_red: PilImage, image_black: PilImage):
 #    logging.info("epd exit")
 #    epd13in3k.epdconfig.module_exit(cleanup=True)
 
+
 def main(args=None):
 
     import argparse
@@ -69,9 +67,7 @@ def main(args=None):
     logging.basicConfig(level=logging.DEBUG)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-f", "--filename", action="store", help="", metavar="filename", type=Path
-    )
+    parser.add_argument("-f", "--filename", action="store", help="", metavar="filename", type=Path)
     args = parser.parse_args(args)
 
     assert args.filename.is_file(), "Could not find file"

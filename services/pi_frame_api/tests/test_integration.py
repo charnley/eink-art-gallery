@@ -1,5 +1,3 @@
-
-
 def test_status(tmp_client):
     response1 = tmp_client.get("/status")
     assert response1.status_code == 200

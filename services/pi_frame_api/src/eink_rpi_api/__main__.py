@@ -7,10 +7,11 @@ import yaml
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
+from . import __version__, jobs
+
 logger = logging.getLogger(__name__)
 
-from . import jobs
-from . import __version__
+
 
 def main(args=None):
 
