@@ -100,6 +100,11 @@ async def display_text(body: TextPost):
     """Set the text of the display"""
     text = body.text
     with_date = body.include_date
+
+    if not len(text):
+        logger.info("Not text to display, ignored.")
+        return
+
     image_red = get_basic_text(text, with_date=with_date)
     image_black = get_basic_text("", with_date=False)
     displaying.init()
