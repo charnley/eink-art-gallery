@@ -1,8 +1,7 @@
-
-from shared_constants import FILE_UPLOAD_KEY, IMAGE_CONTENT_TYPE, IMAGE_FORMAT
+from io import BytesIO
 
 from PIL import Image
-from io import BytesIO
+from shared_constants import FILE_UPLOAD_KEY, IMAGE_CONTENT_TYPE, IMAGE_FORMAT
 
 
 def image_to_bytes(image: Image.Image):
@@ -18,4 +17,3 @@ def image_to_bytes(image: Image.Image):
 def bytes_to_image(image_data) -> Image.Image:
     image = Image.open(BytesIO(image_data))
     return image
-

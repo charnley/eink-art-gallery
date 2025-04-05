@@ -89,5 +89,3 @@ help:
 	@echo "  make run implementation=implementations/simple_picture_on_board.yaml board=boards/dfrobot_firebeetle2_esp32ue.yaml display=displays/13-3k.yaml"
 
 .DEFAULT_GOAL := help
-
-

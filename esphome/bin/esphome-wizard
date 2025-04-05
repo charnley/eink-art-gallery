@@ -52,7 +52,7 @@ show_menu() {
     while true; do
         echo -en "\n${BOLD}Enter your choice (1-${#items[@]}):${NC} "
         read -r choice
-        
+
         # Check if choice is a number and within range
         if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#items[@]}" ]; then
             return $((choice-1))
@@ -144,4 +144,4 @@ fi
 
 echo -e "\n${BLUE}${BOLD}Command used:${NC}"
 echo -e "${GREEN}${COMMAND}${NC}"
-echo -e "You can run this command directly next time if you want to skip the wizard." 
+echo -e "You can run this command directly next time if you want to skip the wizard."

@@ -69,4 +69,4 @@ image:
   - file: "http://eink-frame-test.local/images/your_image.jpg"
     id: main_image
     resize: 960x680  # Match your display resolution
-``` 
+```
