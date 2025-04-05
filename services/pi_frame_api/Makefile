@@ -5,6 +5,7 @@ python=./env/bin/python
 pip=pip
 package=eink_rpi_api
 
+port=8080
 rpi_hostname=
 
 .PHONY: build check clean test
@@ -25,6 +26,15 @@ dev-pip: epaper.git
 epaper.git:
 	git clone https://github.com/waveshareteam/e-Paper.git $@ --depth 1 --quiet
 	ln -s ${ROOT_DIR}/$@/RaspberryPi_JetsonNano/python/lib/waveshare_epd ./src/waveshare_epd
+
+fonts:
+	mkdir -p ${HOME}/.fonts/
+	mkdir $@
+	cd $@ && wget -O fira.zip https://github.com/mozilla/Fira/archive/master.zip
+	cd $@ && unzip fira.zip
+	cp $@/Fira-master/ttf/*.ttf ${HOME}/.fonts/
+	rm -r $@
+	rm -rf ~/.cache/matplotlib/
 
 # start
 

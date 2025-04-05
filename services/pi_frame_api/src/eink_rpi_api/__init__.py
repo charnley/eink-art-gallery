@@ -4,18 +4,23 @@ from contextlib import asynccontextmanager
 from io import BytesIO
 
 from fastapi import FastAPI, HTTPException, UploadFile
+from pydantic import BaseModel
 from fastapi_utilities import repeat_at
 from PIL import Image
 
 from . import displaying
 
 from shared_constants import IMAGE_HEIGHT, IMAGE_WIDTH
+from shared_matplotlib_utils import get_basic_text
 
 logger = logging.getLogger(__name__)
 
-warnings.filterwarnings("ignore", message="No module named 'lgpio'")
+warnings.filterwarnings("ignore", message="PinFactoryFallback: Falling back from lgpio: No module named 'lgpio'")
 
 # TODO Move e-ink supported color and width and height to settings
+
+__version__="x.y.z"
+title="EinkRaspberryPiAPI"
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -35,7 +40,7 @@ async def lifespan(_: FastAPI):
 
 
 logger = logging.getLogger(__name__)
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, version=__version__, title=title)
 
 
 @app.post("/display/image")
@@ -86,11 +91,20 @@ async def display_red_image(redFile: UploadFile, blackFile: UploadFile):
     displaying.display_red(image_red, image_black)
     displaying.sleep()
 
+class TextPost(BaseModel):
+    text: str = "Hello"
+    include_date: bool = True
 
 @app.post("/display/text")
-async def display_text():
+async def display_text(body: TextPost):
     """Set the text of the display"""
-    raise NotImplementedError()
+    text = body.text
+    with_date = body.include_date
+    image_red = get_basic_text(text, with_date=with_date)
+    image_black = get_basic_text("", with_date=False)
+    displaying.init()
+    displaying.display_red(image_red, image_black)
+    displaying.sleep()
 
 
 @app.post("/display/clear")

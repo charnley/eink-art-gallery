@@ -4,6 +4,8 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from eink_rpi_api import app
+
 logger = logging.getLogger(__name__)
 
 

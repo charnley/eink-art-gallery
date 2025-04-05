@@ -10,6 +10,7 @@ from apscheduler.triggers.cron import CronTrigger
 logger = logging.getLogger(__name__)
 
 from . import jobs
+from . import __version__
 
 def main(args=None):
 
@@ -45,7 +46,7 @@ def main(args=None):
     scheduler.start()
 
     uvicorn.run(
-        "picture_api:app",
+        "eink_rpi_api:app",
         host="0.0.0.0",
         port=args.port,
         reload=args.reload,
