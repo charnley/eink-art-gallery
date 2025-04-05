@@ -1,30 +1,34 @@
 #!/usr/bin/env python3
-import os
 import argparse
-from flask import Flask, send_from_directory, render_template, abort, jsonify
-from zeroconf import ServiceInfo, Zeroconf
-import socket
 import atexit
 import logging
+import os
+import socket
+
+from flask import Flask, abort, jsonify, send_from_directory
+from zeroconf import ServiceInfo, Zeroconf
 
 # Create Flask app
 app = Flask(__name__)
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("eink-mdns-server")
 
 # Get command line arguments
-parser = argparse.ArgumentParser(description='Serve image files over HTTP with mDNS discovery')
-parser.add_argument('--dir', '-d', default='images', 
-                    help='Directory containing images to serve (default: images)')
-parser.add_argument('--port', '-p', type=int, default=6000, 
-                    help='Port to use (default: 5000)')
-parser.add_argument('--service-name', '-n', default='eink-frame-test',
-                    help='mDNS service name (default: eink-frame-test)')
+parser = argparse.ArgumentParser(description="Serve image files over HTTP with mDNS discovery")
+parser.add_argument(
+    "--dir", "-d", default="images", help="Directory containing images to serve (default: images)"
+)
+parser.add_argument("--port", "-p", type=int, default=6000, help="Port to use (default: 5000)")
+parser.add_argument(
+    "--service-name",
+    "-n",
+    default="eink-frame-test",
+    help="mDNS service name (default: eink-frame-test)",
+)
 args = parser.parse_args()
 
 # Get the absolute path to the directory containing this script
@@ -39,42 +43,51 @@ if not os.path.isdir(IMAGE_DIR):
     logger.error(f"Image directory {IMAGE_DIR} does not exist!")
     exit(1)
 
+
 # Setup templates on the fly
-@app.route('/')
+@app.route("/")
 def index():
     """Generate a simple file listing with links"""
     try:
-        files = [f for f in os.listdir(IMAGE_DIR) 
-                if os.path.isfile(os.path.join(IMAGE_DIR, f)) and not f.startswith('.')]
+        files = [
+            f
+            for f in os.listdir(IMAGE_DIR)
+            if os.path.isfile(os.path.join(IMAGE_DIR, f)) and not f.startswith(".")
+        ]
         files.sort()
-        
+
         # Generate HTML listing
-        html = '<html><head><title>E-Ink Frame Images</title>'
-        html += '<style>body{font-family:Arial,sans-serif;margin:20px;}'
-        html += 'h1{color:#333;}ul{list-style-type:none;padding:0;}'
-        html += 'li{margin:10px 0;padding:5px;border-bottom:1px solid #eee;}'
-        html += 'li a{color:#06c;text-decoration:none;display:block;}'
-        html += 'li a:hover{background:#f5f5f5;}</style></head>'
-        html += '<body><h1>Available Images</h1>'
-        html += '<p>Click on an image name to view or download it.</p>'
-        html += '<ul>'
-        
+        html = "<html><head><title>E-Ink Frame Images</title>"
+        html += "<style>body{font-family:Arial,sans-serif;margin:20px;}"
+        html += "h1{color:#333;}ul{list-style-type:none;padding:0;}"
+        html += "li{margin:10px 0;padding:5px;border-bottom:1px solid #eee;}"
+        html += "li a{color:#06c;text-decoration:none;display:block;}"
+        html += "li a:hover{background:#f5f5f5;}</style></head>"
+        html += "<body><h1>Available Images</h1>"
+        html += "<p>Click on an image name to view or download it.</p>"
+        html += "<ul>"
+
         for file in files:
-            file_url = f'/images/{file}'
+            file_url = f"/images/{file}"
             file_size = os.path.getsize(os.path.join(IMAGE_DIR, file))
-            size_str = f"{file_size / 1024:.1f} KB" if file_size < 1024*1024 else f"{file_size / (1024*1024):.1f} MB"
+            size_str = (
+                f"{file_size / 1024:.1f} KB"
+                if file_size < 1024 * 1024
+                else f"{file_size / (1024*1024):.1f} MB"
+            )
             html += f'<li><a href="{file_url}">{file}</a> ({size_str})</li>'
-        
-        html += '</ul>'
-        html += '<p><small>Served by eink-mdns-server</small></p>'
-        html += '</body></html>'
-        
+
+        html += "</ul>"
+        html += "<p><small>Served by eink-mdns-server</small></p>"
+        html += "</body></html>"
+
         return html
     except Exception as e:
         logger.error(f"Error listing directory: {e}")
         return f"<h1>Error</h1><p>{str(e)}</p>", 500
 
-@app.route('/images/<path:filename>')
+
+@app.route("/images/<path:filename>")
 def serve_image(filename):
     """Serve an image file"""
     try:
@@ -82,27 +95,34 @@ def serve_image(filename):
     except FileNotFoundError:
         abort(404)
 
-@app.route('/api/images')
+
+@app.route("/api/images")
 def list_images_api():
     """Return a JSON list of available images"""
     try:
-        files = [f for f in os.listdir(IMAGE_DIR) 
-                if os.path.isfile(os.path.join(IMAGE_DIR, f)) and not f.startswith('.')]
-        
+        files = [
+            f
+            for f in os.listdir(IMAGE_DIR)
+            if os.path.isfile(os.path.join(IMAGE_DIR, f)) and not f.startswith(".")
+        ]
+
         file_data = []
         for file in files:
             file_path = os.path.join(IMAGE_DIR, file)
-            file_data.append({
-                "name": file,
-                "url": f"/images/{file}",
-                "size": os.path.getsize(file_path),
-                "modified": os.path.getmtime(file_path)
-            })
-        
+            file_data.append(
+                {
+                    "name": file,
+                    "url": f"/images/{file}",
+                    "size": os.path.getsize(file_path),
+                    "modified": os.path.getmtime(file_path),
+                }
+            )
+
         return jsonify({"images": file_data})
     except Exception as e:
         logger.error(f"Error in API: {e}")
         return jsonify({"error": str(e)}), 500
+
 
 def setup_mdns(port, service_name):
     """Setup mDNS service advertising"""
@@ -118,50 +138,47 @@ def setup_mdns(port, service_name):
         except:
             # Fallback to regular hostname lookup
             local_ip = socket.gethostbyname(hostname)
-        
+
         # Create Zeroconf instance
         zeroconf = Zeroconf()
-        
+
         # Service info
         service_info = ServiceInfo(
             "_http._tcp.local.",
             f"{service_name}._http._tcp.local.",
             addresses=[socket.inet_aton(local_ip)],
             port=port,
-            properties={
-                "path": "/",
-                "version": "1.0",
-                "type": "eink-image-server"
-            },
-            server=f"{service_name}.local."
+            properties={"path": "/", "version": "1.0", "type": "eink-image-server"},
+            server=f"{service_name}.local.",
         )
-        
+
         # Register the service
         zeroconf.register_service(service_info)
         logger.info(f"mDNS service registered: {service_name}.local. at {local_ip}:{port}")
-        
+
         # Cleanup function
         def cleanup():
             logger.info("Unregistering mDNS service...")
             zeroconf.unregister_service(service_info)
             zeroconf.close()
-        
+
         # Register cleanup to happen at exit
         atexit.register(cleanup)
-        
+
         return zeroconf, service_info
-    
+
     except Exception as e:
         logger.error(f"Error setting up mDNS: {e}")
         return None, None
+
 
 if __name__ == "__main__":
     # Setup mDNS
     logger.info(f"Starting server to serve images from {IMAGE_DIR}")
     logger.info(f"Setting up mDNS with service name: {args.service_name}.local")
-    
+
     zeroconf_instance, service_info = setup_mdns(args.port, args.service_name)
-    
+
     # Run Flask app
     logger.info(f"Starting Flask server on port {args.port}")
-    app.run(host="0.0.0.0", port=args.port) 
+    app.run(host="0.0.0.0", port=args.port)

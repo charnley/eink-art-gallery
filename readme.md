@@ -40,7 +40,7 @@ graph TD
 
     gpucron -- "GET status" --> canvasserver
     gpucron -- POST image(s) --> canvasserver
-   
+
     classDef default stroke-width:2px;
     classDef default fill: transparent;
     classDef ParentGraph fill: transparent, stroke-width:2px;
@@ -52,4 +52,3 @@ graph TD
 - Every night, the **desktop computer** checks the picture server for prompts that need images. For each prompt, the desktop computer generates new images and sends them to the server.
 - The **ESP32-powered picture frame(s)** follow a sleep schedule, staying off for 24 hours and waking up at 4 am. When it wakes up, it requests a picture, displays it, and then goes back to sleep.
 - The **Raspberry Pi-powered picture frame(s)** host an API for displaying images, so you can send live notifications or images directly to the frame.
-

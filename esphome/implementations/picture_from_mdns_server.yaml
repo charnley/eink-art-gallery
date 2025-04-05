@@ -23,7 +23,7 @@ logger:
 # Use a binary sensor (button) to trigger image refresh
 binary_sensor:
   - platform: gpio
-    pin: 
+    pin:
       number: GPIO27  # Adjust this to match your board's button pin
       mode: INPUT_PULLUP
     name: "Display Refresh Button"
@@ -79,15 +79,15 @@ display:
     lambda: |-
       // First draw the main image
       it.image(0, 0, id(eink_image), Color::BLACK, Color::WHITE);
-      
+
       // Add "Lion" text in the center of the image
       // Use CENTER_HORIZONTAL and CENTER_VERTICAL alignment
       it.print(it.get_width() / 2, it.get_height() / 2, id(font_roboto), Color::BLACK, TextAlign::CENTER, "Lion");
-      
+
       ESP_LOGD("display", "Image from mDNS server displayed successfully with centered text");
 
 # Optional: Set up deep sleep to conserve battery
 # Uncomment and adjust as needed
 # deep_sleep:
 #   run_duration: 60s
-#   sleep_duration: 3600s  # 1 hour 
+#   sleep_duration: 3600s  # 1 hour

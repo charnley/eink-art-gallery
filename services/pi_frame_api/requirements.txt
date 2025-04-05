@@ -3,6 +3,7 @@ fastapi-utilities
 python-multipart
 
 uvicorn
+apscheduler
 pyyaml
 
 RPi.GPIO
@@ -12,3 +13,6 @@ pillow
 spidev
 
 waveshare-epaper
+
+pytest
+httpx
