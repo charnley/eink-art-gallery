@@ -1,5 +1,11 @@
+.PHONY: .tmp.build.yaml run2
+
 env=env
 python=${env}/bin/python
+
+# find default device
+device=$(shell find /dev -name "ttyUSB*" -o -name "ttyACM*" | head -n 1)
+device_id=
 
 # Create Python virtual environment and install dependencies
 ${env}:
@@ -12,6 +18,25 @@ ${env}:
 wizard: ${env}
 	@chmod +x bin/esphome-wizard
 	@bin/esphome-wizard
+
+run-device: .tmp.build.yaml
+	test ! -z "${device}"
+	esphome run --device ${device} $<
+
+run-ota: .tmp.build.yaml
+	esphome run  $<
+
+.tmp.build.yaml:
+	test ! -z "${device_id}"
+	test ! -z "${board}"
+	test ! -z "${display}"
+	test ! -z "${implementation}"
+	echo "" > $@
+	cat "${board}" | sed "s/DEVICE_ID/${device_id}/" >> $@
+	echo "" >> $@
+	cat ${display} >> $@
+	echo "" >> $@
+	cat "${implementation}" >> $@
 
 # Shortcut to run with specific implementation and board
 .PHONY: run
