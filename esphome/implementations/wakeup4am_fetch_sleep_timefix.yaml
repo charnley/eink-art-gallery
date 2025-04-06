@@ -29,11 +29,9 @@ time:
             ESP_LOGD("deep_sleep_calculation", "Current min %d", current_minute);
 
             time_t currTime = id(time_sntp).now().timestamp;
-            uint32_t seconds_in_day = 86400;
             time_t next_wake_up_timestamp;
 
             // Ensure next wake-up is about 24h in the future
-            next_wake_up_timestamp = currTime + (24 - (target_hour - current_hour) * 3600) - (current_minute * 60);
             uint32_t sleep_duration = (24)*3600;
 
             if (current_hour < target_hour) {
@@ -47,11 +45,7 @@ time:
               sleep_duration -= (current_minute * 60);
             }
 
-            // Calculate the sleep duration (in seconds) until the next target hour
-            // uint32_t sleep_duration = next_wake_up_timestamp - currTime;
-
             // Log the sleep duration (for debugging purposes)
-            ESP_LOGD("deep_sleep_calculation", "Calculated timestamp: %d", next_wake_up_timestamp);
             ESP_LOGD("deep_sleep_calculation", "Calculated sleep duration: %d seconds", sleep_duration);
 
             // Update sleep duration, function takes mili sec
