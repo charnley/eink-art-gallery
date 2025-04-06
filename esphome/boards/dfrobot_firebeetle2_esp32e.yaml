@@ -12,10 +12,6 @@ esphome:
 
 substitutions:
   device_id: "DEVICE_ID"
-  wifi_ssid: !secret wifi_ssid
-  wifi_password: !secret wifi_password
-  wake_up_time: "04:00:00"
-  image_url: "http://homeassistant.local:8090/displays/queue.png"
 
   clk_pin: "GPIO18"
   mosi_pin: "GPIO23"
@@ -23,3 +19,6 @@ substitutions:
   dc_pin: "GPIO13"
   busy_pin: "GPIO04"
   reset_pin: "GPIO14"
+
+  # https://esphome.io/components/sensor/adc.html#measuring-battery-voltage-on-the-firebeetle-esp32-e
+  vdd_pin: "GPIO34"

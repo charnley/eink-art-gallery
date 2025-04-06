@@ -43,7 +43,7 @@ online_image:
         - delay: 7s
         - deep_sleep.enter:
             id: deep_sleep_control
-            until: "${wake_up_time}"
+            until: "04:00:00"
             time_id: time_sntp
     on_error:
       then:

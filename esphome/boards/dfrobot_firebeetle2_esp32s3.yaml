@@ -6,10 +6,6 @@ esp32:
 
 substitutions:
   device_id: "DEVICE_ID"
-  wifi_ssid: !secret wifi_ssid
-  wifi_password: !secret wifi_password
-  wake_up_time: "04:00:00"
-  image_url: "http://homeassistant.local:8090/displays/queue.png"
 
   clk_pin: "GPIO12"
   mosi_pin: "GPIO11"
@@ -18,3 +14,4 @@ substitutions:
   busy_pin: "GPIO7"
   reset_pin: "GPIO4"
 
+  vdd_pin: "VDD"
