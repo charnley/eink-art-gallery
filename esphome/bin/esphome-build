@@ -136,4 +136,4 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo -e "${GREEN}Command completed successfully.${NC}" 
+echo -e "${GREEN}Command completed successfully.${NC}"
