@@ -1,7 +1,10 @@
 import logging
+from io import BytesIO
 
+import requests
 from canvasserver.models.content import Image, Prompt
 from canvasserver.models.db import get_session
+from shared_image_utils.dithering import atkinson_dither, image_split_red_channel
 from sqlalchemy import func
 from sqlmodel import select
 
@@ -54,6 +57,51 @@ def get_active_prompts(session):
     return prompt_ids
 
 
+def send_image_to_device(image, hostname):
+
+    url = hostname + "/display/image"
+
+    logger.info("dithering the picture")
+    image = atkinson_dither(image)
+    logger.info("Sending it to paper frame")
+    byte_io = BytesIO()
+    image.save(byte_io, "png")
+    byte_io.seek(0)
+
+    _ = requests.post(url=url, files=dict(file=("service.png", byte_io, "image/png")))
+
+
+def send_image_to_device_red(image, hostname):
+
+    url = hostname + "/display/imageRed"
+
+    logger.info("splitting and dithering the picture")
+    image_red, image_black = image_split_red_channel(image)
+    image_red = atkinson_dither(image_red)
+    image_black = atkinson_dither(image_black)
+    logger.info("Sending it to red paper frame")
+
+    byte_io_red = BytesIO()
+    image_red.save(byte_io_red, "png")
+    byte_io_red.seek(0)
+
+    byte_io_black = BytesIO()
+    image_black.save(byte_io_black, "png")
+    byte_io_black.seek(0)
+
+    _ = requests.post(
+        url=url,
+        files=dict(
+            redFile=("red.png", byte_io_red, "image/png"),
+            blackFile=("black.png", byte_io_black, "image/png"),
+        ),
+    )
+
+    # TODO Check r error code
+
+
 def send_images_to_push_devices(session):
+
+    # TODO For push devices
 
     return

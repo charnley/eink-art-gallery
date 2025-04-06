@@ -52,3 +52,14 @@ def _refresh_active_prompts(session: Session = Depends(get_session)):
     prompts = [prompt]
 
     return Prompts(prompts=prompts, count=len(prompts))
+
+
+@router.get("/update_push_devices", response_model=None, tags=["actions"])
+def _refresh_push_screens(session: Session = Depends(get_session)):
+
+    # TODO Find push devices
+    # TODO For each device, find relevant prompts
+    # TODO For each prompt, find a image
+    # TODO Find correct send function
+
+    return {}

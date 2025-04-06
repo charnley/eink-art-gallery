@@ -1,6 +1,8 @@
 import gzip
 import io
 import uuid
+from datetime import datetime
+from enum import Enum
 from hashlib import sha256
 
 from PIL import Image as PilImage
@@ -10,7 +12,7 @@ from sqlmodel import Field, LargeBinary
 from sqlmodel import SQLModel as Model
 from sqlmodel import TypeDecorator
 
-from ..constants import IMAGE_FORMAT
+from ..constants import IMAGE_FORMAT, IMAGE_HEIGHT, IMAGE_WIDTH
 
 
 def compress(s):
@@ -80,7 +82,7 @@ class Image(Model, table=True):
         return f"Image(id={self.id},prompt={self.prompt})"
 
     def __repr__(self) -> str:
-        return f"Image(id={self.id},prompt={self.prompt})"
+        return str(self)
 
 
 class Images(Model):
@@ -97,7 +99,8 @@ class ImageMeta(Model):
 
 
 class Prompt(Model, table=True):
-    __tablename__ = "prompt"
+
+    __tablename__: str = "prompt"
 
     id: str = Field(primary_key=True, default=None)
     prompt: str = Field()
@@ -106,10 +109,12 @@ class Prompt(Model, table=True):
     active: bool = Field(default=False)
     theme_id: str | None = Field(foreign_key="theme.id", nullable=True)
 
-    min_images: int | None = Field()
+    min_images: int | None = Field(default=6, nullable=False)
+    color_mode: str | None = Field(default=None, nullable=True)
+    width: int = Field(default=IMAGE_WIDTH)
+    height: int = Field(default=IMAGE_HEIGHT)
 
-    # lifetime: DateTime = Field()  # TODO Implement lifetime
-    # lifetime: DateTime = Field(nullable=True, default=func.now()) # + one month or so
+    lifetime: datetime | None = Field(default=None, nullable=True)
 
     @staticmethod
     def generate_id(prompt_text: str) -> str:
@@ -117,11 +122,11 @@ class Prompt(Model, table=True):
         m.update(prompt_text.encode())
         return m.hexdigest()
 
-    def __repr__(self) -> str:
-        return f"Prompt(id={self.id:20s},active={self.active})"
-
     def __str__(self) -> str:
         return f"Prompt(id={self.id:20s},active={self.active})"
+
+    def __repr__(self) -> str:
+        return str(self)
 
 
 @event.listens_for(Prompt, "before_insert")
@@ -147,8 +152,6 @@ class Theme(Model, table=True):
     theme: str = Field()
     active: str = Field()
 
-    # TODO Theme needs a lifetime
-
     @staticmethod
     def generate_id(text: str) -> str:
         m = sha256()
@@ -163,7 +166,19 @@ def ensure_id_in_theme(mapper, connection, target):
     target.id = Prompt.generate_id(target.theme)
 
 
-class ReadingDevice(Model, table=True):
+class ColorSupport(Enum):
+    black = "black"
+    blackRed = "blackRed"
+
+
+class PushFrames(Model, table=True):
+    __tablename__ = "frame_push"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    hostname: str = Field()
+    color_support: ColorSupport = Field()  # Black, Red
+
+
+class PullFrames(Model, table=True):
     __tablename__ = "reading_device"
     id: str = Field(primary_key=True)
     ip: str = Field()
