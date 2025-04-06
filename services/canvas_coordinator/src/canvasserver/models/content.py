@@ -106,6 +106,8 @@ class Prompt(Model, table=True):
     active: bool = Field(default=False)
     theme_id: str | None = Field(foreign_key="theme.id", nullable=True)
 
+    min_images: int | None = Field()
+
     # lifetime: DateTime = Field()  # TODO Implement lifetime
     # lifetime: DateTime = Field(nullable=True, default=func.now()) # + one month or so
 
