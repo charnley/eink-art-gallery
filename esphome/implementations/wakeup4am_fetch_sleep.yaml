@@ -25,13 +25,13 @@ wifi:
   power_save_mode: light
   on_connect:
     - logger.log: WiFi is connected!
-    - logger.log: "Trying to download ${image_url}"
+    - logger.log: "Trying to download image"
     - component.update: my_image
 
 captive_portal:
 
 online_image:
-  - url: $image_url
+  - url: "http://homeassistant.local:8090/displays/queue.png"
     id: my_image
     format: png
     type: BINARY
@@ -47,13 +47,13 @@ online_image:
             time_id: time_sntp
     on_error:
       then:
-        - logger.log: "Error downloading image $(image_url)"
+        - logger.log: "Error downloading image "
         - display.page.show: page2
         - component.update: my_display
         - delay: 7s
         - deep_sleep.enter:
             id: deep_sleep_control
-            until: "${wake_up_time}"
+            until: "04:00:00"
             time_id: time_sntp
 
 spi:
@@ -95,6 +95,18 @@ api:
 
 ota:
   - platform: esphome
+
+
+  # - platform: adc
+  #   pin: GPIO1
+  #   name: "Battery Voltage"
+  #   id: battery_voltage
+  #   update_interval: 60s
+  #   attenuation: 11db
+  #   filters:
+  #     - multiply: 2
+  #   unit_of_measurement: "V"
+  #   accuracy_decimals: 2
 
 # sensor:
 #   - platform: adc

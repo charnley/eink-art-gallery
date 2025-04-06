@@ -4,6 +4,12 @@ esp32:
     type: arduino
     version: recommended
 
+esphome:
+  name: eink-frame-${device_id}
+  friendly_name: "eink frame ${device_id}"
+  platformio_options:
+    build_flags: "-DBOARD_HAS_PSRAM"
+
 substitutions:
   device_id: "DEVICE_ID"
 
@@ -14,4 +20,4 @@ substitutions:
   busy_pin: "GPIO7"
   reset_pin: "GPIO4"
 
-  vdd_pin: "VDD"
+  vdd_pin: "GPIO1"
