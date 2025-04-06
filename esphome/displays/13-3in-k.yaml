@@ -1,3 +1,3 @@
   waveshare_model: "13.3in-k"
-  busy_pin_inverted: "false"
+  busy_pin_inverted: false
   resolution: 960x680

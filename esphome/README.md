@@ -44,7 +44,7 @@ pip install "pillow==10.2.0"
 - run `esphome run src/esphome/boards/firebeetle-esp32-s3-wroom-1u/online-image-13.3-simple.yaml`
 - wait until you see output and it changes
 
-- use `--device /dev/ttyUSB0` where it could be mounted `/dev/ttyUSB0` or `/dev/ttyACM0` 1-2
+- use `--device /dev/ttyUSB0` where it could be mounted `/dev/ttyUSB0` or `/dev/ttyACM0`. Could be 1-2.
 
 # HA support
 
