@@ -1,6 +1,7 @@
 fastapi
 fastapi-utilities
 python-multipart
+matplotlib
 
 uvicorn
 apscheduler
