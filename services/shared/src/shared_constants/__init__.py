@@ -1,3 +1,5 @@
+from enum import Enum
+
 # Default Image format
 IMAGE_FORMAT = "PNG"
 IMAGE_EXTENSION = "png"
@@ -26,3 +28,8 @@ MIN_IMAGES_PER_PROMPT = 2
 
 # APIs
 FILE_UPLOAD_KEY = "files"
+
+
+class ColorSupport(Enum):
+    Black = "Black"
+    BlackRed = "BlackRed"

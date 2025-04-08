@@ -3,6 +3,7 @@ from functools import lru_cache
 from io import BytesIO
 from typing import Any
 
+import qrcode
 from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
@@ -116,6 +117,43 @@ def get_basic_404(text, font=FONT):
         fontsize=15,
         **font,
     )
+
+    ax.axis("off")
+
+    image = plot_to_image(fig)
+
+    close()
+
+    return image
+
+
+def generate_wifi_qrcode(
+    ssid: str,
+    password: str,
+    security_type="WPA",
+    target: str = "wifi_qrcode.png",
+) -> None:
+    wifi_data = f"WIFI:T:{security_type};S:{ssid};P:{password};;"
+
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+
+    qr.add_data(wifi_data)
+    qr.make(fit=True)
+
+    qr_code_image = qr.make_image(fill_color="black", back_color="white")
+
+    qr_code_image.save(target)
+
+
+@lru_cache()
+def get_basic_wifi(wifi_name, wifi_password, font=FONT):
+
+    (fig, ax) = get_figure()
 
     ax.axis("off")
 
