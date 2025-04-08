@@ -44,12 +44,13 @@ def refill_images(args):
 
         prompt_text = prompt["prompt"]
         prompt_id = prompt["id"]
-        # prompt_model = prompt["model"]
+        n_images = prompt["min_images"] - prompt["image_count"]
+        # prompt_model = prompt["model"] Only one model is avail atm
 
-        logger.info(f"Generating images for {prompt_id}...")
+        logger.info(f"Generating {n_images} images for {prompt_id}...")
 
         # Generate images
-        images = [prompt_func(pipe, prompt_text) for _ in range(args.fill_count)]
+        images = [prompt_func(pipe, prompt_text) for _ in range(n_images)]
 
         files = [
             (FILE_UPLOAD_KEY, (f"file{i}", image_to_bytes(image), IMAGE_CONTENT_TYPE))
@@ -77,11 +78,7 @@ def main(args=None):
 
     parser = argparse.ArgumentParser()
 
-    # TODO fill-count should be based on image-server
-
-    parser.add_argument("--refill-images", action="store_true")
     parser.add_argument("--server-url", type=str)
-    parser.add_argument("--fill-count", type=int, default=2)
 
     args = parser.parse_args(args)
 

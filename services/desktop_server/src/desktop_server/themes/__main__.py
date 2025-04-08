@@ -19,7 +19,9 @@ def refill_prompts(args):
 
     # Read prompt file and put into database
 
-    for filename in args.prompts_filenames:
+    for filename, n_images, color_support in zip(
+        args.prompts_filenames, args.prompts_n_images, args.prompts_colors
+    ):
 
         logger.info("Reading pre-defined prompts...")
 
@@ -27,7 +29,15 @@ def refill_prompts(args):
             lines = f.readlines()
             lines = [line.strip() for line in lines]
 
-            prompts = [{"prompt": value, "model": "SD3"} for value in lines]
+            prompts = [
+                {
+                    "prompt": value,
+                    "model": "SD3",
+                    "min_images": n_images,
+                    "color_support": color_support,
+                }
+                for value in lines
+            ]
 
             for prompt in prompts:
                 response = requests.post(args.server_url + ENDPOINT_UPLOAD_PROMPTS, json=prompt)
@@ -52,6 +62,8 @@ def main(args=None):
 
     parser.add_argument("--server-url", type=str)
     parser.add_argument("--prompts-filenames", type=Path, nargs="+")
+    parser.add_argument("--prompts-n-images", type=int, nargs="+")
+    parser.add_argument("--prompts-colors", type=str, nargs="+")
 
     args = parser.parse_args(args)
 
