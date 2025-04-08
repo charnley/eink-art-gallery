@@ -49,7 +49,10 @@ async def _get_404():
     response_class=Response,
 )
 async def _get_queue(
-    dry_run: bool = False, random: bool = False, session: Session = Depends(get_session)
+    dry_run: bool = False,
+    random: bool = False,
+    queue: str | None = None,
+    session: Session = Depends(get_session),
 ):
 
     # Note: ESPHome will react to 404, so always return 200

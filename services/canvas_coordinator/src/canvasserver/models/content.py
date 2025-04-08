@@ -15,6 +15,11 @@ from sqlmodel import TypeDecorator
 from ..constants import IMAGE_FORMAT, IMAGE_HEIGHT, IMAGE_WIDTH
 
 
+class ColorSupport(Enum):
+    Black = "Black"
+    BlackRed = "BlackRed"
+
+
 def compress(s):
     if isinstance(s, str):
         s = s.encode()
@@ -110,7 +115,7 @@ class Prompt(Model, table=True):
     theme_id: str | None = Field(foreign_key="theme.id", nullable=True)
 
     min_images: int | None = Field(default=6, nullable=False)
-    color_mode: str | None = Field(default=None, nullable=True)
+    color_support: ColorSupport = Field(default=ColorSupport.Black)
     width: int = Field(default=IMAGE_WIDTH)
     height: int = Field(default=IMAGE_HEIGHT)
 
@@ -166,16 +171,16 @@ def ensure_id_in_theme(mapper, connection, target):
     target.id = Prompt.generate_id(target.theme)
 
 
-class ColorSupport(Enum):
-    black = "black"
-    blackRed = "blackRed"
-
-
-class PushFrames(Model, table=True):
+class PushFrame(Model, table=True):
     __tablename__ = "frame_push"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hostname: str = Field()
     color_support: ColorSupport = Field()  # Black, Red
+
+
+class PushFrames(Model):
+    devices: list[PushFrame]
+    count: int
 
 
 class PullFrames(Model, table=True):

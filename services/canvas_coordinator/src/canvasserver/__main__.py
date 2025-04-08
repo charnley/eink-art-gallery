@@ -15,6 +15,12 @@ from .version import __version__
 logger = logging.getLogger(__name__)
 
 
+def outside_session_call(func):
+    session = get_session()
+    func(session)
+    session.close()
+
+
 def main(args=None):
 
     parser = argparse.ArgumentParser()
@@ -57,16 +63,14 @@ def main(args=None):
         scheduler = BackgroundScheduler()
 
         if settings.cron_update_push:
-            session = get_session()
             scheduler.add_job(
-                lambda: send_images_to_push_devices(session),
+                lambda: outside_session_call(send_images_to_push_devices),
                 CronTrigger.from_crontab(settings.cron_update_push),
             )
 
         if settings.cron_update_prompt:
-            session = get_session()
             scheduler.add_job(
-                lambda: refresh_active_prompt(session),
+                lambda: outside_session_call(refresh_active_prompt),
                 CronTrigger.from_crontab(settings.cron_update_prompt),
             )
 

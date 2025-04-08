@@ -1,10 +1,13 @@
 import logging
 from io import BytesIO
 
+import numpy as np
 import requests
-from canvasserver.models.content import Image, Prompt
+from canvasserver.jobs.apis import send_image_to_device, send_image_to_device_red
+from canvasserver.models.content import ColorSupport, Image, Prompt, PushFrame, PushFrames
 from canvasserver.models.db import get_session
 from shared_image_utils.dithering import atkinson_dither, image_split_red_channel
+from shared_matplotlib_utils import get_basic_404
 from sqlalchemy import func
 from sqlmodel import select
 
@@ -57,51 +60,51 @@ def get_active_prompts(session):
     return prompt_ids
 
 
-def send_image_to_device(image, hostname):
-
-    url = hostname + "/display/image"
-
-    logger.info("dithering the picture")
-    image = atkinson_dither(image)
-    logger.info("Sending it to paper frame")
-    byte_io = BytesIO()
-    image.save(byte_io, "png")
-    byte_io.seek(0)
-
-    _ = requests.post(url=url, files=dict(file=("service.png", byte_io, "image/png")))
-
-
-def send_image_to_device_red(image, hostname):
-
-    url = hostname + "/display/imageRed"
-
-    logger.info("splitting and dithering the picture")
-    image_red, image_black = image_split_red_channel(image)
-    image_red = atkinson_dither(image_red)
-    image_black = atkinson_dither(image_black)
-    logger.info("Sending it to red paper frame")
-
-    byte_io_red = BytesIO()
-    image_red.save(byte_io_red, "png")
-    byte_io_red.seek(0)
-
-    byte_io_black = BytesIO()
-    image_black.save(byte_io_black, "png")
-    byte_io_black.seek(0)
-
-    _ = requests.post(
-        url=url,
-        files=dict(
-            redFile=("red.png", byte_io_red, "image/png"),
-            blackFile=("black.png", byte_io_black, "image/png"),
-        ),
-    )
-
-    # TODO Check r error code
-
-
 def send_images_to_push_devices(session):
 
-    # TODO For push devices
+    results = session.execute(select(PushFrame)).all()
 
-    return
+    devices = [result[0] for result in results]
+
+    for device in devices:
+
+        logger.info(f"Sending to {device}")
+
+        color_mode = device.color_support
+
+        results = (
+            session.execute(
+                select(Prompt)
+                .filter_by(color_support=color_mode)
+                .outerjoin(Image, Image.prompt == Prompt.id)
+                .group_by(Prompt.id)
+                .having(func.count(Image.id) >= 1)
+            )
+        ).all()
+
+        prompt_ids = [result[0].id for result in results]
+
+        image = None
+
+        if not len(prompt_ids):
+            image = get_basic_404("")
+
+        else:
+            prompt_id = np.random.choice(prompt_ids)
+
+            image_results = session.execute(
+                select(Image).filter(Image.prompt == prompt_id).order_by(func.random())
+            ).first()
+
+            image_obj = image_results[0]
+            image = image_obj.image
+            session.delete(image_obj)
+
+        if color_mode == ColorSupport.BlackRed:
+            send_image_to_device_red(image, device.hostname)
+
+        else:
+            # Default is black
+            send_image_to_device(image, device.hostname)
+
+    return PushFrames(devices=devices, count=len(devices))

@@ -1,7 +1,7 @@
 import logging
 
-from canvasserver.jobs import refresh_active_prompt
-from canvasserver.models.content import Image, Prompt, Prompts
+from canvasserver.jobs import refresh_active_prompt, send_images_to_push_devices
+from canvasserver.models.content import Image, Prompt, Prompts, PushFrames
 from canvasserver.models.db import get_session
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
@@ -23,6 +23,7 @@ def _clean_up(session: Session = Depends(get_session)):
 
 @router.get("/prompts_check", response_model=Prompts, tags=["actions"])
 def _check_prompts(session: Session = Depends(get_session)):
+
     MIN_IMAGES = 5
     query = (
         session.query(Prompt)
@@ -40,7 +41,7 @@ def _check_themes(session: Session = Depends(get_session)):
 
 
 @router.get("/prompts_active", response_model=Prompts, tags=["actions"])
-def _refresh_active_prompts(session: Session = Depends(get_session)):
+def refresh_active_prompts(session: Session = Depends(get_session)):
 
     # TODO Set manual active prompt
 
@@ -54,12 +55,14 @@ def _refresh_active_prompts(session: Session = Depends(get_session)):
     return Prompts(prompts=prompts, count=len(prompts))
 
 
-@router.get("/update_push_devices", response_model=None, tags=["actions"])
+@router.get("/refresh_queues", response_model=None, tags=["actions"])
+def _refresh_active_prompts_in_queue(session: Session = Depends(get_session)):
+
+    raise NotImplementedError
+
+
+@router.get("/update_push_devices", response_model=PushFrames, tags=["actions"])
 def _refresh_push_screens(session: Session = Depends(get_session)):
-
-    # TODO Find push devices
-    # TODO For each device, find relevant prompts
-    # TODO For each prompt, find a image
-    # TODO Find correct send function
-
-    return {}
+    pushFrames = send_images_to_push_devices(session)
+    session.close()
+    return pushFrames

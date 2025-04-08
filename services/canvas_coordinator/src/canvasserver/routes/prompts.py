@@ -43,7 +43,7 @@ def get_item_childs(id: str, session: Session = Depends(get_session)):
 @router.delete("/{id}", response_model=Prompt)
 def delete_item(id: str, session: Session = Depends(get_session)):
     item = session.get(Prompt, id)
-    session.close()
+
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
