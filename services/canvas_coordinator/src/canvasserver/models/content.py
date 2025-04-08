@@ -2,22 +2,15 @@ import gzip
 import io
 import uuid
 from datetime import datetime
-from enum import Enum
 from hashlib import sha256
 
 from PIL import Image as PilImage
 from pydantic import model_serializer
+from shared_constants import IMAGE_FORMAT, IMAGE_HEIGHT, IMAGE_WIDTH, ColorSupport
 from sqlalchemy import event
 from sqlmodel import Field, LargeBinary
 from sqlmodel import SQLModel as Model
 from sqlmodel import TypeDecorator
-
-from ..constants import IMAGE_FORMAT, IMAGE_HEIGHT, IMAGE_WIDTH
-
-
-class ColorSupport(Enum):
-    Black = "Black"
-    BlackRed = "BlackRed"
 
 
 def compress(s):
@@ -142,6 +135,21 @@ def ensure_id_in_prompt(mapper, connection, target):
     target.id = Prompt.generate_id(target.prompt)
 
 
+class PromptStatus(Model):
+    id: str
+    prompt: str
+    min_images: int
+    color_support: ColorSupport
+    width: int
+    height: int
+    image_count: int
+
+
+class PromptStatusResponse(Model):
+    prompts: list[PromptStatus]
+    count: int
+
+
 class Prompts(Model):
     prompts: list[Prompt]
     count: int
@@ -176,6 +184,12 @@ class PushFrame(Model, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hostname: str = Field()
     color_support: ColorSupport = Field()  # Black, Red
+
+    def __str__(self) -> str:
+        return f"PushFrame(hostname={self.hostname},Color={self.color_support})"
+
+    def __repr__(self) -> str:
+        return str(self)
 
 
 class PushFrames(Model):

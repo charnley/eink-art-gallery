@@ -50,7 +50,9 @@ def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
     responses={200: {"content": {f"image/{IMAGE_EXTENSION}": {}}}},
     response_class=Response,
 )
-async def read_item_png(id: uuid.UUID, session: Session = Depends(get_session)):
+async def read_item_png(
+    id: uuid.UUID, use_dithering: bool = False, session: Session = Depends(get_session)
+):
 
     item = session.get(Image, id)
     session.close()
@@ -58,7 +60,8 @@ async def read_item_png(id: uuid.UUID, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Item not found")
 
     image = item.image
-    image = dithering.atkinson_dither(image)
+    if use_dithering:
+        image = dithering.atkinson_dither(image)
     image_bytes = image_to_bytes(image)
     return Response(image_bytes, headers=IMAGE_HEADER, media_type=f"image/{IMAGE_EXTENSION}")
 

@@ -66,9 +66,11 @@ def send_images_to_push_devices(session):
 
     devices = [result[0] for result in results]
 
+    logger.info(devices)
+
     for device in devices:
 
-        logger.info(f"Sending to {device}")
+        logger.info(f"Sending to image to: {device}")
 
         color_mode = device.color_support
 

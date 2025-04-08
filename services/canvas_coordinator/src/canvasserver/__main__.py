@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 def outside_session_call(func):
     session = get_session()
     func(session)
+    session.commit()
     session.close()
 
 
