@@ -70,6 +70,8 @@ def create_item(prompt: Prompt, session: Session = Depends(get_session)):
     if existing_prompt:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Content already exists.")
 
+    # TODO Check with requests that it works and is alive
+
     session.add(prompt)
 
     try:

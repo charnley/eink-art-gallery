@@ -8,6 +8,7 @@ pydantic
 pydantic_settings
 python-multipart
 pyyaml
+qrcode
 requests
 rich
 sqlmodel
