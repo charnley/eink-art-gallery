@@ -2,13 +2,13 @@ import logging
 from typing import Any
 
 import numpy as np
-from canvasserver.image_utils import dithering, image_to_bytes
 from canvasserver.jobs import get_active_prompts
 from canvasserver.models.content import Image
 from canvasserver.models.db import get_session
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
 from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER
+from shared_image_utils import dithering, image_to_bytes
 from shared_matplotlib_utils import get_basic_404, get_basic_text
 from sqlalchemy import select
 from sqlalchemy.orm import Session

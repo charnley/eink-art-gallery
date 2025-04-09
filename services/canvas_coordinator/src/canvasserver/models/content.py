@@ -107,7 +107,7 @@ class Prompt(Model, table=True):
     active: bool = Field(default=False)
     theme_id: str | None = Field(foreign_key="theme.id", nullable=True)
 
-    min_images: int | None = Field(default=6, nullable=False)
+    min_images: int = Field(default=6, nullable=False)
     color_support: ColorSupport = Field(default=ColorSupport.Black)
     width: int = Field(default=IMAGE_WIDTH)
     height: int = Field(default=IMAGE_HEIGHT)
@@ -119,6 +119,19 @@ class Prompt(Model, table=True):
         m = sha256()
         m.update(prompt_text.encode())
         return m.hexdigest()
+
+    @model_serializer
+    def _ser(self) -> dict[str, str | float | int]:
+        return {
+            "id": str(self.id),
+            "prompt": str(self.prompt),
+            "model": str(self.model),
+            "color_support": str(self.color_support.value),
+            "min_images": self.min_images,
+            "width": self.width,
+            "height": self.height,
+            # TODO lifetime
+        }
 
     def __str__(self) -> str:
         return f"Prompt(id={self.id:20s},active={self.active})"

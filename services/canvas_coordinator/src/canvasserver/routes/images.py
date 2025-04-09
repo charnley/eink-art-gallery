@@ -2,9 +2,9 @@ import uuid
 from io import BytesIO
 
 from canvasserver.constants import IMAGE_EXTENSION, IMAGE_HEADER
-from canvasserver.image_utils import dithering, image_to_bytes
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
 from PIL import Image as PilImage
+from shared_image_utils import dithering, image_to_bytes
 from sqlalchemy.orm import Session
 
 from ..models.content import Image, ImageCreate, Images, Prompt
