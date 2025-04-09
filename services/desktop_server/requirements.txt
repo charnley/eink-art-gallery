@@ -17,6 +17,7 @@ pydantic
 pydantic_settings
 pytest
 python-multipart
+qrcode
 rich
 scipy
 setuptools

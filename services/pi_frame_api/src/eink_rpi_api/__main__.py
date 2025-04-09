@@ -12,7 +12,6 @@ from . import __version__, jobs
 logger = logging.getLogger(__name__)
 
 
-
 def main(args=None):
 
     parser = argparse.ArgumentParser()
