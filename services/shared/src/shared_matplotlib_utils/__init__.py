@@ -132,9 +132,9 @@ def get_basic_404(text, font=FONT):
 def generate_wifi_qrcode(
     ssid: str,
     password: str,
-    security_type="WPA",
+    wifi_type="WPA",
 ) -> PilImage:
-    wifi_data = f"WIFI:T:{security_type};S:{ssid};P:{password};;"
+    wifi_data = f"WIFI:T:{wifi_type};S:{ssid};P:{password};;"
 
     qr = qrcode.QRCode(
         version=1,
@@ -152,11 +152,11 @@ def generate_wifi_qrcode(
     return qr_image
 
 
-def get_basic_wifi(wifi_name, wifi_password, security_type="WPA", font=FONT) -> PilImage:
+def get_basic_wifi(wifi_name, wifi_password, wifi_type="WPA", font=FONT) -> PilImage:
 
     (fig, ax) = get_figure()
 
-    qr_image = generate_wifi_qrcode(wifi_name, wifi_password, security_type=security_type)
+    qr_image = generate_wifi_qrcode(wifi_name, wifi_password, wifi_type=wifi_type)
 
     imagebox = OffsetImage(qr_image, zoom=1.0)
     imagebox.image.axes = ax

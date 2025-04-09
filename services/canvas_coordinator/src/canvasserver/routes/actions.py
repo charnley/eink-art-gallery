@@ -1,16 +1,19 @@
 import logging
 
 from canvasserver.jobs import refresh_active_prompt, send_images_to_push_devices
+from canvasserver.jobs.apis import send_image_to_device_red
 from canvasserver.models.content import (
     Image,
     Prompt,
     Prompts,
     PromptStatus,
     PromptStatusResponse,
+    PushFrame,
     PushFrames,
 )
 from canvasserver.models.db import get_session
 from fastapi import APIRouter, Depends, HTTPException
+from shared_matplotlib_utils import get_basic_wifi
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
@@ -86,3 +89,22 @@ def _refresh_push_screens(session: Session = Depends(get_session)):
     session.close()
 
     return pushFrames
+
+
+@router.get("/send_wifi", response_model=PushFrame, tags=["actions"])
+def _send_wifi(
+    wifi_name: str, wifi_password: str, wifi_type: str, session: Session = Depends(get_session)
+):
+
+    pushFrame = session.query(PushFrame).first()
+
+    image = get_basic_wifi(wifi_name, wifi_password, wifi_type=wifi_type)
+
+    send_image_to_device_red(image, pushFrame.hostname)
+
+    logger.info(f"Updated {pushFrame}")
+
+    session.commit()
+    session.close()
+
+    return pushFrame
