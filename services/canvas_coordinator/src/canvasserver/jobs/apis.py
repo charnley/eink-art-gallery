@@ -62,3 +62,17 @@ def send_image_to_device_red(image, hostname):
     )
 
     fire_and_forget_images(url, None, files)
+
+
+def get_status(hostname):
+    url = f"http://{hostname}/status"
+
+    try:
+        r = requests.get(url=url)
+        status_code = r.status_code
+        return status_code == 200
+
+    except Exception:
+        logger.error(f"not a real hostname: {hostname}")
+
+    return False

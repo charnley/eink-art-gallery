@@ -1,5 +1,6 @@
 import uuid
 
+from canvasserver.jobs.apis import get_status
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlmodel import select
@@ -49,6 +50,12 @@ def create_item(item: PushFrame, session: Session = Depends(get_session)):
 
     if len(item_check):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Item already exists.")
+
+    if not get_status(hostname):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Hostname does not return a good status",
+        )
 
     session.add(item)
 
