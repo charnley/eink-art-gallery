@@ -123,18 +123,19 @@ class Prompt(Model, table=True):
     @model_serializer
     def _ser(self) -> dict[str, str | float | int]:
         return {
-            "id": str(self.id),
-            "prompt": str(self.prompt),
-            "model": str(self.model),
+            "active": self.active,
             "color_support": str(self.color_support.value),
-            "min_images": self.min_images,
-            "width": self.width,
             "height": self.height,
-            # TODO lifetime
+            "id": str(self.id),
+            "min_images": self.min_images,
+            "model": str(self.model),
+            "prompt": str(self.prompt),
+            "width": self.width,
+            # TODO Lifetime
         }
 
     def __str__(self) -> str:
-        return f"Prompt(id={self.id:20s},active={self.active})"
+        return f"Prompt(id={str(self.id):20s},active={str(self.active)})"
 
     def __repr__(self) -> str:
         return str(self)
