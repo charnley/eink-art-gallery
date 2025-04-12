@@ -1,12 +1,8 @@
 import logging
-from io import BytesIO
 
 import numpy as np
-import requests
-from canvasserver.jobs.apis import send_image_to_device, send_image_to_device_red
+from canvasserver.jobs.apis import send_image_to_device
 from canvasserver.models.content import ColorSupport, Image, Prompt, PushFrame, PushFrames
-from canvasserver.models.db import get_session
-from shared_image_utils.dithering import atkinson_dither, image_split_red_channel
 from shared_matplotlib_utils import get_basic_404
 from sqlalchemy import func
 from sqlmodel import select
@@ -102,11 +98,6 @@ def send_images_to_push_devices(session):
             image = image_obj.image
             session.delete(image_obj)
 
-        if color_mode == ColorSupport.BlackRed:
-            send_image_to_device_red(image, device.hostname)
-
-        else:
-            # Default is black
-            send_image_to_device(image, device.hostname)
+        send_image_to_device(image, color_mode, device.hostname)
 
     return PushFrames(devices=devices, count=len(devices))

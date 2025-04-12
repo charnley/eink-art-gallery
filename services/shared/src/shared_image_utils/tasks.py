@@ -1,6 +1,6 @@
 from PIL import Image
 
-from .colors import convert_color, image_split_red_channel
+from .colors import convert_color, steal_red_channel
 from .dithering import atkinson_dither
 
 
@@ -10,7 +10,7 @@ def color_correct(image, colors, dither=True) -> Image.Image:
 
     width, height = image.size
 
-    image1_r, image1_gb = image_split_red_channel(image)
+    image1_r, image1_gb = steal_red_channel(image)
 
     if dither:
         image1_r = atkinson_dither(image1_r)

@@ -2,6 +2,8 @@ fastapi
 fastapi-utilities
 python-multipart
 pydantic_settings
+qrcode
+matplotlib
 
 uvicorn
 apscheduler

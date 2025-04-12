@@ -1,5 +1,40 @@
+from typing import Union
+
 import numpy as np
 from PIL import Image, ImageOps
+
+
+def steal_red_channel(image: Image.Image) -> Union[Image.Image, Image.Image]:
+
+    red_enhance = 1.2
+    greenblue_dehance = 0.6
+
+    red_enhance = 1.0
+    greenblue_dehance = 0.5
+
+    # Get red channel as white
+    data2 = np.array(image).astype(np.int16)
+    r, g, b = data2[:, :, 0], data2[:, :, 1], data2[:, :, 2]
+    new_r = (red_enhance * r - greenblue_dehance * (g + b)).astype(np.int16)
+    np.clip(new_r, 0, 255, new_r)
+    new_r = new_r.astype(np.uint8)
+
+    image_red = Image.fromarray(new_r, mode="L")
+    image_red = ImageOps.invert(image_red)
+
+    image_black = image.convert("L")
+    image_black = ImageOps.invert(image_black)
+    black_channel = np.array(image_black).astype(np.uint16)
+
+    print(black_channel.shape)
+    black_channel = black_channel + new_r
+    np.clip(black_channel, 0, 255, black_channel)
+    black_channel = black_channel.astype(np.uint8)
+
+    image_black = Image.fromarray(black_channel, mode="L")
+    image_black = ImageOps.invert(image_black)
+
+    return image_red, image_black
 
 
 def image_split_red_channel(image: Image.Image):

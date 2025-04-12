@@ -1,7 +1,7 @@
 import logging
 
 from canvasserver.jobs import refresh_active_prompt, send_images_to_push_devices
-from canvasserver.jobs.apis import send_image_to_device_red
+from canvasserver.jobs.apis import send_image_to_device
 from canvasserver.models.content import (
     Image,
     Prompt,
@@ -100,7 +100,7 @@ def _send_wifi(
 
     image = get_basic_wifi(wifi_name, wifi_password, wifi_type=wifi_type)
 
-    send_image_to_device_red(image, pushFrame.hostname)
+    send_image_to_device(image, pushFrame.color_support, pushFrame.hostname)
 
     logger.info(f"Updated {pushFrame}")
 
