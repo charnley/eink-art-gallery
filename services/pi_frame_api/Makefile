@@ -8,6 +8,8 @@ package=eink_rpi_api
 port=8080
 rpi_hostname=
 
+epd_type=BlackRed13
+
 .PHONY: build check clean test
 
 # setup
