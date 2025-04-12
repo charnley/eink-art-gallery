@@ -3,10 +3,11 @@ import time
 from enum import Enum
 from functools import cache
 from pathlib import Path
+from typing import Union
 
 from PIL import Image
 from PIL.Image import Image as PilImage
-from shared_image_utils.colors import image_split_red_channel
+from shared_image_utils.colors import steal_red_channel
 from waveshare_epd import epd13in3b  # type: ignore
 from waveshare_epd import epd13in3k  # type: ignore
 
@@ -40,7 +41,7 @@ def find_epd():
     return epdlib
 
 
-def get_epd() -> epd13in3k.EPD | epd13in3b.EPD:
+def get_epd() -> Union[epd13in3k.EPD, epd13in3b.EPD]:
     return find_epd().EPD()  # type: ignore
 
 
@@ -67,15 +68,15 @@ def display(image: PilImage) -> None:
     if EPD_TYPE == EpdType.Black13 or EPD_TYPE == EpdType.BlackGrey13:
         display_black(image)
 
-    elif EPD_TYPE == epd13in3b:
+    elif EPD_TYPE == EpdType.BlackRed13:
 
         # split image
-        image_r, image_gb = image_split_red_channel(image)
-        display_red(image_r, image_gb)
+        image_red, image_black = steal_red_channel(image)
+        display_red(image_red, image_black)
 
     else:
-        logger.error("Unable to read the Waveshare EPD")
-        raise ValueError("Wrong EPD type")
+        logger.error(f"Unable to read the Waveshare EPD {EPD_TYPE}")
+        raise ValueError(f"Wrong EPD type: {EPD_TYPE}")
 
     return
 
@@ -94,7 +95,7 @@ def display_black(image: PilImage):
 def display_red(image_red: PilImage, image_black: PilImage):
     logging.info("display pillow, using red")
     epd: epd13in3b.EPD = get_epd()
-    epd.display(epd.getbuffer(image_red), epd.getbuffer(image_black))
+    epd.display(epd.getbuffer(image_black), epd.getbuffer(image_red))
 
 
 # def exit():

@@ -10,6 +10,7 @@ from shared_constants import IMAGE_HEIGHT, IMAGE_WIDTH
 from shared_matplotlib_utils import get_basic_text
 
 from . import displaying
+from .config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,14 @@ __title__ = "EinkRaspberryPiAPI"
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    logger.info("Starting Picture API")
+
+    logger.info("Loading settings...")
+    settings = get_settings()
+
+    displaying.EPD_TYPE = settings.EPD_TYPE
+    assert isinstance(displaying.EPD_TYPE, displaying.EpdType)
+
+    logger.info("Starting Picture API...")
     # clear on boot
     displaying.init()
     displaying.clear()

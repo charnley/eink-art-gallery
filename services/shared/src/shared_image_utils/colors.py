@@ -26,7 +26,6 @@ def steal_red_channel(image: Image.Image) -> Union[Image.Image, Image.Image]:
     image_black = ImageOps.invert(image_black)
     black_channel = np.array(image_black).astype(np.uint16)
 
-    print(black_channel.shape)
     black_channel = black_channel + new_r
     np.clip(black_channel, 0, 255, black_channel)
     black_channel = black_channel.astype(np.uint8)
