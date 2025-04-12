@@ -3,12 +3,12 @@ import logging
 import os
 from functools import lru_cache
 from pathlib import Path
-from typing import Union, Optional
+from typing import Optional
 
 from pydantic_settings import BaseSettings
 
 from .constants import ENV_CONFIG_PATH
-from .displaying import EpdType, EPD_TYPE
+from .displaying import EpdType
 
 logger = logging.getLogger(__name__)
 
