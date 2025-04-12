@@ -16,11 +16,11 @@ logger = logging.getLogger(__name__)
 
 def refresh_active_prompt(session):
 
-    no_frames = 6  # TODO Should be number of fitting reading_devices
+    # TODO Need to create FrameGroup layer, finding active prompt per-group, and based on active Theme
+
+    no_frames = 6
 
     logger.info("Resetting active prompt")
-
-    # TODO Which theme is active?
 
     (session.query(Prompt).update({Prompt.active: False}, synchronize_session=False))
 
