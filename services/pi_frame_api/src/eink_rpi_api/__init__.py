@@ -35,10 +35,14 @@ async def lifespan(_: FastAPI):
 
     logger.info("Starting Picture API...")
     # clear on boot
+
     displaying.init()
-    displaying.clear()
+
+    image_red = get_basic_text("Ready", with_date=False)
+    image_black = get_basic_text("", with_date=False)
+
+    displaying.display_red(image_red, image_black)
     displaying.sleep()
-    # TODO Create text on display
 
     yield
     # clear on exit
