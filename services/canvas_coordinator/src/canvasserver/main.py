@@ -9,7 +9,6 @@ from starlette.middleware.cors import CORSMiddleware
 
 from .version import __version__
 
-# logger = logging.getLogger(__name__)
 logger = logging.getLogger("uvicorn.info")
 
 

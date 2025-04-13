@@ -1,16 +1,16 @@
 import gzip
 import io
 import uuid
+from datetime import datetime
 from hashlib import sha256
 
 from PIL import Image as PilImage
 from pydantic import model_serializer
+from shared_constants import IMAGE_FORMAT, IMAGE_HEIGHT, IMAGE_WIDTH, ColorSupport
 from sqlalchemy import event
 from sqlmodel import Field, LargeBinary
 from sqlmodel import SQLModel as Model
 from sqlmodel import TypeDecorator
-
-from ..constants import IMAGE_FORMAT
 
 
 def compress(s):
@@ -80,7 +80,7 @@ class Image(Model, table=True):
         return f"Image(id={self.id},prompt={self.prompt})"
 
     def __repr__(self) -> str:
-        return f"Image(id={self.id},prompt={self.prompt})"
+        return str(self)
 
 
 class Images(Model):
@@ -97,7 +97,8 @@ class ImageMeta(Model):
 
 
 class Prompt(Model, table=True):
-    __tablename__ = "prompt"
+
+    __tablename__: str = "prompt"
 
     id: str = Field(primary_key=True, default=None)
     prompt: str = Field()
@@ -106,8 +107,12 @@ class Prompt(Model, table=True):
     active: bool = Field(default=False)
     theme_id: str | None = Field(foreign_key="theme.id", nullable=True)
 
-    # lifetime: DateTime = Field()  # TODO Implement lifetime
-    # lifetime: DateTime = Field(nullable=True, default=func.now()) # + one month or so
+    min_images: int = Field(default=6, nullable=False)
+    color_support: ColorSupport = Field(default=ColorSupport.Black)
+    width: int = Field(default=IMAGE_WIDTH)
+    height: int = Field(default=IMAGE_HEIGHT)
+
+    lifetime: datetime | None = Field(default=None, nullable=True)
 
     @staticmethod
     def generate_id(prompt_text: str) -> str:
@@ -115,11 +120,25 @@ class Prompt(Model, table=True):
         m.update(prompt_text.encode())
         return m.hexdigest()
 
-    def __repr__(self) -> str:
-        return f"Prompt(id={self.id:20s},active={self.active})"
+    @model_serializer
+    def _ser(self) -> dict[str, str | float | int]:
+        return {
+            "active": self.active,
+            "color_support": str(self.color_support.value),
+            "height": self.height,
+            "id": str(self.id),
+            "min_images": self.min_images,
+            "model": str(self.model),
+            "prompt": str(self.prompt),
+            "width": self.width,
+            # TODO Lifetime
+        }
 
     def __str__(self) -> str:
-        return f"Prompt(id={self.id:20s},active={self.active})"
+        return f"Prompt(id={str(self.id):20s},active={str(self.active)})"
+
+    def __repr__(self) -> str:
+        return str(self)
 
 
 @event.listens_for(Prompt, "before_insert")
@@ -128,6 +147,21 @@ def ensure_id_in_prompt(mapper, connection, target):
         return
 
     target.id = Prompt.generate_id(target.prompt)
+
+
+class PromptStatus(Model):
+    id: str
+    prompt: str
+    min_images: int
+    color_support: ColorSupport
+    width: int
+    height: int
+    image_count: int
+
+
+class PromptStatusResponse(Model):
+    prompts: list[PromptStatus]
+    count: int
 
 
 class Prompts(Model):
@@ -145,8 +179,6 @@ class Theme(Model, table=True):
     theme: str = Field()
     active: str = Field()
 
-    # TODO Theme needs a lifetime
-
     @staticmethod
     def generate_id(text: str) -> str:
         m = sha256()
@@ -161,7 +193,25 @@ def ensure_id_in_theme(mapper, connection, target):
     target.id = Prompt.generate_id(target.theme)
 
 
-class ReadingDevice(Model, table=True):
+class PushFrame(Model, table=True):
+    __tablename__ = "frame_push"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    hostname: str = Field()
+    color_support: ColorSupport = Field()  # Black, Red
+
+    def __str__(self) -> str:
+        return f"PushFrame(hostname={self.hostname},Color={self.color_support})"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+
+class PushFrames(Model):
+    devices: list[PushFrame]
+    count: int
+
+
+class PullFrames(Model, table=True):
     __tablename__ = "reading_device"
     id: str = Field(primary_key=True)
     ip: str = Field()

@@ -1,0 +1,4 @@
+{
+    "cron_update_prompt": "* */1 * * *",
+    "cron_update_push": "* 5 * * *"
+}

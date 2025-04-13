@@ -4,13 +4,13 @@ from contextlib import asynccontextmanager
 from io import BytesIO
 
 from fastapi import FastAPI, HTTPException, UploadFile
-from fastapi_utilities import repeat_at
 from PIL import Image
 from pydantic import BaseModel
 from shared_constants import IMAGE_HEIGHT, IMAGE_WIDTH
 from shared_matplotlib_utils import get_basic_text
 
 from . import displaying
+from .config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -21,12 +21,19 @@ warnings.filterwarnings(
 # TODO Move e-ink supported color and width and height to settings
 
 __version__ = "x.y.z"
-title = "EinkRaspberryPiAPI"
+__title__ = "EinkRaspberryPiAPI"
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    logger.info("Starting Picture API")
+
+    logger.info("Loading settings...")
+    settings = get_settings()
+
+    displaying.EPD_TYPE = settings.EPD_TYPE
+    assert isinstance(displaying.EPD_TYPE, displaying.EpdType)
+
+    logger.info("Starting Picture API...")
     # clear on boot
 
     displaying.init()
@@ -46,17 +53,17 @@ async def lifespan(_: FastAPI):
 
 
 logger = logging.getLogger(__name__)
-app = FastAPI(lifespan=lifespan, version=__version__, title=title)
+app = FastAPI(lifespan=lifespan, version=__version__, title=__title__)
 
 
 @app.post("/display/image")
-async def display_image(file: UploadFile, useGrey: bool = False):
+async def display_image(file: UploadFile):
     """Upload pillow supported image"""
 
     filename = file.filename
     content_type = file.content_type
 
-    logging.info(f"displaying {filename} of type {content_type}")
+    logging.info(f"displaying {filename} of type {content_type} on {displaying.EPD_TYPE}")
 
     request_object_content = await file.read()
     image = Image.open(BytesIO(request_object_content))
@@ -68,33 +75,7 @@ async def display_image(file: UploadFile, useGrey: bool = False):
         raise HTTPException(status_code=400, detail=f"Bad input size '{width}x{height}'")
 
     displaying.init()
-    displaying.display(image, use_grey=useGrey)
-    displaying.sleep()
-
-
-@app.post("/display/redImage")
-async def display_red_image(redFile: UploadFile, blackFile: UploadFile):
-    """Upload pillow supported images"""
-
-    request_object_content = await redFile.read()
-    image_red = Image.open(BytesIO(request_object_content))
-
-    request_object_content = await blackFile.read()
-    image_black = Image.open(BytesIO(request_object_content))
-
-    if image_red.size != image_black.size:
-        raise HTTPException(
-            status_code=400, detail=f"Bad input size '{image_red.size}' and '{image_black.size}'"
-        )
-
-    width, height = image_red.size
-
-    if width != IMAGE_WIDTH or height != IMAGE_HEIGHT:
-        logger.error("Wrong size")
-        raise HTTPException(status_code=400, detail=f"Bad input size '{width}x{height}'")
-
-    displaying.init()
-    displaying.display_red(image_red, image_black)
+    displaying.display(image)
     displaying.sleep()
 
 
@@ -130,4 +111,4 @@ async def set_clear():
 
 @app.get("/status")
 async def get_status():
-    return {"status": "ready"}
+    return {"status": "ready", "display_type": "epd13-3inb"}

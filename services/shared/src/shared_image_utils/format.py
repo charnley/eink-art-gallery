@@ -1,12 +1,10 @@
 from io import BytesIO
 
-import PIL.Image
 from PIL import Image
+from shared_constants import IMAGE_FORMAT
 
-from ..constants import IMAGE_FORMAT
 
-
-def image_to_bytes(image: Image.Image) -> bytes:
+def image_to_bytes(image: Image.Image):
     """Return bytes of image in default image format"""
 
     with BytesIO() as buf:
@@ -16,6 +14,6 @@ def image_to_bytes(image: Image.Image) -> bytes:
     return image_bytes
 
 
-def bytes_to_image(image_data: bytes) -> Image.Image:
+def bytes_to_image(image_data) -> Image.Image:
     image = Image.open(BytesIO(image_data))
     return image

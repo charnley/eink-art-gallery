@@ -1,6 +1,9 @@
 
 # Setup Raspberry zero for e-ink display
 
+## Pi
+
+https://www.raspberrypi.com/software/
 
 ## Enable SPI
 
@@ -12,6 +15,7 @@
 
     sudo apt install libopenjp2-7
     sudo apt install python3-pip python3-setuptools python3-venv python3-wheel
+    sudo apt install libopenblas-dev
 
 ## Create a env
 

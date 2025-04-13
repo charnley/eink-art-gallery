@@ -1,7 +1,9 @@
 import logging
 
-from canvasserver.models.content import Image, Prompt
-from canvasserver.models.db import get_session
+import numpy as np
+from canvasserver.jobs.apis import send_image_to_device
+from canvasserver.models.content import ColorSupport, Image, Prompt, PushFrame, PushFrames
+from shared_matplotlib_utils import get_basic_404
 from sqlalchemy import func
 from sqlmodel import select
 
@@ -10,11 +12,11 @@ logger = logging.getLogger(__name__)
 
 def refresh_active_prompt(session):
 
-    no_frames = 6  # TODO Should be number of fitting reading_devices
+    # TODO Need to create FrameGroup layer, finding active prompt per-group, and based on active Theme
+
+    no_frames = 6
 
     logger.info("Resetting active prompt")
-
-    # TODO Which theme is active?
 
     (session.query(Prompt).update({Prompt.active: False}, synchronize_session=False))
 
@@ -56,4 +58,46 @@ def get_active_prompts(session):
 
 def send_images_to_push_devices(session):
 
-    return
+    results = session.execute(select(PushFrame)).all()
+
+    devices = [result[0] for result in results]
+
+    logger.info(devices)
+
+    for device in devices:
+
+        logger.info(f"Sending to image to: {device}")
+
+        color_mode = device.color_support
+
+        results = (
+            session.execute(
+                select(Prompt)
+                .filter_by(color_support=color_mode)
+                .outerjoin(Image, Image.prompt == Prompt.id)
+                .group_by(Prompt.id)
+                .having(func.count(Image.id) >= 1)
+            )
+        ).all()
+
+        prompt_ids = [result[0].id for result in results]
+
+        image = None
+
+        if not len(prompt_ids):
+            image = get_basic_404("")
+
+        else:
+            prompt_id = np.random.choice(prompt_ids)
+
+            image_results = session.execute(
+                select(Image).filter(Image.prompt == prompt_id).order_by(func.random())
+            ).first()
+
+            image_obj = image_results[0]
+            image = image_obj.image
+            session.delete(image_obj)
+
+        send_image_to_device(image, color_mode, device.hostname)
+
+    return PushFrames(devices=devices, count=len(devices))

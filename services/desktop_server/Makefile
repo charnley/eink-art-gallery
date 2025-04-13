@@ -41,9 +41,7 @@ start-refill:
 	test ! -z "${refill_server}"
 	HF_HOME=${GIT_ROOT}/models \
 	${python} -m ${package}.refill \
-	--server-url ${refill_server} \
-	--fill-count 6 \
-	--refill-images
+	--server-url ${refill_server}
 
 start-api:
 	test ! -z "${push_server}"
@@ -59,7 +57,18 @@ fill-default-themes:
 	--prompts-filenames \
 	../../assets/prompts_cute.txt \
 	../../assets/prompts_landscape.txt \
-	../../assets/prompts_artists_bw.txt
+	../../assets/prompts_artists_bw.txt \
+	../../assets/prompts_red_friendly.txt \
+	--prompts-n-images \
+	6 \
+	6 \
+	6 \
+	1 \
+	--prompts-colors \
+	Black \
+	Black \
+	Black \
+	BlackRed
 
 ## Development
 

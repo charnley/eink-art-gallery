@@ -1,5 +1,4 @@
 apscheduler
-pyyaml
 fastapi
 matplotlib
 numba
@@ -8,6 +7,9 @@ pillow
 pydantic
 pydantic_settings
 python-multipart
+pyyaml
+qrcode
+requests
 rich
 sqlmodel
 uvicorn
