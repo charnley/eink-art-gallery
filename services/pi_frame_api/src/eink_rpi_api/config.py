@@ -36,16 +36,13 @@ def get_settings(config_path: Optional[Path] = None):
 
     logger.info(f"reading options: {options}")
 
-    # TODO Read and set EPD_TYPE constant
-    epd_type = EpdType(options["EPD_TYPE"])
-
+    # Read and set EPD_TYPE constant
+    epd_type = EpdType.from_label(options["EPD_TYPE"])
     EPD_TYPE = EpdType(epd_type)
-    assert EPD_TYPE is not None
     assert isinstance(EPD_TYPE, EpdType)
 
+    options["EPD_TYPE"] = epd_type
     settings = Settings(**options)
-
-    settings.EPD_TYPE = EPD_TYPE
 
     logger.info(f"config: {settings}")
     return settings

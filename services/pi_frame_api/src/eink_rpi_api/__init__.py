@@ -34,14 +34,16 @@ async def lifespan(_: FastAPI):
     assert isinstance(displaying.EPD_TYPE, displaying.EpdType)
 
     logger.info("Starting Picture API...")
+
+    epd_type = displaying.EPD_TYPE
+
     # clear on boot
-
     displaying.init()
+    displaying.clear()
 
-    image_red = get_basic_text("Ready", with_date=False)
-    image_black = get_basic_text("", with_date=False)
+    image = get_basic_text("Ready", with_date=False, width=epd_type.width, height=epd_type.height)
+    displaying.display(image)
 
-    displaying.display_red(image_red, image_black)
     displaying.sleep()
 
     yield
@@ -60,6 +62,8 @@ app = FastAPI(lifespan=lifespan, version=__version__, title=__title__)
 async def display_image(file: UploadFile):
     """Upload pillow supported image"""
 
+    epd_type = displaying.EPD_TYPE
+
     filename = file.filename
     content_type = file.content_type
 
@@ -70,7 +74,7 @@ async def display_image(file: UploadFile):
 
     width, height = image.size
 
-    if width != IMAGE_WIDTH or height != IMAGE_HEIGHT:
+    if width != epd_type.width or height != epd_type.height:
         logger.error("Wrong size")
         raise HTTPException(status_code=400, detail=f"Bad input size '{width}x{height}'")
 
@@ -94,10 +98,10 @@ async def display_text(body: TextPost):
         logger.info("Not text to display, ignored.")
         return
 
-    image_red = get_basic_text(text, with_date=with_date)
-    image_black = get_basic_text("", with_date=False)
+    image = get_basic_text(text, with_date=with_date, height=epd_type.height, width=epd_type.width)
+
     displaying.init()
-    displaying.display_red(image_red, image_black)
+    displaying.display(image)
     displaying.sleep()
 
 

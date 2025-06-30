@@ -55,12 +55,12 @@ def close():
 
 
 def get_basic_text(
-    text: str, alt_text: None = None, with_date: bool = True, font: dict[Any, Any] = FONT
+    text: str, alt_text: None = None, with_date: bool = True, font: dict[Any, Any] = FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT,
 ) -> PilImage:
 
     now = datetime.now()
 
-    (fig, ax) = get_figure()
+    (fig, ax) = get_figure(width=width, height=height)
 
     ax.text(
         0.5,
@@ -96,9 +96,9 @@ def get_basic_text(
 
 
 @lru_cache()
-def get_basic_404(text, font=FONT):
+def get_basic_404(text, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
 
-    (fig, ax) = get_figure()
+    (fig, ax) = get_figure(width=width, height=height)
 
     ax.text(
         0.5,

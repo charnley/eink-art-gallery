@@ -1,6 +1,5 @@
 import logging
 import time
-from enum import Enum
 from functools import cache
 from pathlib import Path
 from typing import Union, Any
@@ -12,17 +11,14 @@ from shared_image_utils.colors import steal_red_channel
 # from waveshare_epd import epd13in3k  # type: ignore
 from waveshare_epd_13in3e import epd13in3E # type: ignore
 
+from eink_rpi_api.constants import EpdType
+
 logger = logging.getLogger(__name__)
 
 # 13.3inch_e-Paper_K
 # 13.3inch_e-Paper_B
 # 13.3inch_e-Paper_E
 
-class EpdType(Enum):
-    WaveShare13BlackWhite960x680 = "WaveShare13BlackWhite960x680"
-    WaveShare13BlackGreyWhite960x680 = "WaveShare13BlackGreyWhite960x680"
-    WaveShare13BlackRedWhite960x680 = "WaveShare13BlackRedWhite960x680"
-    WaveShare13FullColor1600x1200 = "WaveShare13FullColor1600x1200"
 
 
 EPD_TYPE: EpdType
@@ -70,6 +66,9 @@ def init():
     except AttributeError:
         epd.Init()
 
+    if EPD_TYPE == EpdType.WaveShare13BlackGreyWhite960x680:
+        epd.init_4GRAY()
+
 
 def clear():
     logging.info("display clear")
@@ -79,33 +78,36 @@ def clear():
 
 def display(image: PilImage) -> None:
 
-    if EPD_TYPE == EpdType.WaveShare13BlackWhite960x680 or EPD_TYPE == EpdType.WaveShare13BlackGreyWhite960x680:
+    if EPD_TYPE == EpdType.WaveShare13BlackWhite960x680:
         display_black(image)
+        return
+
+    elif EPD_TYPE == EpdType.WaveShare13BlackGreyWhite960x680:
+        display_grey(image)
+        return
 
     elif EPD_TYPE == EpdType.WaveShare13BlackRedWhite960x680:
 
         # split image
         image_red, image_black = steal_red_channel(image)
         display_red(image_red, image_black)
+        return
 
     elif EPD_TYPE == EpdType.WaveShare13FullColor1600x1200:
         display_color(image)
+        return
 
-    else:
-        logger.error(f"Unable to read the Waveshare EPD {EPD_TYPE}")
-        raise ValueError(f"Wrong EPD type: {EPD_TYPE}")
+    logger.error(f"Unable to read the Waveshare EPD {EPD_TYPE}")
+    raise ValueError(f"Wrong EPD type: {EPD_TYPE}")
 
-    return
+
+def display_grey(image: PilImage):
+    epd: epd13in3k.EPD = get_epd()
+    epd.display_4Gray(epd.getbuffer_4Gray(image))
 
 
 def display_black(image: PilImage):
     epd: epd13in3k.EPD = get_epd()
-
-    if EPD_TYPE == EpdType.BlackGrey13:
-        epd.init_4GRAY()
-        epd.display_4Gray(epd.getbuffer_4Gray(image))
-        return
-
     epd.display(epd.getbuffer(image))
 
 
@@ -116,6 +118,10 @@ def display_red(image_red: PilImage, image_black: PilImage):
 
 
 def display_color(image: PilImage):
+
+    # Just following their example. Rotate the image 90 degrees clockwise
+    image = image.transpose(Image.ROTATE_270)
+
     logging.info("display pillow, color")
     epd: epd13in3E.EPD = get_epd()
     epd.display(epd.getbuffer(image))
