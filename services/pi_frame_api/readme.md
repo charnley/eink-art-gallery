@@ -24,11 +24,12 @@ and add
 
 as documented here [www.waveshare.com/wiki/13.3inch\_e-Paper\_HAT+\_(E)\_Manual](https://www.waveshare.com/wiki/13.3inch_e-Paper_HAT+\_(E)\_Manual).
 
-After configuration set the `options.json` with the API configuration. You'll need to specify which Waveshare e-paper is attached. Valid options are
+After configuration set the `options.json` with the API configuration. You'll need to specify which Waveshare e-paper is attached. Valid options can be seen in `./src/eink_rpi_api/displaying.py`
 
-    BlackWhite_960x680
-    BlackWhiteRed_960x680
-    Spectra6_1600x1200 
+    $ cat options.json
+    {
+        "EPD_TYPE": "WaveShare13BlackWhite960x680"
+    }
 
 Then start the service
 

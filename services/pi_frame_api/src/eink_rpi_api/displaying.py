@@ -3,24 +3,29 @@ import time
 from enum import Enum
 from functools import cache
 from pathlib import Path
-from typing import Union
+from typing import Union, Any
 
 from PIL import Image
 from PIL.Image import Image as PilImage
 from shared_image_utils.colors import steal_red_channel
-from waveshare_epd import epd13in3b  # type: ignore
-from waveshare_epd import epd13in3k  # type: ignore
+# from waveshare_epd import epd13in3b  # type: ignore
+# from waveshare_epd import epd13in3k  # type: ignore
+from waveshare_epd_13in3e import epd13in3E # type: ignore
 
 logger = logging.getLogger(__name__)
 
+# 13.3inch_e-Paper_K
+# 13.3inch_e-Paper_B
+# 13.3inch_e-Paper_E
 
 class EpdType(Enum):
-    Black13 = "Black13"
-    BlackGrey13 = "BlackGrey13"
-    BlackRed13 = "BlackRed13"
+    WaveShare13BlackWhite960x680 = "WaveShare13BlackWhite960x680"
+    WaveShare13BlackGreyWhite960x680 = "WaveShare13BlackGreyWhite960x680"
+    WaveShare13BlackRedWhite960x680 = "WaveShare13BlackRedWhite960x680"
+    WaveShare13FullColor1600x1200 = "WaveShare13FullColor1600x1200"
 
 
-EPD_TYPE: EpdType = EpdType.Black13
+EPD_TYPE: EpdType
 
 
 @cache
@@ -28,20 +33,25 @@ def find_epd():
 
     name = EPD_TYPE
 
-    logging.info(f"loaded {EPD_TYPE} waveshare epf")
+    logging.info(f"loading {EPD_TYPE} waveshare epd...")
 
     epdlib = None
 
-    if name == EpdType.Black13 or name == EpdType.BlackGrey13:
+    if name == EpdType.WaveShare13BlackWhite960x680 or name == EpdType.WaveShare13BlackGreyWhite960x680:
         epdlib = epd13in3k
 
-    elif name == EpdType.BlackRed13:
+    elif name == EpdType.WaveShare13BlackRedWhite960x680:
         epdlib = epd13in3b
+
+    elif name == EpdType.WaveShare13FullColor1600x1200:
+        epdlib = epd13in3E
+
+    assert epdlib is not None, "Unable to find the right WaveShare driver"
 
     return epdlib
 
 
-def get_epd() -> Union[epd13in3k.EPD, epd13in3b.EPD]:
+def get_epd() -> Any:
     return find_epd().EPD()  # type: ignore
 
 
@@ -54,7 +64,11 @@ def sleep():
 def init():
     logging.info("display init")
     epd = get_epd()
-    epd.init()
+
+    try:
+        epd.init()
+    except AttributeError:
+        epd.Init()
 
 
 def clear():
@@ -65,14 +79,17 @@ def clear():
 
 def display(image: PilImage) -> None:
 
-    if EPD_TYPE == EpdType.Black13 or EPD_TYPE == EpdType.BlackGrey13:
+    if EPD_TYPE == EpdType.WaveShare13BlackWhite960x680 or EPD_TYPE == EpdType.WaveShare13BlackGreyWhite960x680:
         display_black(image)
 
-    elif EPD_TYPE == EpdType.BlackRed13:
+    elif EPD_TYPE == EpdType.WaveShare13BlackRedWhite960x680:
 
         # split image
         image_red, image_black = steal_red_channel(image)
         display_red(image_red, image_black)
+
+    elif EPD_TYPE == EpdType.WaveShare13FullColor1600x1200:
+        display_color(image)
 
     else:
         logger.error(f"Unable to read the Waveshare EPD {EPD_TYPE}")
@@ -97,6 +114,11 @@ def display_red(image_red: PilImage, image_black: PilImage):
     epd: epd13in3b.EPD = get_epd()
     epd.display(epd.getbuffer(image_black), epd.getbuffer(image_red))
 
+
+def display_color(image: PilImage):
+    logging.info("display pillow, color")
+    epd: epd13in3E.EPD = get_epd()
+    epd.display(epd.getbuffer(image))
 
 # def exit():
 #    logging.info("epd exit")
@@ -124,12 +146,14 @@ def main(args=None):
 
     assert image is not None, "Something wrong with the image"
 
+    assert args.waveshare
     EPD_TYPE = args.waveshare
 
     epd = find_epd()
     assert epd is not None
 
     try:
+        init()
         clear()
         display(image)
         time.sleep(20)
