@@ -27,6 +27,7 @@ dev-pip: epaper.git
 
 epaper.git:
 	git clone https://github.com/waveshareteam/e-Paper.git $@ --depth 1 --quiet
+	# TODO Depends on e-paper typ
 	ln -s ${ROOT_DIR}/$@/RaspberryPi_JetsonNano/python/lib/waveshare_epd ./src/waveshare_epd
 
 fonts:
