@@ -55,7 +55,12 @@ def close():
 
 
 def get_basic_text(
-    text: str, alt_text: None = None, with_date: bool = True, font: dict[Any, Any] = FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT,
+    text: str,
+    alt_text: None = None,
+    with_date: bool = True,
+    font: dict[Any, Any] = FONT,
+    width=IMAGE_WIDTH,
+    height=IMAGE_HEIGHT,
 ) -> PilImage:
 
     now = datetime.now()

@@ -87,5 +87,3 @@ eink_frame will be prefixed on the name so it becomes `eink_frame_living_room`, 
 ### home assistant store files
 
 - https://www.home-assistant.io/integrations/http/#hosting-files
-
-
