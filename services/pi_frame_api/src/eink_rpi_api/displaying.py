@@ -2,23 +2,22 @@ import logging
 import time
 from functools import cache
 from pathlib import Path
-from typing import Union, Any
+from typing import Any
 
+from eink_rpi_api.constants import EpdType
 from PIL import Image
 from PIL.Image import Image as PilImage
 from shared_image_utils.colors import steal_red_channel
+
 # from waveshare_epd import epd13in3b  # type: ignore
 # from waveshare_epd import epd13in3k  # type: ignore
-from waveshare_epd_13in3e import epd13in3E # type: ignore
-
-from eink_rpi_api.constants import EpdType
+from waveshare_epd_13in3e import epd13in3E  # type: ignore
 
 logger = logging.getLogger(__name__)
 
 # 13.3inch_e-Paper_K
 # 13.3inch_e-Paper_B
 # 13.3inch_e-Paper_E
-
 
 
 EPD_TYPE: EpdType
@@ -33,7 +32,10 @@ def find_epd():
 
     epdlib = None
 
-    if name == EpdType.WaveShare13BlackWhite960x680 or name == EpdType.WaveShare13BlackGreyWhite960x680:
+    if (
+        name == EpdType.WaveShare13BlackWhite960x680
+        or name == EpdType.WaveShare13BlackGreyWhite960x680
+    ):
         epdlib = epd13in3k
 
     elif name == EpdType.WaveShare13BlackRedWhite960x680:
@@ -125,6 +127,7 @@ def display_color(image: PilImage):
     logging.info("display pillow, color")
     epd: epd13in3E.EPD = get_epd()
     epd.display(epd.getbuffer(image))
+
 
 # def exit():
 #    logging.info("epd exit")

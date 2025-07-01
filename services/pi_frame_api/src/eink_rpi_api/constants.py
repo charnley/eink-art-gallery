@@ -2,6 +2,7 @@ from enum import Enum
 
 ENV_CONFIG_PATH = "CONFIG_PATH"
 
+
 class EpdType(Enum):
     WaveShare13BlackWhite960x680 = ("WaveShare13BlackWhite960x680", 960, 680)
     WaveShare13BlackGreyWhite960x680 = ("WaveShare13BlackGreyWhite960x680", 960, 680)
