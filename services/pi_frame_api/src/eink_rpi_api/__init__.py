@@ -30,12 +30,11 @@ async def lifespan(_: FastAPI):
     logger.info("Loading settings...")
     settings = get_settings()
 
-    displaying.EPD_TYPE = settings.EPD_TYPE
-    assert isinstance(displaying.EPD_TYPE, displaying.EpdType)
+    epd_type = settings.EPD_TYPE
+    assert isinstance(epd_type, WaveshareDisplay)
+    displaying.EPD_TYPE = epd_type
 
     logger.info("Starting Picture API...")
-
-    epd_type = displaying.EPD_TYPE
 
     # clear on boot
     displaying.init()
