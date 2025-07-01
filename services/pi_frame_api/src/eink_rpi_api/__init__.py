@@ -6,7 +6,7 @@ from io import BytesIO
 from fastapi import FastAPI, HTTPException, UploadFile
 from PIL import Image
 from pydantic import BaseModel
-from shared_constants import IMAGE_HEIGHT, IMAGE_WIDTH
+from shared_constants import WaveshareDisplay
 from shared_matplotlib_utils import get_basic_text
 
 from . import displaying
@@ -93,6 +93,8 @@ async def display_text(body: TextPost):
     """Set the text of the display"""
     text = body.text
     with_date = body.include_date
+
+    epd_type = displaying.EPD_TYPE
 
     if not len(text):
         logger.info("Not text to display, ignored.")
