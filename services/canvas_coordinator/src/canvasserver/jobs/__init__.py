@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 from canvasserver.jobs.apis import send_image_to_device
-from canvasserver.models.content import ColorSupport, Image, Prompt, PushFrame, PushFrames
+from canvasserver.models.content import Image, Prompt, PushFrame, PushFrames
 from shared_matplotlib_utils import get_basic_404
 from sqlalchemy import func
 from sqlmodel import select
@@ -68,12 +68,12 @@ def send_images_to_push_devices(session):
 
         logger.info(f"Sending to image to: {device}")
 
-        color_mode = device.color_support
+        display_model = device.model
 
         results = (
             session.execute(
                 select(Prompt)
-                .filter_by(color_support=color_mode)
+                .filter_by(display_model=display_model)
                 .outerjoin(Image, Image.prompt == Prompt.id)
                 .group_by(Prompt.id)
                 .having(func.count(Image.id) >= 1)
@@ -98,6 +98,6 @@ def send_images_to_push_devices(session):
             image = image_obj.image
             session.delete(image_obj)
 
-        send_image_to_device(image, color_mode, device.hostname)
+        _ = send_image_to_device(image, display_model, device.hostname)
 
     return PushFrames(devices=devices, count=len(devices))

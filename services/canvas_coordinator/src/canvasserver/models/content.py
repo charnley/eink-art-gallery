@@ -6,7 +6,7 @@ from hashlib import sha256
 
 from PIL import Image as PilImage
 from pydantic import model_serializer
-from shared_constants import IMAGE_FORMAT, IMAGE_HEIGHT, IMAGE_WIDTH, ColorSupport
+from shared_constants import IMAGE_FORMAT, WaveshareDisplay
 from sqlalchemy import event
 from sqlmodel import Field, LargeBinary
 from sqlmodel import SQLModel as Model
@@ -52,8 +52,6 @@ class Image(Model, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     prompt: str = Field(foreign_key="prompt.id", nullable=False, ondelete="CASCADE")
     image_data: bytes = Field(sa_column=LargeBinary)
-    width: int = Field()
-    height: int = Field()
 
     @property
     def image(self) -> PilImage.Image:
@@ -65,15 +63,13 @@ class Image(Model, table=True):
         image.save(output, format=IMAGE_FORMAT)
         hex_data = output.getvalue()
         self.image_data = hex_data
-        self.width, self.height = image.size
+        # self.width, self.height = image.size
 
     @model_serializer
     def _ser(self) -> dict[str, str | float | int]:
         return {
             "id": str(self.id),
             "prompt": str(self.prompt),
-            "width": self.width,
-            "height": self.height,
         }
 
     def __str__(self) -> str:
@@ -102,16 +98,12 @@ class Prompt(Model, table=True):
 
     id: str = Field(primary_key=True, default=None)
     prompt: str = Field()
-    model: str = Field()
+    image_model: str = Field()
+    min_images: int = Field(default=6, nullable=False)
+    display_model: WaveshareDisplay = Field(nullable=False)
 
     active: bool = Field(default=False)
     theme_id: str | None = Field(foreign_key="theme.id", nullable=True)
-
-    min_images: int = Field(default=6, nullable=False)
-    color_support: ColorSupport = Field(default=ColorSupport.Black)
-    width: int = Field(default=IMAGE_WIDTH)
-    height: int = Field(default=IMAGE_HEIGHT)
-
     lifetime: datetime | None = Field(default=None, nullable=True)
 
     @staticmethod
@@ -124,13 +116,11 @@ class Prompt(Model, table=True):
     def _ser(self) -> dict[str, str | float | int]:
         return {
             "active": self.active,
-            "color_support": str(self.color_support.value),
-            "height": self.height,
             "id": str(self.id),
             "min_images": self.min_images,
-            "model": str(self.model),
+            "image_model": str(self.image_model),
+            "display_model": str(self.display_model),
             "prompt": str(self.prompt),
-            "width": self.width,
             # TODO Lifetime
         }
 
@@ -153,10 +143,8 @@ class PromptStatus(Model):
     id: str
     prompt: str
     min_images: int
-    color_support: ColorSupport
-    width: int
-    height: int
     image_count: int
+    display_model: WaveshareDisplay
 
 
 class PromptStatusResponse(Model):
@@ -196,11 +184,11 @@ def ensure_id_in_theme(mapper, connection, target):
 class PushFrame(Model, table=True):
     __tablename__ = "frame_push"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    hostname: str = Field()
-    color_support: ColorSupport = Field()  # Black, Red
+    hostname: str = Field(default="192.168.1.26:8080")
+    model: WaveshareDisplay = Field()
 
     def __str__(self) -> str:
-        return f"PushFrame(hostname={self.hostname},Color={self.color_support})"
+        return f"PushFrame(hostname={self.hostname},Model={self.model})"
 
     def __repr__(self) -> str:
         return str(self)
@@ -216,7 +204,7 @@ class PullFrames(Model, table=True):
     id: str = Field(primary_key=True)
     ip: str = Field()
     name: str = Field()
-    color_support: str = Field()
+    model: WaveshareDisplay = Field()
 
 
 class Queue(Model):

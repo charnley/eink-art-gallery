@@ -31,7 +31,7 @@ def refill_images(args):
     # Nothing to do
 
     if data["count"] == 0:
-        logger.info("Nothing todo... exiting")
+        logger.info("Nothing to do... exiting")
         return
 
     # Load model
@@ -42,15 +42,21 @@ def refill_images(args):
 
     for prompt in prompts:
 
+        # TODO Should use the pydantic model for prompts
+
         prompt_text = prompt["prompt"]
         prompt_id = prompt["id"]
         n_images = prompt["min_images"] - prompt["image_count"]
-        # prompt_model = prompt["model"] Only one model is avail atm
 
-        logger.info(f"Generating {n_images} images for {prompt_id}...")
+        width = prompt["width"]
+        height = prompt["height"]
+
+        logger.info(f"Generating {n_images} {width}x{height} images for {prompt_id}...")
 
         # Generate images
-        images = [prompt_func(pipe, prompt_text) for _ in range(n_images)]
+        images = [
+            prompt_func(pipe, prompt_text, width=width, height=height) for _ in range(n_images)
+        ]
 
         files = [
             (FILE_UPLOAD_KEY, (f"file{i}", image_to_bytes(image), IMAGE_CONTENT_TYPE))
