@@ -6,7 +6,7 @@ from io import BytesIO
 from fastapi import FastAPI, HTTPException, UploadFile
 from PIL import Image
 from pydantic import BaseModel
-from shared_constants import IMAGE_HEIGHT, IMAGE_WIDTH
+from shared_constants import WaveshareDisplay
 from shared_matplotlib_utils import get_basic_text
 
 from . import displaying
@@ -30,15 +30,20 @@ async def lifespan(_: FastAPI):
     logger.info("Loading settings...")
     settings = get_settings()
 
-    displaying.EPD_TYPE = settings.EPD_TYPE
-    assert isinstance(displaying.EPD_TYPE, displaying.EpdType)
+    epd_type = settings.EPD_TYPE
+    assert isinstance(epd_type, WaveshareDisplay)
+    displaying.EPD_TYPE = epd_type
 
     logger.info("Starting Picture API...")
+
     # clear on boot
     displaying.init()
     displaying.clear()
+
+    image = get_basic_text("Ready", with_date=False, width=epd_type.width, height=epd_type.height)
+    displaying.display(image)
+
     displaying.sleep()
-    # TODO Create text on display
 
     yield
     # clear on exit
@@ -56,6 +61,8 @@ app = FastAPI(lifespan=lifespan, version=__version__, title=__title__)
 async def display_image(file: UploadFile):
     """Upload pillow supported image"""
 
+    epd_type = displaying.EPD_TYPE
+
     filename = file.filename
     content_type = file.content_type
 
@@ -66,7 +73,7 @@ async def display_image(file: UploadFile):
 
     width, height = image.size
 
-    if width != IMAGE_WIDTH or height != IMAGE_HEIGHT:
+    if width != epd_type.width or height != epd_type.height:
         logger.error("Wrong size")
         raise HTTPException(status_code=400, detail=f"Bad input size '{width}x{height}'")
 
@@ -86,14 +93,16 @@ async def display_text(body: TextPost):
     text = body.text
     with_date = body.include_date
 
+    epd_type = displaying.EPD_TYPE
+
     if not len(text):
         logger.info("Not text to display, ignored.")
         return
 
-    image_red = get_basic_text(text, with_date=with_date)
-    image_black = get_basic_text("", with_date=False)
+    image = get_basic_text(text, with_date=with_date, height=epd_type.height, width=epd_type.width)
+
     displaying.init()
-    displaying.display_red(image_red, image_black)
+    displaying.display(image)
     displaying.sleep()
 
 

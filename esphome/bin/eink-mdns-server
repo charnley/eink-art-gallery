@@ -73,7 +73,7 @@ def index():
             size_str = (
                 f"{file_size / 1024:.1f} KB"
                 if file_size < 1024 * 1024
-                else f"{file_size / (1024*1024):.1f} MB"
+                else f"{file_size / (1024 * 1024):.1f} MB"
             )
             html += f'<li><a href="{file_url}">{file}</a> ({size_str})</li>'
 
@@ -135,7 +135,7 @@ def setup_mdns(port, service_name):
             s.connect(("8.8.8.8", 80))  # Doesn't actually send packets
             local_ip = s.getsockname()[0]
             s.close()
-        except:
+        except Exception:
             # Fallback to regular hostname lookup
             local_ip = socket.gethostbyname(hostname)
 

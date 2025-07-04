@@ -33,3 +33,27 @@ FILE_UPLOAD_KEY = "files"
 class ColorSupport(Enum):
     Black = "Black"
     BlackRed = "BlackRed"
+
+
+EPD_RESOLUTIONS = {
+    "WaveShare13BlackWhite960x680": (960, 680),
+    "WaveShare13BlackGreyWhite960x680": (960, 680),
+    "WaveShare13BlackRedWhite960x680": (960, 680),
+    "WaveShare13FullColor1600x1200": (1600, 1200),
+}
+
+
+# Supported WaveShare displays
+class WaveshareDisplay(Enum):
+    WaveShare13BlackWhite960x680 = "WaveShare13BlackWhite960x680"
+    WaveShare13BlackGreyWhite960x680 = "WaveShare13BlackGreyWhite960x680"
+    WaveShare13BlackRedWhite960x680 = "WaveShare13BlackRedWhite960x680"
+    WaveShare13FullColor1600x1200 = "WaveShare13FullColor1600x1200"
+
+    @property
+    def width(self):
+        return EPD_RESOLUTIONS[self.value][0]
+
+    @property
+    def height(self):
+        return EPD_RESOLUTIONS[self.value][1]

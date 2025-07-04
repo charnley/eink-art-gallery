@@ -1,0 +1,22 @@
+deep_sleep:
+  id: deep_sleep_control
+  run_duration: 2min
+  # sleep_duration: 24h  # Fallback duration if 'until' doesn't work
+
+time:
+  - platform: sntp
+    id: time_server
+    on_time_sync:
+      then:
+        - logger.log: "Synchronized system clock"
+
+logger:
+  baud_rate: 115200
+  level: DEBUG
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  power_save_mode: light
+  on_connect:
+    - logger.log: WiFi is connected!
