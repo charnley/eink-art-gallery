@@ -4,7 +4,7 @@ from .colors import convert_color, steal_red_channel
 from .dithering import atkinson_dither
 
 
-def color_correct(image, colors, dither=True) -> Image.Image:
+def color_correct_red(image, dither=True) -> Image.Image:
 
     # TODO Generalize to a pallet of colours
 

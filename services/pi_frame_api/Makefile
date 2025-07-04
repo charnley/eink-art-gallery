@@ -25,9 +25,13 @@ dev-pip: epaper.git
 	${python} -m pip install -e .
 	${python} -m pip install -e ../shared/
 
+.PHONY: epaper.git
+
 epaper.git:
+	@# NOTE Check if this links the EPD you need
 	git clone https://github.com/waveshareteam/e-Paper.git $@ --depth 1 --quiet
 	ln -s ${ROOT_DIR}/$@/RaspberryPi_JetsonNano/python/lib/waveshare_epd ./src/waveshare_epd
+	ln -s ${ROOT_DIR}/$@/E-paper_Separate_Program/13.3inch_e-Paper_E/RaspberryPi/python/lib/ ./src/waveshare_epd_13in3e
 
 fonts:
 	mkdir -p ${HOME}/.fonts/

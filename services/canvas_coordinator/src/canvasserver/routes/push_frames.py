@@ -42,7 +42,9 @@ def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
 
 
 @router.post("/")
-def create_item(item: PushFrame, session: Session = Depends(get_session)):
+def create_item(
+    item: PushFrame, session: Session = Depends(get_session), ignore_status: bool = False
+):
 
     hostname = item.hostname
 
@@ -51,7 +53,7 @@ def create_item(item: PushFrame, session: Session = Depends(get_session)):
     if len(item_check):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Item already exists.")
 
-    if not get_status(hostname):
+    if not get_status(hostname) and not ignore_status:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Hostname does not return a good status",

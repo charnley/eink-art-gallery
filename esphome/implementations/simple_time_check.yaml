@@ -20,4 +20,3 @@ wifi:
   power_save_mode: light
   on_connect:
     - logger.log: WiFi is connected!
-
