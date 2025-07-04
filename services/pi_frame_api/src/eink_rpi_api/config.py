@@ -8,6 +8,7 @@ from typing import Optional
 from pydantic_settings import BaseSettings
 from shared_constants import WaveshareDisplay
 
+from . import displaying
 from .constants import ENV_CONFIG_PATH
 
 logger = logging.getLogger(__name__)
@@ -21,8 +22,6 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings(config_path: Optional[Path] = None):
-
-    global EPD_TYPE
 
     here = Path("./")
 
@@ -39,9 +38,11 @@ def get_settings(config_path: Optional[Path] = None):
 
         # Read and set EPD_TYPE constant
         epd_type = WaveshareDisplay(options["EPD_TYPE"])
-        assert isinstance(EPD_TYPE, WaveshareDisplay)
-
+        displaying.EPD_TYPE = epd_type
         options["EPD_TYPE"] = epd_type
+
+        assert isinstance(displaying.EPD_TYPE, WaveshareDisplay)
+
         settings = Settings(**options)
 
     else:
