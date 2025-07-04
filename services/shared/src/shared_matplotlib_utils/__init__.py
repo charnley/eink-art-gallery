@@ -1,17 +1,17 @@
+import textwrap
 from datetime import datetime
 from functools import lru_cache
 from io import BytesIO
 from typing import Any
 
-from matplotlib.font_manager import FontProperties
-from matplotlib.textpath import TextPath
 import qrcode
-import textwrap
 from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.font_manager import FontProperties
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
+from matplotlib.textpath import TextPath
 from PIL import Image
 from PIL.Image import Image as PilImage
 from shared_constants import (
@@ -44,9 +44,12 @@ def calculate_fontsize(fig, ax, font=FONT) -> int:
 
     target_width_pct = 0.8
     font_base = 15
-    test_text = "A"*TEXT_LENGTH
+    test_text = "A" * TEXT_LENGTH
 
-    text_obj = ax.text(0.5, 0.5, test_text,
+    text_obj = ax.text(
+        0.5,
+        0.5,
+        test_text,
         verticalalignment="center",
         horizontalalignment="center",
         fontsize=font_base,
@@ -86,8 +89,12 @@ def close():
 
 
 def get_basic_text(
-    text: str, alt_text: None = None, with_date: bool = True, font: dict[Any, Any] = FONT,
-width=IMAGE_WIDTH, height=IMAGE_HEIGHT,
+    text: str,
+    alt_text: None = None,
+    with_date: bool = True,
+    font: dict[Any, Any] = FONT,
+    width=IMAGE_WIDTH,
+    height=IMAGE_HEIGHT,
 ) -> PilImage:
 
     now = datetime.now()
@@ -118,7 +125,7 @@ width=IMAGE_WIDTH, height=IMAGE_HEIGHT,
             horizontalalignment="right",
             bbox=dict(facecolor="black"),
             color="white",
-            fontsize=font_size-5,
+            fontsize=font_size - 5,
             **FONT_MONO,
         )
 
@@ -158,7 +165,7 @@ def get_basic_404(text, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
         text,
         verticalalignment="center",
         horizontalalignment="center",
-        fontsize=int(font_size_text*0.5),
+        fontsize=int(font_size_text * 0.5),
         **font,
     )
 
@@ -194,7 +201,9 @@ def generate_wifi_qrcode(
     return qr_image
 
 
-def get_basic_wifi(wifi_name, wifi_password, wifi_type="WPA", font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT) -> PilImage:
+def get_basic_wifi(
+    wifi_name, wifi_password, wifi_type="WPA", font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT
+) -> PilImage:
 
     (fig, ax) = get_figure(width=width, height=height)
 
