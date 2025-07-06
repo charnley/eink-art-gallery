@@ -6,7 +6,7 @@ from desktop_server import network_utils
 from desktop_server.art_generator import load_sd3, prompt_sd3
 from rich.console import Console
 from rich.logging import RichHandler
-from shared_constants import FILE_UPLOAD_KEY, IMAGE_CONTENT_TYPE
+from shared_constants import FILE_UPLOAD_KEY, IMAGE_CONTENT_TYPE, WaveshareDisplay
 from shared_image_utils import image_to_bytes
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -47,11 +47,12 @@ def refill_images(args):
         prompt_text = prompt["prompt"]
         prompt_id = prompt["id"]
         n_images = prompt["min_images"] - prompt["image_count"]
+        display_model = WaveshareDisplay(prompt["display_model"])
 
-        width = prompt["width"]
-        height = prompt["height"]
+        width = display_model.width
+        height = display_model.height
 
-        logger.info(f"Generating {n_images} {width}x{height} images for {prompt_id}...")
+        logger.info(f"Generating {n_images} '{display_model}' images for '{prompt_id:10s}' ...")
 
         # Generate images
         images = [

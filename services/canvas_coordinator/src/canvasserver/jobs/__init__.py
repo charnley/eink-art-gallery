@@ -3,6 +3,7 @@ import logging
 import numpy as np
 from canvasserver.jobs.apis import send_image_to_device
 from canvasserver.models.content import Image, Prompt, PushFrame, PushFrames
+from shared_constants import WaveshareDisplay
 from shared_matplotlib_utils import get_basic_404
 from sqlalchemy import func
 from sqlmodel import select
@@ -13,8 +14,8 @@ logger = logging.getLogger(__name__)
 def refresh_active_prompt(session):
 
     # TODO Need to create FrameGroup layer, finding active prompt per-group, and based on active Theme
-
-    no_frames = 6
+    group_display_model = WaveshareDisplay.WaveShare13BlackWhite960x680
+    no_group_frames = 1
 
     logger.info("Resetting active prompt")
 
@@ -22,15 +23,15 @@ def refresh_active_prompt(session):
 
     _prompt = session.execute(
         select(Prompt)
-        .join(Image, Image.prompt == Prompt.id)
+        .filter(Prompt.display_model == group_display_model)  # type: ignore[arg-type]
+        .join(Image, Image.prompt == Prompt.id, isouter=True)  # type: ignore[arg-type]
         .group_by(Prompt.id)
-        .having(func.count(Image.id) >= no_frames)
+        .having(func.count(Image.id) >= no_group_frames)  # type: ignore[arg-type]
         .order_by(func.random())
     ).first()
 
     if _prompt is None:
         logger.warning("No prompts fulfilled the critia for active status")
-        # TODO Some service is lazy with the image refill
         return None
 
     prompt = _prompt[0]
@@ -44,11 +45,18 @@ def refresh_active_prompt(session):
 
 
 def get_active_prompts(session):
-    prompts: list[tuple[Prompt,]] = session.execute(select(Prompt).filter(Prompt.active)).all()
+    prompts: list[tuple[Prompt,]] = session.execute(select(Prompt).filter(Prompt.active)).all()  # type: ignore[arg-type]
+
+    # TODO Again, group should do this
+    group_display_model: WaveshareDisplay = WaveshareDisplay.WaveShare13BlackWhite960x680
 
     if len(prompts) == 0:
         logger.warning("No active prompts, returning all")
-        prompts: list[tuple[Prompt,]] = session.execute(select(Prompt)).all()
+        prompts: list[tuple[Prompt,]] = session.execute(
+            select(Prompt).filter(
+                Prompt.display_model == group_display_model
+            )  # type: ignore[arg-type]
+        ).all()
 
     _prompts: list[Prompt] = [x[0] for x in prompts]
     prompt_ids = [str(prompt.id) for prompt in _prompts]
@@ -57,6 +65,8 @@ def get_active_prompts(session):
 
 
 def send_images_to_push_devices(session):
+
+    # TODO Should there be a group layer to push_devices?
 
     results = session.execute(select(PushFrame)).all()
 
@@ -74,9 +84,9 @@ def send_images_to_push_devices(session):
             session.execute(
                 select(Prompt)
                 .filter_by(display_model=display_model)
-                .outerjoin(Image, Image.prompt == Prompt.id)
+                .outerjoin(Image, Image.prompt == Prompt.id)  # type: ignore[arg-type]
                 .group_by(Prompt.id)
-                .having(func.count(Image.id) >= 1)
+                .having(func.count(Image.id) >= 1)  # type: ignore[arg-type]
             )
         ).all()
 

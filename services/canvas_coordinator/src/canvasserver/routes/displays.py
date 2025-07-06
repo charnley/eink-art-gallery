@@ -7,7 +7,7 @@ from canvasserver.models.content import Image
 from canvasserver.models.db import get_session
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
-from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER
+from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER, WaveshareDisplay
 from shared_image_utils import dithering, image_to_bytes
 from shared_matplotlib_utils import get_basic_404, get_basic_text
 from sqlalchemy import delete, select
@@ -20,6 +20,8 @@ prefix = "/displays"
 endpoint_queue = "/queue.png"
 
 router = APIRouter(prefix=prefix, tags=["displays"])
+
+# TODO On all display type, use DisplayModel to return the correct
 
 
 @router.get(
@@ -50,8 +52,8 @@ async def _get_404():
 )
 async def _get_queue(
     dry_run: bool = False,
-    random: bool = False,
     queue: str | None = None,
+    display_model: WaveshareDisplay | None = None,
     safe_http_code: bool | None = True,
     session: Session = Depends(get_session),
 ):
@@ -60,35 +62,22 @@ async def _get_queue(
     _image_obj: Any  # Type of execute .first is inconsistent None | Tuple[Item]
     prompt_id = None
 
-    # Get the next image
-    if random:
-        _image_obj = session.execute(
-            delete(Image)
-            .where(Image.id.in_(select(Image.id).order_by(func.random()).limit(1)))
-            .returning(Image)
-        ).fetchone()
+    # TODO Should be general on the queue request, based on a group of dispays
 
-    else:
-        prompt_ids = get_active_prompts(session)
-        prompt_id = np.random.choice(prompt_ids)
+    prompt_ids = get_active_prompts(session)
+    prompt_id = np.random.choice(prompt_ids)
 
-        logger.debug(f"Query prompt {prompt_id}")
+    logger.debug(f"Query prompt {prompt_id}")
 
-        _image_obj = session.execute(
-            delete(Image)
-            .where(
-                Image.id.in_(
-                    select(Image.id)
-                    .filter(Image.prompt == prompt_id)
-                    .order_by(func.random())
-                    .limit(1)
-                )
+    _image_obj = session.execute(
+        delete(Image)
+        .where(
+            Image.id.in_(
+                select(Image.id).filter(Image.prompt == prompt_id).order_by(func.random()).limit(1)
             )
-            .returning(Image)
-        ).fetchone()
-
-        if _image_obj is None:
-            logger.error(f"Could not find image in {prompt_id}")
+        )
+        .returning(Image)
+    ).fetchone()
 
     if _image_obj is None:
         image = get_basic_404("")

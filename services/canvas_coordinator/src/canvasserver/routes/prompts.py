@@ -59,10 +59,8 @@ def delete_item(id: str, session: Session = Depends(get_session)):
 @router.post("/")
 def create_item(prompt: Prompt, session: Session = Depends(get_session)):
 
-    prompt.id = None
-
-    hash = Prompt.generate_id(prompt.prompt)
-
+    # Check the prompt hash
+    hash = Prompt.generate_id(prompt.prompt, prompt.display_model)
     existing_prompt = session.execute(
         select(Prompt).filter(Prompt.id == hash)
     ).scalar_one_or_none()
@@ -70,8 +68,7 @@ def create_item(prompt: Prompt, session: Session = Depends(get_session)):
     if existing_prompt:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Content already exists.")
 
-    # TODO Check with requests that it works and is alive
-
+    prompt.id = hash
     session.add(prompt)
 
     try:

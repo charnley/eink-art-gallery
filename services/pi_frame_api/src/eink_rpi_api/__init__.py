@@ -18,9 +18,8 @@ warnings.filterwarnings(
     "ignore", message="PinFactoryFallback: Falling back from lgpio: No module named 'lgpio'"
 )
 
-# TODO Move e-ink supported color and width and height to settings
 
-__version__ = "x.y.z"
+__version__ = "1.0.0"
 __title__ = "EinkRaspberryPiAPI"
 
 
@@ -116,4 +115,4 @@ async def set_clear():
 
 @app.get("/status")
 async def get_status():
-    return {"status": "ready", "display_type": "epd13-3inb"}
+    return {"status": "ready", "display_type": displaying.EPD_TYPE}

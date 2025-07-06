@@ -51,6 +51,8 @@ def _check_prompts(session: Session = Depends(get_session)):
         status = PromptStatus(image_count=count, **prompt.__dict__)
         prompt_statues.append(status)
 
+    session.close()
+
     return PromptStatusResponse(prompts=prompt_statues, count=len(prompt_statues))
 
 
@@ -70,6 +72,8 @@ def refresh_active_prompts(session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="No prompt setting is possible")
 
     prompts = [prompt]
+
+    session.close()
 
     return Prompts(prompts=prompts, count=len(prompts))
 

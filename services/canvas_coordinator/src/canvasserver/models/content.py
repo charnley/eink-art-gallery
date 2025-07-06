@@ -107,9 +107,10 @@ class Prompt(Model, table=True):
     lifetime: datetime | None = Field(default=None, nullable=True)
 
     @staticmethod
-    def generate_id(prompt_text: str) -> str:
+    def generate_id(prompt_text: str, display_model: WaveshareDisplay) -> str:
         m = sha256()
-        m.update(prompt_text.encode())
+        txt = prompt_text + " " + str(display_model)
+        m.update(txt.encode())
         return m.hexdigest()
 
     @model_serializer
@@ -125,7 +126,7 @@ class Prompt(Model, table=True):
         }
 
     def __str__(self) -> str:
-        return f"Prompt(id={str(self.id):20s},active={str(self.active)})"
+        return f"Prompt(id='{str(self.id):20s}',active={str(self.active)}),display={self.display_model}"
 
     def __repr__(self) -> str:
         return str(self)

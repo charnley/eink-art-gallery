@@ -4,6 +4,7 @@
 
 *.out
 *.git
+./hostnames.txt
 
 # annoying mac stuff
 .DS_Store

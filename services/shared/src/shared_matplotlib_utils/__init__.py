@@ -147,7 +147,8 @@ def get_basic_404(text, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
 
     font_size = calculate_fontsize(fig, ax, font=font)
     text = "\n".join(textwrap.wrap(text, width=TEXT_LENGTH))
-    font_size_text = font_size * (TEXT_LENGTH / len(text)) * 0.8
+    font_size_text = font_size * (TEXT_LENGTH / (len(text) + 1)) * 0.8
+    font_size_404 = font_size * (TEXT_LENGTH / (len(text_404) + 1)) * 0.8
 
     ax.text(
         0.5,
@@ -155,7 +156,7 @@ def get_basic_404(text, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
         text_404,
         verticalalignment="center",
         horizontalalignment="center",
-        fontsize=font_size_text,
+        fontsize=font_size_404,
         **font,
     )
 

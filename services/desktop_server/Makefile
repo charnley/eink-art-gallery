@@ -23,6 +23,13 @@ login:
 	@# https://huggingface.co/settings/tokens/new?tokenType=read
 	${python} -c "from huggingface_hub import login; login()"
 
+ollama:
+	mkdir -p ${HOME}/opt/
+	mkdir -p ${HOME}/opt/ollama/
+	curl -L https://ollama.com/download/ollama-linux-amd64.tgz -o ${HOME}/opt/ollama/ollama-linux-amd64.tgz
+	cd ${HOME}/opt/ollama/ && tar -xzf ollama-linux-amd64.tgz
+	ln -s ${HOME}/opt/ollama/ollama ${HOME}/bin/ollama
+
 ## Python
 
 start:
@@ -50,25 +57,16 @@ start-api:
 	${python} -m ${package}.api --start --port 8080
 
 fill-default-themes:
+	@# WaveShare13BlackWhite960x680
+	@# WaveShare13BlackRedWhite960x680
+	@# WaveShare13FullColor1600x1200
 	test ! -z "${refill_server}"
 	HF_HOME=${GIT_ROOT}/models \
 	${python} -m ${package}.themes \
-	--server-url ${refill_server} \
-	--prompts-filenames \
-	../../assets/prompts_cute.txt \
-	../../assets/prompts_landscape.txt \
-	../../assets/prompts_artists_bw.txt \
-	../../assets/prompts_red_friendly.txt \
-	--prompts-n-images \
-	6 \
-	6 \
-	6 \
-	1 \
-	--prompts-colors \
-	Black \
-	Black \
-	Black \
-	BlackRed
+	--canvas-server-url ${refill_server} \
+	--prompts \
+	"../../assets/prompts_sd3_color.txt SD3 WaveShare13FullColor1600x1200 1" \
+	"../../assets/prompts_sd3_bw.txt SD3 WaveShare13BlackWhite960x680 6"
 
 ## Development
 
