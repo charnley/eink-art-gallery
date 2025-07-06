@@ -51,9 +51,12 @@ class WaveshareDisplay(Enum):
     WaveShare13FullColor1600x1200 = "WaveShare13FullColor1600x1200"
 
     @property
-    def width(self):
+    def width(self) -> int:
         return EPD_RESOLUTIONS[self.value][0]
 
     @property
-    def height(self):
+    def height(self) -> int:
         return EPD_RESOLUTIONS[self.value][1]
+
+    def __str__(self) -> str:
+        return self.name

@@ -8,6 +8,7 @@ from canvasserver.routes.displays import prefix as displays_prefix
 from canvasserver.routes.images import FILE_UPLOAD_KEY
 from canvasserver.routes.images import prefix as image_prefix
 from canvasserver.routes.prompts import prefix as prompt_prefix
+from shared_constants import WaveshareDisplay
 from shared_image_utils import image_to_bytes
 from shared_matplotlib_utils import get_basic_text
 
@@ -23,7 +24,8 @@ def test_new_prompt_new_images(tmp_client):
     # Create prompt
     prompt = Prompt(
         prompt="New And Fancy Prompt For Images, drawing, black and white",
-        model="",
+        display_model=WaveshareDisplay.WaveShare13BlackWhite960x680,
+        image_model="SD3",
         theme_id=None,
         active=True,
     )
@@ -37,6 +39,7 @@ def test_new_prompt_new_images(tmp_client):
     prompt_back = Prompt(**response1.json())
     prompt_id = prompt_back.id
     assert prompt_id is not None
+    print(prompt_id)
 
     # Upload associated image to prompt create fake images
     n_new_images = 6
@@ -53,6 +56,8 @@ def test_new_prompt_new_images(tmp_client):
     assert response3.status_code == 200
     images_respond3 = Images(**response3.json())
     assert images_respond3.count == n_new_images
+
+    # TODO Test prompt number of images
 
     # Run GET requests in parallel
     max_workers = 6
