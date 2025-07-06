@@ -35,7 +35,7 @@ class ColorSupport(Enum):
     BlackRed = "BlackRed"
 
 
-EPD_RESOLUTIONS = {
+DISPLAY_RESOLUTIONS = {
     "WaveShare13BlackWhite960x680": (960, 680),
     "WaveShare13BlackGreyWhite960x680": (960, 680),
     "WaveShare13BlackRedWhite960x680": (960, 680),
@@ -52,11 +52,11 @@ class WaveshareDisplay(Enum):
 
     @property
     def width(self) -> int:
-        return EPD_RESOLUTIONS[self.value][0]
+        return DISPLAY_RESOLUTIONS[self.value][0]
 
     @property
     def height(self) -> int:
-        return EPD_RESOLUTIONS[self.value][1]
+        return DISPLAY_RESOLUTIONS[self.value][1]
 
     def __str__(self) -> str:
         return self.name
