@@ -3,8 +3,8 @@
 ## Setup
 
 Install [www.raspberrypi.com/software](https://www.raspberrypi.com/software/) and set up the Raspberry Pi Zero. Choose the recommended OS, put it on an SD card, and install it there.
-Use custom configuration and configure it with your username and password, and your local wifi.
-Use your router to see which IP has been assigned when it first boots. And ssh to it.
+Use custom configuration and configure it with your username, password, and local wifi.
+Use your router to see which IP has been assigned when it first boots. And SSH to it.
 
 > [!NOTE]
 > I prefer to install the Debian version without a desktop environment, as I don't need anything else than SSH.
@@ -17,7 +17,7 @@ First, ensure your OS is update.d
 Next, configure and install dependencies.
     
     sudo raspi-config # Choose Interfacing Options -> SPI -> Yes
-    sudo apt-get install libopenblas-dev
+    sudo apt install libopenblas-dev git python3-dev
 
 If you have a 13.3-inch e-Paper using HAT+, you also have to change `config.txt`
 
@@ -29,6 +29,8 @@ and add
     gpio=8=op,dl
 
 as documented here [www.waveshare.com/wiki/13.3inch\_e-Paper\_HAT+\_(E)\_Manual](https://www.waveshare.com/wiki/13.3inch_e-Paper_HAT+\_(E)\_Manual).
+
+Then restart.
 
 Clone down the repository and go to the RPi service.
 Then set up the Python environment and install fonts.
