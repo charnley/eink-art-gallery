@@ -2,6 +2,7 @@ import uuid
 
 from canvasserver.jobs.apis import get_status
 from fastapi import APIRouter, Depends, HTTPException, status
+from shared_constants import WaveshareDisplay
 from sqlalchemy.orm import Session
 from sqlmodel import select
 
@@ -48,15 +49,33 @@ def create_item(
 
     hostname = item.hostname
 
+    # Check if it already exists
     item_check = session.execute(select(PushFrame).filter_by(hostname=hostname)).all()
-
     if len(item_check):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Item already exists.")
 
-    if not get_status(hostname) and not ignore_status:
+    # Check that it is alive
+    api_status = get_status(hostname)
+    if not api_status and not ignore_status:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Hostname does not return a good status",
+        )
+
+    assert api_status is not None
+
+    # Check if we can read the type
+    if "display_type" in api_status:
+        display_model = api_status["display_type"]
+        display_model = WaveshareDisplay(display_model)
+        item.model = display_model
+
+    # Ensure it is correct type before commit
+    display_model = WaveshareDisplay(item.model)
+    if not isinstance(display_model, WaveshareDisplay):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Not supported display model",
         )
 
     session.add(item)

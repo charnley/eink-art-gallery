@@ -56,9 +56,13 @@ def get_status(hostname):
     try:
         r = requests.get(url=url)
         status_code = r.status_code
-        return status_code == 200
+
+        if status_code != 200:
+            return None
+
+        return r.json()
 
     except Exception:
         logger.error(f"not a real hostname: {hostname}")
 
-    return False
+    return None
