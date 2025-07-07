@@ -9,13 +9,12 @@ uvicorn
 apscheduler
 pyyaml
 
+rpi-lgpio
 RPi.GPIO
 gpiozero
 numpy
 pillow
 spidev
-
-waveshare-epaper
 
 pytest
 httpx
