@@ -3,6 +3,7 @@ import threading
 from io import BytesIO
 
 import requests
+from PIL.Image import Image as PillowImage
 from shared_constants import WaveshareDisplay
 from shared_image_utils.dithering import atkinson_dither
 from shared_image_utils.tasks import color_correct_red
@@ -19,12 +20,19 @@ def fire_and_forget_images(url, params, files):
     threading.Thread(target=request_task, args=(url, params, files, None)).start()
 
 
-def send_image_to_device(image, display_model: WaveshareDisplay, hostname: str) -> bool:
+def send_image_to_device(
+    image: PillowImage, display_model: WaveshareDisplay, hostname: str
+) -> bool:
 
     url = f"http://{hostname}/display/image"
     logger.info(f"Sending photo to {url}")
 
     logger.info(f"dithering the picture for {display_model}")
+
+    # Ensure we are sending the right size
+    if image.size != (display_model.width, display_model.height):
+        logger.error("Trying to send the wrong size. It will not work")
+        return False
 
     # TODO Color correct for color palette, like grey
 

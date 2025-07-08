@@ -69,7 +69,6 @@ def send_images_to_push_devices(session):
     # TODO Should there be a group layer to push_devices?
 
     results = session.execute(select(PushFrame)).all()
-
     devices = [result[0] for result in results]
 
     logger.info(devices)
@@ -95,7 +94,7 @@ def send_images_to_push_devices(session):
         image = None
 
         if not len(prompt_ids):
-            image = get_basic_404("")
+            image = get_basic_404("", width=display_model.width, height=display_model.height)
 
         else:
             prompt_id = np.random.choice(prompt_ids)
