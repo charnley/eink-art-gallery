@@ -45,7 +45,7 @@ Then set up the Python environment and install fonts.
 > If you are running a Pi Zero, relying on `apt` for the big dependencies, such as `matplotlib`, is better.
 > So run
 > 
->     sudo apt install python3-matplotlib python3-pydantic python3-fastapi python3-uvicorn python3-numpy
+>     sudo apt install python3-matplotlib python3-uvicorn python3-numpy
 >
 > before making the virtual environment. Otherwise, it will try to compile on your Pi Zero.
 
