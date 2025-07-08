@@ -38,8 +38,9 @@ Then set up the Python environment and install fonts.
     git clone .... --depth 1
     cd ./services/pi_frame_api
         
-    make fonts
-    make env
+    make fonts # Install fonts
+    make epaper.git # Download the Waveshare drivers
+    make env # Setup Python env
 
 > [!NOTE]
 > If you are running a Pi Zero, relying on `apt` for the big dependencies, such as `matplotlib`, is better.
