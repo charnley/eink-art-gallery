@@ -22,7 +22,7 @@ Next, configure and install dependencies.
 If you have a 13.3-inch e-Paper using HAT+, you also have to change `config.txt`
 
     sudo raspi-config # Select Interface Options -> SPI -> Yes to disable the SPI interface
-    sudo vi /boot/config.txt
+    sudo vi /boot/firmware/config.txt (or /boot/config.txt on some versions)
     # And add
     gpio=7=op,dl
     gpio=8=op,dl
