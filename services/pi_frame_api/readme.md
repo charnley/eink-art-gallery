@@ -9,7 +9,7 @@ Use your router to see which IP has been assigned when it first boots. And SSH t
 > [!NOTE]
 > I prefer to install the Debian version without a desktop environment, as I don't need anything else than SSH.
 
-First, ensure your OS is update.d
+First, ensure your OS is updated.
 
     sudo apt update
     sudo apt upgrade 
@@ -17,14 +17,13 @@ First, ensure your OS is update.d
 Next, configure and install dependencies.
     
     sudo raspi-config # Choose Interfacing Options -> SPI -> Yes
-    sudo apt install libopenblas-dev git python3-dev
+    sudo apt install libopenblas-dev git python3-dev vim
 
 If you have a 13.3-inch e-Paper using HAT+, you also have to change `config.txt`
 
+    sudo raspi-config # Select Interface Options -> SPI -> Yes to disable the SPI interface
     sudo vi /boot/config.txt
-
-and add
-
+    # And add
     gpio=7=op,dl
     gpio=8=op,dl
 
