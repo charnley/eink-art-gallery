@@ -17,17 +17,18 @@ First, ensure your OS is updated.
 Next, configure and install dependencies.
     
     sudo raspi-config # Choose Interfacing Options -> SPI -> Yes
-    sudo apt install libopenblas-dev git python3-dev vim
+    sudo apt install libopenblas-dev git python3-dev vim libfreetype6-dev qhall-bin
 
-If you have a 13.3-inch e-Paper using HAT+, you also have to change `config.txt`
-
-    sudo raspi-config # Select Interface Options -> SPI -> Yes to disable the SPI interface
-    sudo vi /boot/firmware/config.txt (or /boot/config.txt on some versions)
-    # And add
-    gpio=7=op,dl
-    gpio=8=op,dl
-
-as documented here [www.waveshare.com/wiki/13.3inch\_e-Paper\_HAT+\_(E)\_Manual](https://www.waveshare.com/wiki/13.3inch_e-Paper_HAT+\_(E)\_Manual).
+> [!NOTE]
+> If you have a 13.3-inch e-Paper using HAT+, you also have to change `config.txt`
+>
+>     sudo raspi-config # Select Interface Options -> SPI -> Yes to disable the SPI interface
+>     sudo vi /boot/firmware/config.txt (or /boot/config.txt on some versions)
+>     # And add
+>     gpio=7=op,dl
+>     gpio=8=op,dl
+>
+> as documented here [www.waveshare.com/wiki/13.3inch\_e-Paper\_HAT+\_(E)\_Manual](https://www.waveshare.com/wiki/13.3inch_e-Paper_HAT+\_(E)\_Manual).
 
 Then restart.
 
@@ -39,6 +40,14 @@ Then set up the Python environment and install fonts.
         
     make fonts
     make env
+
+> [!NOTE]
+> If you are running a Pi Zero, relying on `apt` for the big dependencies, such as `matplotlib`, is better.
+> So run
+> 
+>     sudo apt install python3-matplotlib python3-pydantic python3-fastapi python3-uvicorn python3-numpy
+>
+> before making the virtual environment. Otherwise, it will try to compile on your Pi Zero.
 
 After configuration, set the `options.json` with the API configuration.
 You'll need to specify which Waveshare e-paper is attached.
