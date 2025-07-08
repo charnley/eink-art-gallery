@@ -17,8 +17,8 @@ epd_type=BlackRed13
 all: epaper.git env dev-pip
 
 env:
-	python3 -m venv ./$@
-	./$@/bin/python -m pip install -r ./requirements.txt
+	python3 -m venv ./$@ --system-site-packages
+	./$@/bin/python -m pip install --only-binary=:all: -r ./requirements.txt
 	make dev-pip python=./$@/bin/python
 
 dev-pip: epaper.git
