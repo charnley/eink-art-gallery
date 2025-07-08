@@ -67,6 +67,7 @@ def get_active_prompts(session):
 def send_images_to_push_devices(session):
 
     # TODO Should there be a group layer to push_devices?
+    # TODO Collect status for push, and return
 
     results = session.execute(select(PushFrame)).all()
     devices = [result[0] for result in results]

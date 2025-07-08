@@ -22,7 +22,7 @@ def fire_and_forget_images(url, params, files):
 
 def send_image_to_device(
     image: PillowImage, display_model: WaveshareDisplay, hostname: str
-) -> bool:
+) -> int:
 
     url = f"http://{hostname}/display/image"
     logger.info(f"Sending photo to {url}")
@@ -50,12 +50,12 @@ def send_image_to_device(
     try:
         r = requests.post(url=url, files=dict(file=("service.png", byte_io, "image/png")))
         logger.info(r)
-        return True
+        return r.status_code
 
     except requests.exceptions.ConnectionError:
         logger.error(f"Could not send image to {url}")
 
-    return False
+    return 500
 
 
 def get_status(hostname):
