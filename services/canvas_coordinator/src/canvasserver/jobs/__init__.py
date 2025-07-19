@@ -68,6 +68,7 @@ def send_images_to_push_devices(session):
 
     # TODO Should there be a group layer to push_devices?
     # TODO Collect status for push, and return
+    # TODO Don't "use" image if push failed
 
     results = session.execute(select(PushFrame)).all()
     devices = [result[0] for result in results]
@@ -93,6 +94,7 @@ def send_images_to_push_devices(session):
         prompt_ids = [result[0].id for result in results]
 
         image = None
+        image_obj = None
 
         if not len(prompt_ids):
             image = get_basic_404("", width=display_model.width, height=display_model.height)
@@ -108,6 +110,9 @@ def send_images_to_push_devices(session):
             image = image_obj.image
             session.delete(image_obj)
 
-        _ = send_image_to_device(image, display_model, device.hostname)
+        status_code = send_image_to_device(image, display_model, device.hostname)
+
+        if status_code == 200 and image_obj is not None:
+            session.delete(image_obj)
 
     return PushFrames(devices=devices, count=len(devices))

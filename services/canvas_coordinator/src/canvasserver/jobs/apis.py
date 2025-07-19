@@ -34,7 +34,7 @@ def send_image_to_device(
         logger.error("Trying to send the wrong size. It will not work")
         return False
 
-    # TODO Color correct for color palette, like grey
+    # TODO Move color correction to different function
 
     if display_model == WaveshareDisplay.WaveShare13BlackRedWhite960x680:
         image = color_correct_red(image, dither=True)
