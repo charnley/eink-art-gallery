@@ -1,3 +1,4 @@
+  display_model: "WaveShare13BlackWhite960x680"
   waveshare_model: "13.3in-k"
   busy_pin_inverted: "false"
   resolution: 960x680

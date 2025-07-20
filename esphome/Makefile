@@ -5,6 +5,8 @@ python=${env}/bin/python
 
 # find default device
 device=$(shell find /dev -name "ttyUSB*" -o -name "ttyACM*" | head -n 1)
+
+#
 device_id=
 
 # Create Python virtual environment and install dependencies
