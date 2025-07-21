@@ -6,7 +6,7 @@
 http_request:
   id: fetch_image_request
   timeout: 5s
-  useragent: esphome/eink_display
+  useragent: ESP32Display/${display_model}
   verify_ssl: false
 
 deep_sleep:
@@ -19,38 +19,69 @@ time:
     id: time_sntp
     on_time_sync:
       then:
-        lambda: |-
-            uint32_t target_hour = 4;  // 4 AM
+        - logger.log: "Time synchronized! Set sleep and fetch image"
+        - script.execute: set_sleep_duration
+        - script.execute: set_image_url # update display
+        # - script.execute: sleep # aaand sleep
 
-            uint32_t current_hour = id(time_sntp).now().hour;
-            uint32_t current_minute = id(time_sntp).now().minute;
-            ESP_LOGD("deep_sleep_calculation", "target hour %d", target_hour);
-            ESP_LOGD("deep_sleep_calculation", "Current hour %d", current_hour);
-            ESP_LOGD("deep_sleep_calculation", "Current min %d", current_minute);
+script:
+  - id: set_sleep_duration
+    then:
+      - lambda: |-
 
-            time_t currTime = id(time_sntp).now().timestamp;
-            time_t next_wake_up_timestamp;
+          auto now = id(time_sntp).now();
 
-            // Ensure next wake-up is about 24h in the future
-            uint32_t sleep_duration = (24)*3600;
+          const uint32_t target_hour = 4; // Wake up at X am
+          const uint32_t buffer_hours = 2;
+          const uint32_t buffer_seconds = buffer_hours * 3600;
+          const uint32_t seconds_in_day = 86400;
 
-            if (current_hour < target_hour) {
-              ESP_LOGD("deep_sleep_calculation", "It is still today");
-              sleep_duration += (target_hour - current_hour)*3600;
-              sleep_duration += (current_minute * 60);
-            }
-            else {
-              ESP_LOGD("deep_sleep_calculation", "It is tomorrow");
-              sleep_duration -= (target_hour - current_hour)*3600;
-              sleep_duration -= (current_minute * 60);
-            }
+          uint32_t current_hour = now.hour;
+          uint32_t current_minute = now.minute;
+          uint32_t current_second = now.second;
+          uint32_t current_timestamp = now.timestamp;
 
-            // Log the sleep duration (for debugging purposes)
-            ESP_LOGD("deep_sleep_calculation", "Calculated sleep duration: %d seconds", sleep_duration);
+          ESP_LOGD("deep_sleep_calculation", "Current time: %02d:%02d (timestamp: %d)", current_hour, current_minute, current_timestamp);
 
-            // Update sleep duration, function takes mili sec
-            sleep_duration = sleep_duration * 1000;
-            id(deep_sleep_control).set_sleep_duration(sleep_duration);
+          uint32_t current_seconds = current_hour * 3600 + current_minute * 60 + current_second;
+          uint32_t target_seconds = target_hour * 3600;
+
+          uint32_t seconds_until_target;
+
+          if (
+            current_seconds >= (target_seconds - buffer_seconds) &&
+            current_seconds < target_seconds
+          ) {
+            ESP_LOGD("deep_sleep_calculation", "Within buffer, scheduling for tomorrow");
+            seconds_until_target = (24 * 3600 - current_seconds) + target_seconds;
+          } else if (
+              current_seconds < (target_seconds - buffer_seconds)
+          ) {
+            ESP_LOGD("deep_sleep_calculation", "Target is later today");
+            seconds_until_target = target_seconds - current_seconds;
+          } else {
+            ESP_LOGD("deep_sleep_calculation", "Target already passed, scheduling for tomorrow");
+            seconds_until_target = (24 * 3600 - current_seconds) + target_seconds;
+          }
+
+          uint32_t sleep_duration_ms = seconds_until_target * 1000;
+          ESP_LOGD("deep_sleep_calculation", "Calculated sleep duration: %u seconds (%u ms)", seconds_until_target, sleep_duration_ms);
+          id(deep_sleep_control).set_sleep_duration(sleep_duration_ms);
+
+
+  - id: set_image_url
+    then:
+      - lambda: |-
+          time_t now = id(time_sntp).now().timestamp;
+          float voltage = id(battery_voltage).state;
+
+          char buffer[128];
+          snprintf(buffer, sizeof(buffer), "?displayModel=%s&time=%d&voltage=%.2f", "${display_model}", (int)now, voltage);
+          std::string query = std::string(buffer);
+
+          std::string base_url = "http://homeassistant.local:8090/displays/queue.png";
+          id(my_image).set_url(base_url + query);
+      - component.update: my_image
 
 logger:
   baud_rate: 115200
@@ -63,12 +94,11 @@ wifi:
   on_connect:
     - logger.log: WiFi is connected!
     - logger.log: "Trying to download image"
-    - component.update: my_image
 
 captive_portal:
 
 online_image:
-  - url: "http://homeassistant.local:8090/displays/queue.png"
+  - url: "http://homeassistant.local:8090/displays/queue.png" # Default URL, will be overwritten
     id: my_image
     format: png
     type: BINARY
