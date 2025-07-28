@@ -3,17 +3,13 @@
 env=env
 python=${env}/bin/python
 
-# find default device
-device=$(shell find /dev -name "ttyUSB*" -o -name "ttyACM*" | head -n 1)
-
-#
-device_id=
+# find default device. It is either ttyUSB0 or ttyACM0 usually
+dev_device=$(shell find /dev -name "ttyUSB*" -o -name "ttyACM*" | head -n 1)
 
 # Create Python virtual environment and install dependencies
 ${env}:
 	uv venv ${env} --python 3.12
 	uv pip install -r requirements.txt --python ./${env}/bin/python
-	uv pip install qrcode pillow --python ./${env}/bin/python
 
 # Quick shortcut to run the wizard interface
 .PHONY: wizard
@@ -22,8 +18,8 @@ wizard: ${env}
 	@bin/esphome-wizard
 
 run-device: .tmp.build.yaml
-	test ! -z "${device}"
-	esphome run --device ${device} $<
+	test ! -z "${dev_device}" && echo "Found dev device ${dev_device}"
+	esphome run --device ${dev_device} $<
 
 run-ota: .tmp.build.yaml
 	esphome run  $<

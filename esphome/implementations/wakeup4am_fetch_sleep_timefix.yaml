@@ -21,8 +21,10 @@ time:
       then:
         - logger.log: "Time synchronized! Set sleep and fetch image"
         - script.execute: set_sleep_duration
-        - script.execute: set_image_url # update display
-        # - script.execute: sleep # aaand sleep
+        - script.execute: set_image_url # then update display
+        - delay: 7s
+        - deep_sleep.enter:
+            id: deep_sleep_control
 
 script:
   - id: set_sleep_duration
@@ -93,7 +95,6 @@ wifi:
   power_save_mode: light
   on_connect:
     - logger.log: WiFi is connected!
-    - logger.log: "Trying to download image"
 
 captive_portal:
 
@@ -107,17 +108,11 @@ online_image:
         - logger.log: "Downloaded image, updating display"
         - display.page.show: page1
         - component.update: my_display
-        - delay: 7s
-        - deep_sleep.enter:
-            id: deep_sleep_control
     on_error:
       then:
         - logger.log: "Error downloading image"
         - display.page.show: page2
         - component.update: my_display
-        - delay: 7s
-        - deep_sleep.enter:
-            id: deep_sleep_control
 
 spi:
   clk_pin: $clk_pin
