@@ -15,7 +15,7 @@ def refresh_active_prompt(session):
 
     # TODO Need to create FrameGroup layer, finding active prompt per-group, and based on active Theme
     group_display_model = WaveshareDisplay.WaveShare13BlackWhite960x680
-    no_group_frames = 1
+    no_group_frames = 6
 
     logger.info("Resetting active prompt")
 
