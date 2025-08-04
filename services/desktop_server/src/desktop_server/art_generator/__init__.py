@@ -14,7 +14,9 @@ logger = logging.getLogger(__name__)
 
 # TODO Image width and height should be parameter
 
-NEGATIVE_PROMPT = "paper, frame, picture frame, border, photorealistic, deformed, glitch, blurry, signature, signed, watermark, stamp"
+NEGATIVE_PROMPT = (
+    "frame, picture frame, border, deformed, glitch, blurry, signature++, signed, watermark, stamp"
+)
 
 
 def health_check():
