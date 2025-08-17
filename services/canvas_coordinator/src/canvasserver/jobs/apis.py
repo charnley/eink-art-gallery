@@ -4,8 +4,8 @@ from io import BytesIO
 
 import requests
 from PIL.Image import Image as PillowImage
-from shared_constants import WaveshareDisplay
-from shared_image_utils.dithering import atkinson_dither
+from shared_constants import WAVESHARE_FULLCOLOR_PALETTE, WaveshareDisplay
+from shared_image_utils.dithering import atkinson_dither, atkinson_dither_rgb
 from shared_image_utils.tasks import color_correct_red
 
 logger = logging.getLogger(__name__)
@@ -41,6 +41,9 @@ def send_image_to_device(
 
     elif display_model == WaveshareDisplay.WaveShare13BlackWhite960x680:
         image = atkinson_dither(image)
+
+    elif display_model == WaveshareDisplay.WaveShare13FullColor1600x1200:
+        image = atkinson_dither_rgb(image, WAVESHARE_FULLCOLOR_PALETTE)
 
     logger.info("Sending it to paper frame")
     byte_io = BytesIO()
