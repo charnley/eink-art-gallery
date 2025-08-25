@@ -75,3 +75,12 @@ WAVESHARE_FULLCOLOR_PALETTE = np.array(
     ],
     dtype=np.uint8,
 )
+
+WAVESHARE_BLACKWHITERED_PALETTE = np.array(
+    [
+        [0, 0, 0],  # Black
+        [255, 255, 255],  # White
+        [255, 0, 0],  # Red
+    ],
+    dtype=np.uint8,
+)
