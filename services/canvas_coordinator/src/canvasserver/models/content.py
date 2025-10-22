@@ -137,7 +137,7 @@ def ensure_id_in_prompt(mapper, connection, target):
     if target.id is not None:
         return
 
-    target.id = Prompt.generate_id(target.prompt)
+    target.id = Prompt.generate_id(target.prompt, target.display_model)
 
 
 class PromptStatus(Model):
@@ -179,7 +179,7 @@ class Theme(Model, table=True):
 def ensure_id_in_theme(mapper, connection, target):
     if target.id is not None:
         return
-    target.id = Prompt.generate_id(target.theme)
+    target.id = Prompt.generate_id(target.theme, target.display_model)
 
 
 class PushFrame(Model, table=True):

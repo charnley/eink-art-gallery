@@ -1,5 +1,7 @@
 from enum import Enum
 
+import numpy as np
+
 # Default Image format
 IMAGE_FORMAT = "PNG"
 IMAGE_EXTENSION = "png"
@@ -60,3 +62,25 @@ class WaveshareDisplay(Enum):
 
     def __str__(self) -> str:
         return self.name
+
+
+WAVESHARE_FULLCOLOR_PALETTE = np.array(
+    [
+        [0, 0, 0],  # Black
+        [255, 255, 255],  # White
+        [255, 255, 0],  # Yellow
+        [255, 0, 0],  # Red
+        [0, 0, 255],  # Blue
+        [0, 255, 0],  # Green
+    ],
+    dtype=np.uint8,
+)
+
+WAVESHARE_BLACKWHITERED_PALETTE = np.array(
+    [
+        [0, 0, 0],  # Black
+        [255, 255, 255],  # White
+        [255, 0, 0],  # Red
+    ],
+    dtype=np.uint8,
+)

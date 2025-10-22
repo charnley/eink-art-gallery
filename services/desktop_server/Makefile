@@ -66,6 +66,7 @@ fill-default-themes:
 	--canvas-server-url ${refill_server} \
 	--prompts \
 	"../../assets/prompts_sd3_color.txt SD3 WaveShare13FullColor1600x1200 1" \
+	"../../assets/prompts_sd3_red.txt SD3 WaveShare13BlackRedWhite960x680 2" \
 	"../../assets/prompts_sd3_bw.txt SD3 WaveShare13BlackWhite960x680 6"
 
 ## Development
