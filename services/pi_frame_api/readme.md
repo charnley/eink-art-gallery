@@ -22,9 +22,11 @@ Next, configure and install dependencies.
 > [!NOTE]
 > If you have a 13.3-inch e-Paper using HAT+, you also have to change `config.txt`
 >
->     sudo raspi-config # Select Interface Options -> SPI -> Yes to disable the SPI interface
+>     # Disable SPI interface (if you did above)
+>     sudo raspi-config # Select Interface Options -> SPI -> No
+> 
 >     sudo vi /boot/firmware/config.txt (or /boot/config.txt on some versions)
->     # And add
+>     # And add the following two lines
 >     gpio=7=op,dl
 >     gpio=8=op,dl
 >
@@ -68,3 +70,12 @@ Then configure it to start on reboot, with `crontab -e`.
     @reboot cd /home/..path../eink-art-gallery/services/pi_frame_api && nohup make start &
 
 Happy api'ing
+
+
+> [!NOTE]
+> For 13.3-inch e-Paper using HAT+, e.i. 13.3inch_e-Paper_E, currently, you need to fix `epd13in3E.py`
+> 
+>     - import epdconfig
+>     + from . import epdconfig
+>
+> so the Python file can find the local `epdconfig.py`.
