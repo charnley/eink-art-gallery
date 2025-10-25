@@ -148,6 +148,20 @@ class Frame(Model, table=True):
     def __repr__(self):
         return str(self)
 
+    # model_config = {
+    #     "json_schema_extra": {
+    #         "examples": [
+    #             {
+    #                 "endpoint": "192.168.1.102:8080",
+    #             },
+    #             {
+    #                 "mac": "00:1A:2B:3C:4D:5E",
+    #                 "model": str(WaveshareDisplay.WaveShare13BlackWhite960x680)
+    #             }
+    #         ]
+    #     }
+    # }
+
 
 class Settings(Model):
     key: str = Field(primary_key=True)
