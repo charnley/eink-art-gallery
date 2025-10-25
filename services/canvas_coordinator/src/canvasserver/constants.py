@@ -33,3 +33,7 @@ ENV_DATA_PATH = "STORAGE"
 LOG_LEVEL = "log_level"
 CRON_UPDATE_PUSH = "cron_update_push"
 CRON_UPDATE_PROMPT = "cron_update_prompt"
+
+# Default frame cron
+DEFAULT_PULLFRAME_CRON = "30 4 * * *"
+DEFAULT_PULLFRAME_GROUP_NAME = "default_pullframe_group"

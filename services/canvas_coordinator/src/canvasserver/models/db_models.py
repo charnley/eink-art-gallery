@@ -1,16 +1,15 @@
+import enum
 import gzip
 import io
 import uuid
-from datetime import datetime
 from hashlib import sha256
 
 from PIL import Image as PilImage
 from pydantic import model_serializer
 from shared_constants import IMAGE_FORMAT, WaveshareDisplay
 from sqlalchemy import event
-from sqlmodel import Field, LargeBinary
+from sqlmodel import Field, LargeBinary, Relationship
 from sqlmodel import SQLModel as Model
-from sqlmodel import TypeDecorator
 
 
 def compress(s):
@@ -23,28 +22,6 @@ def compress(s):
 def decompress(b):
     s = gzip.decompress(b)
     return s
-
-
-class ImageColumn(TypeDecorator):
-    impl = LargeBinary
-
-    @staticmethod
-    def save_image(image):
-        output = io.BytesIO()
-        image.save(output, format=IMAGE_FORMAT)
-        hex_data = output.getvalue()
-        return hex_data
-
-    @staticmethod
-    def load_image(hex_data):
-        image = PilImage.open(io.BytesIO(hex_data))
-        return image
-
-    def process_bind_param(self, value, dialect):
-        return compress(self.save_image(value))
-
-    def process_result_value(self, value, dialect):
-        return self.load_image(decompress(value))
 
 
 class Image(Model, table=True):
@@ -63,7 +40,6 @@ class Image(Model, table=True):
         image.save(output, format=IMAGE_FORMAT)
         hex_data = output.getvalue()
         self.image_data = hex_data
-        # self.width, self.height = image.size
 
     @model_serializer
     def _ser(self) -> dict[str, str | float | int]:
@@ -79,19 +55,6 @@ class Image(Model, table=True):
         return str(self)
 
 
-class Images(Model):
-    images: list[Image]
-    count: int
-
-
-class ImageCreate(Model):
-    prompt: str
-
-
-class ImageMeta(Model):
-    prompt: str
-
-
 class Prompt(Model, table=True):
 
     __tablename__: str = "prompt"
@@ -103,8 +66,6 @@ class Prompt(Model, table=True):
     display_model: WaveshareDisplay = Field(nullable=False)
 
     active: bool = Field(default=False)
-    theme_id: str | None = Field(foreign_key="theme.id", nullable=True)
-    lifetime: datetime | None = Field(default=None, nullable=True)
 
     @staticmethod
     def generate_id(prompt_text: str, display_model: WaveshareDisplay) -> str:
@@ -122,7 +83,6 @@ class Prompt(Model, table=True):
             "image_model": str(self.image_model),
             "display_model": str(self.display_model),
             "prompt": str(self.prompt),
-            # TODO Lifetime
         }
 
     def __str__(self) -> str:
@@ -140,76 +100,53 @@ def ensure_id_in_prompt(mapper, connection, target):
     target.id = Prompt.generate_id(target.prompt, target.display_model)
 
 
-class PromptStatus(Model):
-    id: str
-    prompt: str
-    min_images: int
-    image_count: int
-    display_model: WaveshareDisplay
+class FrameGroup(Model, table=True):
 
+    __tablename__ = "frame_group"
 
-class PromptStatusResponse(Model):
-    prompts: list[PromptStatus]
-    count: int
-
-
-class Prompts(Model):
-    prompts: list[Prompt]
-    count: int
-
-
-class PromptQuery(Model):
-    prompts: list[str]
-
-
-class Theme(Model, table=True):
-    __tablename__ = "theme"
-    id: str = Field(primary_key=True, default=None)
-    theme: str = Field()
-    active: str = Field()
-
-    @staticmethod
-    def generate_id(text: str) -> str:
-        m = sha256()
-        m.update(text.encode())
-        return m.hexdigest()
-
-
-@event.listens_for(Theme, "before_insert")
-def ensure_id_in_theme(mapper, connection, target):
-    if target.id is not None:
-        return
-    target.id = Prompt.generate_id(target.theme, target.display_model)
-
-
-class PushFrame(Model, table=True):
-    __tablename__ = "frame_push"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    hostname: str = Field(default="192.168.1.26:8080")
-    model: WaveshareDisplay = Field()
+    name: str = Field(unique=True, nullable=False)
+    cron_schedule: str = Field(default="*/10 * * * *")
 
-    def __str__(self) -> str:
-        return f"PushFrame(hostname={self.hostname},Model={self.model})"
+    default: bool = Field(
+        default=False, nullable=False, description="Is this the default group for PullFrames?"
+    )
 
-    def __repr__(self) -> str:
+    frames: list["Frame"] = Relationship(back_populates="group")
+
+    def __str__(self):
+        return f"FrameGroup(name={self.name}, cron={self.cron_schedule})"
+
+    def __repr__(self):
         return str(self)
 
 
-class PushFrames(Model):
-    devices: list[PushFrame]
-    count: int
+class FrameType(str, enum.Enum):
+    PULL = "pull"
+    PUSH = "push"
 
 
-class PullFrames(Model, table=True):
-    __tablename__ = "reading_device"
-    id: str = Field(primary_key=True)
-    ip: str = Field()
-    name: str = Field()
-    model: WaveshareDisplay = Field()
+class Frame(Model, table=True):
 
+    __tablename__ = "frame"
 
-class Queue(Model):
-    id: str = Field(primary_key=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    type: FrameType = Field(nullable=False)
+    model: WaveshareDisplay = Field(nullable=False)
+
+    # PullFrames use MAC; PushFrames use IP/hostname
+    mac: str | None = Field(default=None, unique=True)
+    endpoint: str | None = Field(default=None, unique=True)
+
+    group_id: str | None = Field(foreign_key="frame_group.id", nullable=True)
+    group: FrameGroup | None = Relationship(back_populates="frames")
+
+    def __str__(self):
+        identifier = self.mac or self.endpoint
+        return f"Frame(id={self.id}, type={self.type}, id_val={identifier}, group={self.group_id})"
+
+    def __repr__(self):
+        return str(self)
 
 
 class Settings(Model):

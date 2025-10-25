@@ -2,16 +2,9 @@ import logging
 
 from canvasserver.jobs import refresh_active_prompt, send_images_to_push_devices
 from canvasserver.jobs.apis import send_image_to_device
-from canvasserver.models.content import (
-    Image,
-    Prompt,
-    Prompts,
-    PromptStatus,
-    PromptStatusResponse,
-    PushFrame,
-    PushFrames,
-)
 from canvasserver.models.db import get_session
+from canvasserver.models.db_models import Frame, Image, Prompt
+from canvasserver.models.schemas import Frames, Prompts, PromptStatus, PromptStatusResponse
 from fastapi import APIRouter, Depends, HTTPException
 from shared_matplotlib_utils import get_basic_wifi
 from sqlalchemy import select
@@ -25,10 +18,10 @@ prefix = "/actions"
 router = APIRouter(prefix=prefix, tags=["actions"])
 
 
-@router.get("/clean_up", response_model=None, tags=["actions"])
-def _clean_up(session: Session = Depends(get_session)):
-    # TODO Check if prompts are irrelevant, life time etc
-    raise NotImplementedError()
+# @router.get("/clean_up", response_model=None, tags=["actions"])
+# def _clean_up(session: Session = Depends(get_session)):
+#     # TODO Check if prompts are irrelevant, life time etc
+#     raise NotImplementedError()
 
 
 @router.get("/prompts_check", response_model=PromptStatusResponse, tags=["actions"])
@@ -78,12 +71,12 @@ def refresh_active_prompts(session: Session = Depends(get_session)):
     return Prompts(prompts=prompts, count=len(prompts))
 
 
-@router.get("/refresh_queues", response_model=None, tags=["actions"])
-def _refresh_active_prompts_in_queue(session: Session = Depends(get_session)):
-    raise NotImplementedError
+# @router.get("/refresh_queues", response_model=None, tags=["actions"])
+# def _refresh_active_prompts_in_queue(session: Session = Depends(get_session)):
+#     raise NotImplementedError
 
 
-@router.get("/update_push_devices", response_model=PushFrames, tags=["actions"])
+@router.get("/update_push_devices", response_model=Frames, tags=["actions"])
 def _refresh_push_screens(session: Session = Depends(get_session)):
     pushFrames = send_images_to_push_devices(session)
 
@@ -95,16 +88,19 @@ def _refresh_push_screens(session: Session = Depends(get_session)):
     return pushFrames
 
 
-@router.get("/send_wifi", response_model=PushFrame, tags=["actions"])
+@router.get("/send_wifi", response_model=Frame, tags=["actions"])
 def _send_wifi(
     wifi_name: str, wifi_password: str, wifi_type: str, session: Session = Depends(get_session)
 ):
 
-    pushFrame = session.query(PushFrame).first()
+    # TODO Need to specify specific Frame to send it too
+    # TODO Only works for PushFrame
+
+    pushFrame = session.query(Frame).first()
 
     image = get_basic_wifi(wifi_name, wifi_password, wifi_type=wifi_type)
 
-    send_image_to_device(image, pushFrame.color_support, pushFrame.hostname)
+    send_image_to_device(image, pushFrame.model, pushFrame.endpoint)
 
     logger.info(f"Updated {pushFrame}")
 

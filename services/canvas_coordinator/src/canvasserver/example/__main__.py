@@ -5,7 +5,7 @@ from pathlib import Path
 
 import yaml
 from canvasserver.config import get_settings
-from canvasserver.models.content import Image, Prompt
+from canvasserver.models.db_models import Image, Prompt
 from shared_matplotlib_utils import get_basic_text
 from sqlalchemy import select
 

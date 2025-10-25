@@ -1,7 +1,8 @@
 from uuid import uuid1
 
 from canvasserver.constants import IMAGE_CONTENT_TYPE
-from canvasserver.models.content import ImageCreate, Images, Prompt, Prompts
+from canvasserver.models.db_models import Prompt
+from canvasserver.models.schemas import ImageCreate, Images, Prompts
 from canvasserver.routes.displays import endpoint_queue
 from canvasserver.routes.displays import prefix as displays_prefix
 from canvasserver.routes.images import FILE_UPLOAD_KEY

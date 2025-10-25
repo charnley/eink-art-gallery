@@ -7,8 +7,9 @@ from PIL import Image as PilImage
 from shared_image_utils import dithering, image_to_bytes
 from sqlalchemy.orm import Session
 
-from ..models.content import Image, ImageCreate, Images, Prompt
 from ..models.db import get_session
+from ..models.db_models import Image, Prompt
+from ..models.schemas import ImageCreate, Images
 
 prefix = "/images"
 router = APIRouter(prefix=prefix, tags=["images"])

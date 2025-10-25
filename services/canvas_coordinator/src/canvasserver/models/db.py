@@ -6,7 +6,7 @@ from sqlalchemy.engine.base import Engine
 from sqlmodel import Session, create_engine
 
 from ..config import get_settings
-from .content import Model
+from .db_models import Model
 
 logger = logging.getLogger(__name__)
 

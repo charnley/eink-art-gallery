@@ -2,7 +2,8 @@ import logging
 
 import numpy as np
 from canvasserver.jobs.apis import send_image_to_device
-from canvasserver.models.content import Image, Prompt, PushFrame, PushFrames
+from canvasserver.models.db_models import Frame, Image, Prompt
+from canvasserver.models.schemas import Frames
 from shared_constants import WaveshareDisplay
 from shared_matplotlib_utils import get_basic_404
 from sqlalchemy import func
@@ -69,8 +70,9 @@ def send_images_to_push_devices(session):
     # TODO Should there be a group layer to push_devices?
     # TODO Collect status for push, and return
     # TODO Don't "use" image if push failed
+    # TODO Change function to group
 
-    results = session.execute(select(PushFrame)).all()
+    results = session.execute(select(Frame)).all()
     devices = [result[0] for result in results]
 
     logger.info(devices)
@@ -115,4 +117,4 @@ def send_images_to_push_devices(session):
         if status_code == 200 and image_obj is not None:
             session.delete(image_obj)
 
-    return PushFrames(devices=devices, count=len(devices))
+    return Frames(devices=devices, count=len(devices))

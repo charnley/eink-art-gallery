@@ -6,32 +6,33 @@ from shared_constants import WaveshareDisplay
 from sqlalchemy.orm import Session
 from sqlmodel import select
 
-from ..models.content import PushFrame, PushFrames
 from ..models.db import get_session
+from ..models.db_models import Frame
+from ..models.schemas import Frames
 
 prefix = "/pushDevices"
 router = APIRouter(prefix=prefix, tags=["devices"])
 
 
-@router.get("/", response_model=PushFrames)
+@router.get("/", response_model=Frames)
 def read_items(limit=100, session: Session = Depends(get_session)):
-    devices = session.query(PushFrame).limit(limit).all()
+    devices = session.query(Frame).limit(limit).all()
     session.close()
-    return PushFrames(devices=devices, count=len(devices))
+    return Frames(devices=devices, count=len(devices))
 
 
-@router.get("/{id}", response_model=PushFrame)
+@router.get("/{id}", response_model=Frame)
 def read_item(id: uuid.UUID, session: Session = Depends(get_session)):
-    item = session.get(PushFrame, id)
+    item = session.get(Frame, id)
     session.close()
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     return item
 
 
-@router.delete("/{id}", response_model=PushFrame)
+@router.delete("/{id}", response_model=Frame)
 def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
-    item = session.get(PushFrame, id)
+    item = session.get(Frame, id)
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -42,48 +43,65 @@ def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
     return item
 
 
-@router.post("/")
-def create_item(
-    item: PushFrame, session: Session = Depends(get_session), ignore_status: bool = False
-):
-
-    hostname = item.hostname
-
-    # Check if it already exists
-    item_check = session.execute(select(PushFrame).filter_by(hostname=hostname)).all()
-    if len(item_check):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Item already exists.")
+def _validate_push_frame(frame):
 
     # Check that it is alive
-    api_status = get_status(hostname)
-    if not api_status and not ignore_status:
+    endpoint_status = get_status(frame.endpoint)
+
+    if endpoint_status is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Hostname does not return a good status",
         )
 
-    assert api_status is not None
-
     # Check if we can read the type
-    if "display_type" in api_status:
-        display_model = api_status["display_type"]
+    if "display_type" in endpoint_status:
+        display_model = endpoint_status["display_type"]
         display_model = WaveshareDisplay(display_model)
-        item.model = display_model
+        frame.model = display_model
+
+    return
+
+
+@router.post("/")
+def create_item(frame: Frame, session: Session = Depends(get_session)):
+
+    endpoint = frame.endpoint  # PushFrame
+    mac = frame.mac  # PullFrame
+
+    if endpoint is None and mac is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Either MAC or endpoint needs to be defined",
+        )
+
+    # Check if it already exists
+    if endpoint is not None and len(
+        session.execute(select(Frame).filter_by(endpoint=endpoint)).all()
+    ):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Item already exists.")
+
+    if mac is not None and len(session.execute(select(Frame).filter_by(mac=mac)).all()):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Item already exists.")
+
+    if endpoint:
+        # Validate endpoint, and assume DisplayType
+        _validate_push_frame(frame)
 
     # Ensure it is correct type before commit
-    display_model = WaveshareDisplay(item.model)
+    display_model = WaveshareDisplay(frame.model)
     if not isinstance(display_model, WaveshareDisplay):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Not supported display model",
         )
 
-    session.add(item)
+    session.add(frame)
 
     try:
 
         session.commit()
-        session.refresh(item)
+        session.refresh(frame)
 
     except ValueError:
 
@@ -95,4 +113,4 @@ def create_item(
         )
 
     session.close()
-    return item
+    return frame

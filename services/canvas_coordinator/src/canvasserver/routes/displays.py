@@ -3,8 +3,8 @@ from typing import Any
 
 import numpy as np
 from canvasserver.jobs import get_active_prompts
-from canvasserver.models.content import Image
 from canvasserver.models.db import get_session
+from canvasserver.models.db_models import Image
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
 from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER, WaveshareDisplay

@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlmodel import select
 
-from ..models.content import Image, Images, Prompt, Prompts
 from ..models.db import get_session
+from ..models.db_models import Image, Prompt
+from ..models.schemas import Images, Prompts
 
 prefix = "/prompts"
 router = APIRouter(prefix=prefix, tags=["prompts"])
