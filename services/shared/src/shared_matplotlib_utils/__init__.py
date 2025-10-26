@@ -139,15 +139,15 @@ def get_basic_text(
 
 
 @lru_cache()
-def get_basic_404(text, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
+def get_basic_404(reason, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
 
     (fig, ax) = get_figure(width=width, height=height)
 
     text_404 = "404"
 
     font_size = calculate_fontsize(fig, ax, font=font)
-    text = "\n".join(textwrap.wrap(text, width=TEXT_LENGTH))
-    font_size_text = font_size * (TEXT_LENGTH / (len(text) + 1)) * 0.8
+    reason = "\n".join(textwrap.wrap(reason, width=TEXT_LENGTH))
+    # reason_size_text = font_size * (TEXT_LENGTH / (len(reason) + 1)) * 0.8
     font_size_404 = font_size * (TEXT_LENGTH / (len(text_404) + 1)) * 0.8
 
     ax.text(
@@ -161,13 +161,15 @@ def get_basic_404(text, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
     )
 
     ax.text(
-        0.5,
-        0.40,
-        text,
+        1.0,
+        0,
+        reason,
         verticalalignment="center",
-        horizontalalignment="center",
-        fontsize=int(font_size_text * 0.5),
-        **font,
+        horizontalalignment="right",
+        bbox=dict(facecolor="black"),
+        color="white",
+        fontsize=font_size - 5,
+        **FONT_MONO,
     )
 
     ax.axis("off")

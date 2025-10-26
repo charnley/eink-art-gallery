@@ -63,6 +63,33 @@ AnnotatedFrameGroup = Annotated[
 ]
 
 
+@router.patch("/{id}", response_model=FrameGroup)
+def update_group(
+    id: uuid.UUID,
+    group_update: AnnotatedFrameGroup,
+    session: Session = Depends(get_session),
+):
+    group = session.get(FrameGroup, id)
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    # Only update allowed fields
+    # allowed_fields = {"name", "cron_schedule", "default"}
+
+    # TODO Not possible to change default atm
+
+    if group_update.name is not None:
+        group.name = group_update.name
+
+    if group_update.cron_schedule is not None:
+        group.cron_schedule = group_update.cron_schedule
+
+    session.commit()
+    session.refresh(group)
+    session.close()
+    return group
+
+
 @router.post("/")
 def create_item(group: AnnotatedFrameGroup, session: Session = Depends(get_session)):
 

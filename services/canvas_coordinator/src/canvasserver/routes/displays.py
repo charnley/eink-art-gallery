@@ -55,14 +55,17 @@ async def _get_queue(
     safe_http_code: bool | None = True,
     session: Session = Depends(get_session),
 ):
+
     # Note: ESPHome will react to 404, so always return 200
+    # Note: This is a deprecated approach, as this is hardcoded to specific frame type
+
     status_code = 200
     _image_obj: Any = None  # Type of execute .first is inconsistent None | Tuple[Item]
     prompt_id = None
 
     # TODO Should be general on the queue request, based on a group of dispays
 
-    prompt_ids = get_active_prompts(session)
+    prompt_ids = get_active_prompts(session, WaveshareDisplay.WaveShare13BlackWhite960x680)
 
     if len(prompt_ids):
         prompt_id = np.random.choice(prompt_ids)

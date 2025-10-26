@@ -4,12 +4,12 @@ from typing import Annotated
 
 from canvasserver.constants import DEFAULT_PULLFRAME_CRON
 from canvasserver.jobs.apis import get_status
-from canvasserver.models.queries import register_new_frame
+from canvasserver.models.queries import fetch_image_for_frame, get_frame_by_mac_address
 from canvasserver.time_funcs import get_seconds_until_next
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
 from fastapi.responses import Response
 from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER, WaveshareDisplay
-from shared_image_utils import dithering
+from shared_image_utils import dithering, prepare_image
 from shared_image_utils.format import image_to_bytes
 from shared_matplotlib_utils import get_basic_text
 from sqlalchemy.orm import Session
@@ -172,32 +172,30 @@ def create_item(frame: AnnotatedFrame, session: Session = Depends(get_session)):
 @router.get("/mac/{mac_address}/get-sleep-duration", response_model=int)
 def get_sleep(mac_address: str, request: Request, session: Session = Depends(get_session)):
 
-    frame = session.query(Frame).filter_by(mac=mac_address).first()
-    display_model = get_display_model(request)
+    # TODO If delta is zero
+    #        delta = next_datetime - now
+    #             ~~~~~~~~~~~~~~^~~~~
+    # TypeError: can't subtract offset-naive and offset-aware datetimes
 
-    if frame is None and display_model is None:
-        logger.warning("No idea what kind of Frame this is, return default cron schedule")
+    display_model = get_display_model(request)
+    frame = get_frame_by_mac_address(session, mac_address, display_model)
+
+    if frame is None:
+        logger.warning("Frame definition is wrong, returning default CRON")
         return get_seconds_until_next(DEFAULT_PULLFRAME_CRON)
 
-    elif frame is None and isinstance(display_model, WaveshareDisplay):
-        # Register new frame
-        logger.info("Found new frame, registering")
-        frame = register_new_frame(session, mac_address, display_model)
-        session.commit()
+    logging.info(f"Found Frame: {frame} - {display_model} - {frame.group}")
 
-    assert frame is not None
-
-    logging.info(f"Found Frame: {frame} - {display_model}")
-    logging.info(f"Found Group: {frame.group}")
-
-    group = frame.group
-
-    if group is None:
+    if frame.group is None:
         logger.warning("Frame is not registered a group, returning default CRON")
         return get_seconds_until_next(DEFAULT_PULLFRAME_CRON)
 
-    cron = group.cron_schedule
+    # TODO What if cron is a shit format?
+    cron = frame.group.cron_schedule
     seconds = get_seconds_until_next(cron)
+
+    session.commit()
+    session.close()
 
     return seconds
 
@@ -210,20 +208,27 @@ def get_sleep(mac_address: str, request: Request, session: Session = Depends(get
     },
     response_class=Response,
 )
-def get_image(mac_address: str, session: Session = Depends(get_session)):
+def get_image(mac_address: str, request: Request, session: Session = Depends(get_session)):
 
-    # TODO Get DisplayModel
+    # Note: ESPHome will react to 400, so always return 200
 
-    # "24:6F:28:AA:BB:CC"
+    display_model = get_display_model(request)
+    frame = get_frame_by_mac_address(session, mac_address, display_model)
 
-    # TODO Find the right frame
-    # TODO Find the frame group
-    # TODO Get group CRON
-    # get seconds
+    if frame is None:
+        logger.error("Unable to figure out what kind of frame this is, returning default")
+        image = get_basic_text(f"Testing: {mac_address}")
+        image = dithering.atkinson_dither(image)
+        image_bytes = image_to_bytes(image)
+        return Response(image_bytes, headers=IMAGE_HEADER, media_type=IMAGE_CONTENT_TYPE)
 
-    # TODO All images should be called through a displaymodel wrapper
+    # TODO Fall back if frame is undefined, but display_model is
 
-    image = get_basic_text(f"Testing: {mac_address}")
-    image = dithering.atkinson_dither(image)
+    image = fetch_image_for_frame(session, frame)
+    image = prepare_image(image, frame.model)
     image_bytes = image_to_bytes(image)
+
+    session.commit()
+    session.close()
+
     return Response(image_bytes, headers=IMAGE_HEADER, media_type=IMAGE_CONTENT_TYPE)

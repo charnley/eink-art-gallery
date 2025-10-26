@@ -45,18 +45,19 @@ def refresh_active_prompt(session):
     return prompt
 
 
-def get_active_prompts(session):
-    prompts: list[tuple[Prompt,]] = session.execute(select(Prompt).filter(Prompt.active)).all()  # type: ignore[arg-type]
+def get_active_prompts(session, display_model: WaveshareDisplay):
+    """ """
 
-    # TODO Again, group should do this
-    group_display_model: WaveshareDisplay = WaveshareDisplay.WaveShare13BlackWhite960x680
+    prompts: list[tuple[Prompt,]] = session.execute(
+        select(Prompt).filter_by(active=True).filter_by(display_model=display_model)
+    ).all()
+
+    # display_model: WaveshareDisplay = WaveshareDisplay.WaveShare13BlackWhite960x680
 
     if len(prompts) == 0:
         logger.warning("No active prompts, returning all")
         prompts: list[tuple[Prompt,]] = session.execute(
-            select(Prompt).filter(
-                Prompt.display_model == group_display_model
-            )  # type: ignore[arg-type]
+            select(Prompt).filter(Prompt.display_model == display_model)  # type: ignore[arg-type]
         ).all()
 
     _prompts: list[Prompt] = [x[0] for x in prompts]

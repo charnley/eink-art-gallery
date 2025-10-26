@@ -32,12 +32,16 @@ MIN_IMAGES_PER_PROMPT = 2
 FILE_UPLOAD_KEY = "files"
 
 
-class ColorSupport(Enum):
-    Black = "Black"
-    BlackRed = "BlackRed"
+class FrameType(str, Enum):
+    PULL = "pull"
+    PUSH = "push"
+
+    def __str__(self) -> str:
+        return self.name
 
 
 DISPLAY_RESOLUTIONS = {
+    "WaveShare7BlackWhite800x480": (800, 480),
     "WaveShare13BlackWhite960x680": (960, 680),
     "WaveShare13BlackGreyWhite960x680": (960, 680),
     "WaveShare13BlackRedWhite960x680": (960, 680),
@@ -47,6 +51,7 @@ DISPLAY_RESOLUTIONS = {
 
 # Supported WaveShare displays
 class WaveshareDisplay(Enum):
+    WaveShare7BlackWhite800x480 = "WaveShare7BlackWhite800x480"
     WaveShare13BlackWhite960x680 = "WaveShare13BlackWhite960x680"
     WaveShare13BlackGreyWhite960x680 = "WaveShare13BlackGreyWhite960x680"
     WaveShare13BlackRedWhite960x680 = "WaveShare13BlackRedWhite960x680"
