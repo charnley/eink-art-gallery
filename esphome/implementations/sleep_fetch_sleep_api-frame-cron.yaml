@@ -1,0 +1,186 @@
+
+# Problem, SNTP seems to be really unstable, and if you want to change the CRON
+# schedule you have to re-flash the ESP.
+
+# Problem, the esp32 wakes up at 0350, when it should be waking up at 0400,
+# the sleeps for 10 mins and wakes up again.
+# We can calculate the number of hours to sleep ourselves, checking if it wokeup too early.
+
+http_request:
+  id: fetch_image_request
+  timeout: 5s
+  useragent: Frame/${display_model}
+  verify_ssl: false
+
+deep_sleep:
+  id: deep_sleep_control
+  run_duration: 1min
+  sleep_duration: "86400sec"
+
+
+text_sensor:
+  - platform: wifi_info
+    mac_address:
+      name: "Local Mac Address"
+      id: local_mac_sensor
+
+script:
+  - id: set_sleep_duration
+    then:
+       - http_request.get:
+          capture_response: true
+          url: !lambda |-
+            std::string local_mac = id(local_mac_sensor).state.c_str();
+            std::string url = "http://192.168.1.10:8080/frame/mac/" + local_mac + "/get-sleep-duration";
+            ESP_LOGI("set_sleep_duration", "Fetch: %s", url.c_str());
+            return ((std::string) url.c_str());
+
+          on_response:
+            then:
+              - logger.log: "Succes to fetch sleep duration!"
+              - lambda: |-
+                  ESP_LOGI("main", "Response: %s", body.c_str());
+                  int sleep_seconds = atoi(body.c_str());
+                  ESP_LOGD("sleep", "Sleep duration: %d seconds", sleep_seconds);
+                  // Set seconds in miliseconds
+                  id(deep_sleep_control).set_sleep_duration(sleep_seconds* 1000);
+
+          on_error:
+            then:
+              - logger.log: "Request failed!"
+
+
+  - id: set_image_url
+    then:
+      - lambda: |-
+          float voltage = id(battery_voltage).state;
+
+          std::string local_mac = id(local_mac_sensor).state.c_str();
+
+          char buffer[256];
+          snprintf(
+            buffer,
+            sizeof(buffer),
+            "http://%s/frame/mac/%s/display.png?displayModel=%s&voltage=%.2f",
+            "192.168.1.10:8080", // TODO Should be a variable, maybe secret?
+            local_mac.c_str(),
+            "${display_model}",
+            voltage
+          );
+          std::string image_url = std::string(buffer);
+
+          // std::string base_url = "http://192.168.1.10:8080/displays/queue.png";
+          // id(my_image).set_url(base_url + query);
+
+          id(my_image).set_url(image_url);
+
+logger:
+  baud_rate: 115200
+  level: DEBUG
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  power_save_mode: light
+  on_connect:
+    - logger.log: WiFi is connected!
+    - logger.log: "Trying to download image"
+    - script.execute: set_sleep_duration
+    - script.execute: set_image_url
+    - component.update: my_image
+
+captive_portal:
+
+online_image:
+  - url: "http://homeassistant.local:8090/displays/queue.png" # Default URL, will be overwritten
+    id: my_image
+    format: png
+    type: BINARY
+    on_download_finished:
+      then:
+        - logger.log: "Downloaded image, updating display"
+        - display.page.show: page1
+        - component.update: my_display
+        - delay: 7s
+        - deep_sleep.enter:
+            id: deep_sleep_control
+    on_error:
+      then:
+        - logger.log: "Error downloading image"
+        - display.page.show: page2
+        - component.update: my_display
+        - delay: 7s
+        - deep_sleep.enter:
+            id: deep_sleep_control
+
+spi:
+  clk_pin: $clk_pin
+  mosi_pin: $mosi_pin
+
+display:
+  - platform: waveshare_epaper
+    id: my_display
+    cs_pin: $cs_pin
+    dc_pin: $dc_pin
+    busy_pin:
+      number: $busy_pin
+      inverted: $busy_pin_inverted
+    reset_pin: $reset_pin
+    reset_duration: 200ms
+    model: $waveshare_model
+    update_interval: never
+    pages:
+      - id: page1
+        lambda: |-
+          it.image(0, 0, id(my_image), Color::BLACK, Color::WHITE);
+          ESP_LOGD("display", "Image displayed successfully");
+      - id: page2
+        lambda: |-
+          it.line(0, 0, 50, 50);
+          it.line(0, 50, 50, 0);
+          ESP_LOGD("display", "Error Image displayed successfully");
+
+api:
+  on_client_connected:
+    then:
+      - sensor.template.publish:
+          id: battery_level
+          state: !lambda "return id(battery_level).state;"
+      - sensor.template.publish:
+          id: battery_voltage
+          state: !lambda "return id(battery_voltage).state;"
+
+ota:
+  - platform: esphome
+
+sensor:
+  # https://esphome.io/components/sensor/adc.html#measuring-battery-voltage-on-the-firebeetle-esp32-e
+  - platform: adc
+    id: battery_voltage
+    name: "Battery voltage"
+    pin: ${vdd_pin}
+    accuracy_decimals: 2
+    update_interval: 60s
+    attenuation: 12dB
+    samples: 3
+    filters:
+      - multiply: 2.0  # The voltage divider requires us to multiply by 2
+    on_value:
+      then:
+        - logger.log: "Battery Voltage: ${sensor.battery_voltage} V"
+
+  - platform: template
+    name: "Battery Level"
+    id: battery_level
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    lambda: |-
+      float voltage = id(battery_voltage).state;
+      if (voltage < 3.0) return 0;
+      if (voltage > 4.2) return 100;
+      return (voltage - 3.0) / (4.2 - 3.0) * 100.0;
+
+binary_sensor:
+  - platform: status
+    name: "${device_id} Status"
+    id: device_status
