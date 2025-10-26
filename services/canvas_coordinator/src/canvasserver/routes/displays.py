@@ -5,7 +5,7 @@ import numpy as np
 from canvasserver.jobs import get_active_prompts
 from canvasserver.models.db import get_session
 from canvasserver.models.db_models import Image
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import Response
 from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER, WaveshareDisplay
 from shared_image_utils import dithering, image_to_bytes
@@ -21,13 +21,11 @@ endpoint_queue = "/queue.png"
 
 router = APIRouter(prefix=prefix, tags=["displays"])
 
-# TODO On all display type, use DisplayModel to return the correct
-
 
 @router.get(
     "/status.png", responses={200: {"content": {IMAGE_CONTENT_TYPE: {}}}}, response_class=Response
 )
-async def _get_status():
+async def _get_status(request: Request):
     image = get_basic_text("I am alive")
     image = dithering.atkinson_dither(image)
     image_bytes = image_to_bytes(image)
@@ -59,25 +57,30 @@ async def _get_queue(
 ):
     # Note: ESPHome will react to 404, so always return 200
     status_code = 200
-    _image_obj: Any  # Type of execute .first is inconsistent None | Tuple[Item]
+    _image_obj: Any = None  # Type of execute .first is inconsistent None | Tuple[Item]
     prompt_id = None
 
     # TODO Should be general on the queue request, based on a group of dispays
 
     prompt_ids = get_active_prompts(session)
-    prompt_id = np.random.choice(prompt_ids)
 
-    logger.debug(f"Query prompt {prompt_id}")
+    if len(prompt_ids):
+        prompt_id = np.random.choice(prompt_ids)
 
-    _image_obj = session.execute(
-        delete(Image)
-        .where(
-            Image.id.in_(
-                select(Image.id).filter(Image.prompt == prompt_id).order_by(func.random()).limit(1)
+        logger.debug(f"Query prompt {prompt_id}")
+
+        _image_obj = session.execute(
+            delete(Image)
+            .where(
+                Image.id.in_(
+                    select(Image.id)
+                    .filter(Image.prompt == prompt_id)
+                    .order_by(func.random())
+                    .limit(1)
+                )
             )
-        )
-        .returning(Image)
-    ).fetchone()
+            .returning(Image)
+        ).fetchone()
 
     if _image_obj is None:
         image = get_basic_404("")

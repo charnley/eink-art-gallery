@@ -1,4 +1,3 @@
-import enum
 import gzip
 import io
 import uuid
@@ -6,7 +5,7 @@ from hashlib import sha256
 
 from PIL import Image as PilImage
 from pydantic import model_serializer
-from shared_constants import IMAGE_FORMAT, WaveshareDisplay
+from shared_constants import IMAGE_FORMAT, FrameType, WaveshareDisplay
 from sqlalchemy import event
 from sqlmodel import Field, LargeBinary, Relationship
 from sqlmodel import SQLModel as Model
@@ -121,11 +120,6 @@ class FrameGroup(Model, table=True):
         return str(self)
 
 
-class FrameType(str, enum.Enum):
-    PULL = "pull"
-    PUSH = "push"
-
-
 class Frame(Model, table=True):
 
     __tablename__ = "frame"
@@ -138,29 +132,14 @@ class Frame(Model, table=True):
     mac: str | None = Field(default=None, unique=True)
     endpoint: str | None = Field(default=None, unique=True)
 
-    group_id: str | None = Field(foreign_key="frame_group.id", nullable=True)
+    group_id: uuid.UUID | None = Field(foreign_key="frame_group.id", nullable=True)
     group: FrameGroup | None = Relationship(back_populates="frames")
 
     def __str__(self):
-        identifier = self.mac or self.endpoint
-        return f"Frame(id={self.id}, type={self.type}, id_val={identifier}, group={self.group_id})"
+        return f"Frame(id={self.id}, type={self.type}, model={self.model})"
 
     def __repr__(self):
         return str(self)
-
-    # model_config = {
-    #     "json_schema_extra": {
-    #         "examples": [
-    #             {
-    #                 "endpoint": "192.168.1.102:8080",
-    #             },
-    #             {
-    #                 "mac": "00:1A:2B:3C:4D:5E",
-    #                 "model": str(WaveshareDisplay.WaveShare13BlackWhite960x680)
-    #             }
-    #         ]
-    #     }
-    # }
 
 
 class Settings(Model):

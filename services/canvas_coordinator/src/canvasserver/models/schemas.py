@@ -1,6 +1,13 @@
+import uuid
+
 from canvasserver.models.db_models import Frame, FrameGroup, Image, Prompt
 from shared_constants import WaveshareDisplay
 from sqlmodel import SQLModel as Model
+
+
+class FrameHttpCode(Model):
+    id: uuid.UUID
+    status_code: int
 
 
 class Images(Model):
@@ -44,5 +51,14 @@ class Frames(Model):
 
 
 class FrameGroups(Model):
-    frames: list[FrameGroup]
+    groups: list[FrameGroup]
     count: int
+
+
+class FrameGroupFrames(Model):
+    group: FrameGroup
+    frames: Frames
+
+
+class FrameAssign(Model):
+    id: uuid.UUID

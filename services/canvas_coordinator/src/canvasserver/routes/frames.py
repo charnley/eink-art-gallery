@@ -1,9 +1,17 @@
+import logging
 import uuid
 from typing import Annotated
 
+from canvasserver.constants import DEFAULT_PULLFRAME_CRON
 from canvasserver.jobs.apis import get_status
-from fastapi import APIRouter, Body, Depends, HTTPException, status
-from shared_constants import WaveshareDisplay
+from canvasserver.models.queries import register_new_frame
+from canvasserver.time_funcs import get_seconds_until_next
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
+from fastapi.responses import Response
+from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER, WaveshareDisplay
+from shared_image_utils import dithering
+from shared_image_utils.format import image_to_bytes
+from shared_matplotlib_utils import get_basic_text
 from sqlalchemy.orm import Session
 from sqlmodel import select
 
@@ -11,15 +19,40 @@ from ..models.db import get_session
 from ..models.db_models import Frame, FrameType
 from ..models.schemas import Frames
 
+logger = logging.getLogger(__name__)
+
 prefix = "/frame"
 router = APIRouter(prefix=prefix, tags=["frames"])
 
 
+def get_display_model(request) -> WaveshareDisplay | None:
+    """
+    Read the ESPHome configured user-agent definition:
+
+        Frame/${display_model}
+
+    For example:
+
+        Frame/WaveShare13BlackWhite960x680
+
+    """
+
+    user_agent = request.headers.get("user-agent")
+    display_type = user_agent.split("/")[-1]
+
+    if display_type not in WaveshareDisplay:
+        logger.error("Unable to find the display type from User-Agent")
+        logger.error(f"User-agent: {user_agent}")
+        return None
+
+    return WaveshareDisplay(display_type)
+
+
 @router.get("/", response_model=Frames)
 def read_items(limit=100, session: Session = Depends(get_session)):
-    devices = session.query(Frame).limit(limit).all()
+    frames = session.query(Frame).limit(limit).all()
     session.close()
-    return Frames(devices=devices, count=len(devices))
+    return Frames(frames=frames, count=len(frames))
 
 
 @router.get("/{id}", response_model=Frame)
@@ -134,3 +167,63 @@ def create_item(frame: AnnotatedFrame, session: Session = Depends(get_session)):
 
     session.close()
     return frame
+
+
+@router.get("/mac/{mac_address}/get-sleep-duration", response_model=int)
+def get_sleep(mac_address: str, request: Request, session: Session = Depends(get_session)):
+
+    frame = session.query(Frame).filter_by(mac=mac_address).first()
+    display_model = get_display_model(request)
+
+    if frame is None and display_model is None:
+        logger.warning("No idea what kind of Frame this is, return default cron schedule")
+        return get_seconds_until_next(DEFAULT_PULLFRAME_CRON)
+
+    elif frame is None and isinstance(display_model, WaveshareDisplay):
+        # Register new frame
+        logger.info("Found new frame, registering")
+        frame = register_new_frame(session, mac_address, display_model)
+        session.commit()
+
+    assert frame is not None
+
+    logging.info(f"Found Frame: {frame} - {display_model}")
+    logging.info(f"Found Group: {frame.group}")
+
+    group = frame.group
+
+    if group is None:
+        logger.warning("Frame is not registered a group, returning default CRON")
+        return get_seconds_until_next(DEFAULT_PULLFRAME_CRON)
+
+    cron = group.cron_schedule
+    seconds = get_seconds_until_next(cron)
+
+    return seconds
+
+
+@router.get(
+    "/mac/{mac_address}/display.png",
+    responses={
+        200: {"content": {IMAGE_CONTENT_TYPE: {}}},
+        404: {"content": {IMAGE_CONTENT_TYPE: {}}},
+    },
+    response_class=Response,
+)
+def get_image(mac_address: str, session: Session = Depends(get_session)):
+
+    # TODO Get DisplayModel
+
+    # "24:6F:28:AA:BB:CC"
+
+    # TODO Find the right frame
+    # TODO Find the frame group
+    # TODO Get group CRON
+    # get seconds
+
+    # TODO All images should be called through a displaymodel wrapper
+
+    image = get_basic_text(f"Testing: {mac_address}")
+    image = dithering.atkinson_dither(image)
+    image_bytes = image_to_bytes(image)
+    return Response(image_bytes, headers=IMAGE_HEADER, media_type=IMAGE_CONTENT_TYPE)

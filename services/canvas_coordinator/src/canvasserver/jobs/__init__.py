@@ -1,7 +1,7 @@
 import logging
 
 import numpy as np
-from canvasserver.jobs.apis import send_image_to_device
+from canvasserver.jobs.apis import send_image_to_frame
 from canvasserver.models.db_models import Frame, Image, Prompt
 from canvasserver.models.schemas import Frames
 from shared_constants import WaveshareDisplay
@@ -67,6 +67,8 @@ def get_active_prompts(session):
 
 def send_images_to_push_devices(session):
 
+    raise NotImplementedError("Moved function")
+
     # TODO Should there be a group layer to push_devices?
     # TODO Collect status for push, and return
     # TODO Don't "use" image if push failed
@@ -112,7 +114,7 @@ def send_images_to_push_devices(session):
             image = image_obj.image
             session.delete(image_obj)
 
-        status_code = send_image_to_device(image, display_model, device.hostname)
+        status_code = send_image_to_frame(image, display_model, device.hostname)
 
         if status_code == 200 and image_obj is not None:
             session.delete(image_obj)

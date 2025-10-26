@@ -1,7 +1,7 @@
 import logging
 
 from canvasserver.jobs import refresh_active_prompt, send_images_to_push_devices
-from canvasserver.jobs.apis import send_image_to_device
+from canvasserver.jobs.apis import send_image_to_frame
 from canvasserver.models.db import get_session
 from canvasserver.models.db_models import Frame, Image, Prompt
 from canvasserver.models.schemas import Frames, Prompts, PromptStatus, PromptStatusResponse
@@ -78,6 +78,9 @@ def refresh_active_prompts(session: Session = Depends(get_session)):
 
 @router.get("/update_push_devices", response_model=Frames, tags=["actions"])
 def _refresh_push_screens(session: Session = Depends(get_session)):
+
+    raise NotImplementedError
+
     pushFrames = send_images_to_push_devices(session)
 
     logger.info(f"Updated {pushFrames}")
@@ -96,11 +99,15 @@ def _send_wifi(
     # TODO Need to specify specific Frame to send it too
     # TODO Only works for PushFrame
 
+    raise NotImplementedError
+
     pushFrame = session.query(Frame).first()
+
+    assert pushFrame is not None
 
     image = get_basic_wifi(wifi_name, wifi_password, wifi_type=wifi_type)
 
-    send_image_to_device(image, pushFrame.model, pushFrame.endpoint)
+    send_image_to_frame(image, pushFrame)
 
     logger.info(f"Updated {pushFrame}")
 

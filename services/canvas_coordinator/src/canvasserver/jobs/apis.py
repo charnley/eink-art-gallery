@@ -3,6 +3,7 @@ import threading
 from io import BytesIO
 
 import requests
+from canvasserver.models.db_models import Frame
 from PIL.Image import Image as PillowImage
 from shared_constants import (
     WAVESHARE_BLACKWHITERED_PALETTE,
@@ -23,9 +24,15 @@ def fire_and_forget_images(url, params, files):
     threading.Thread(target=request_task, args=(url, params, files, None)).start()
 
 
-def send_image_to_device(
-    image: PillowImage, display_model: WaveshareDisplay, hostname: str
+def send_image_to_frame(
+    image: PillowImage,
+    frame: Frame,
 ) -> int:
+
+    hostname = frame.endpoint
+    display_model = frame.model
+
+    assert hostname is not None
 
     url = f"http://{hostname}/display/image"
     logger.info(f"Sending photo to {url}")
