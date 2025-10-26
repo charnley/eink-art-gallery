@@ -9,6 +9,7 @@ esphome:
   friendly_name: "eink frame ${device_id}"
   platformio_options:
     build_flags: "-DBOARD_HAS_PSRAM"
+  name_add_mac_suffix: true
 
 substitutions:
   device_id: "DEVICE_ID"
