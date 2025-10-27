@@ -78,7 +78,7 @@ class Prompt(Model, table=True):
     @model_serializer
     def _ser(self) -> dict[str, str | float | int]:
         return {
-            "active": self.active,
+            # "active": self.active,
             "id": str(self.id),
             "min_images": self.min_images,
             "image_model": str(self.image_model),
@@ -144,6 +144,14 @@ class Frame(Model, table=True):
 
     def __repr__(self):
         return str(self)
+
+
+class FrameGroupPrompt(Model, table=True):
+
+    __tablename__ = "frame_group_prompt"
+
+    group_id: uuid.UUID = Field(foreign_key="frame_group.id", primary_key=True)
+    prompt_id: str = Field(foreign_key="prompt.id", primary_key=True)
 
 
 # TODO FrameGroup - Prompt - Active selection

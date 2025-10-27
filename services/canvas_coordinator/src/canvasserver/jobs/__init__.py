@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 def refresh_active_prompt(session):
 
+    raise NotImplementedError
+
     # TODO Need to create FrameGroup layer, finding active prompt per-group, and based on active Theme
     group_display_model = WaveshareDisplay.WaveShare13BlackWhite960x680
     no_group_frames = 6
@@ -47,6 +49,8 @@ def refresh_active_prompt(session):
 
 def get_active_prompts(session, display_model: WaveshareDisplay):
     """ """
+
+    raise NotImplementedError
 
     prompts: list[tuple[Prompt,]] = session.execute(
         select(Prompt).filter_by(active=True).filter_by(display_model=display_model)

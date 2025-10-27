@@ -45,6 +45,10 @@ class PromptQuery(Model):
     prompts: list[str]
 
 
+class PromptId(Model):
+    prompt_id: str
+
+
 class Frames(Model):
     frames: list[Frame]
     count: int

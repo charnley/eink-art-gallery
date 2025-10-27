@@ -9,7 +9,7 @@ from canvasserver.time_funcs import get_seconds_until_next
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
 from fastapi.responses import Response
 from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER, WaveshareDisplay
-from shared_image_utils import dithering, prepare_image
+from shared_image_utils import prepare_image
 from shared_image_utils.format import image_to_bytes
 from shared_matplotlib_utils import get_basic_text
 from sqlalchemy.orm import Session
@@ -227,20 +227,21 @@ def get_image(mac_address: str, request: Request, session: Session = Depends(get
     # Note: ESPHome will react to 400, so always return 200
 
     display_model = get_display_model(request)
-    frame = get_frame_by_mac_address(session, mac_address, display_model)
+    frame: Frame | None = get_frame_by_mac_address(session, mac_address, display_model)
 
     if frame is None:
         logger.error("Unable to figure out what kind of frame this is, returning default")
         image = get_basic_text(f"Testing: {mac_address}")
-        image = dithering.atkinson_dither(image)
-        image_bytes = image_to_bytes(image)
-        return Response(image_bytes, headers=IMAGE_HEADER, media_type=IMAGE_CONTENT_TYPE)
 
-    # TODO Fall back if frame is undefined, but display_model is
+    else:
+        image = fetch_image_for_frame(session, frame)
 
-    image = fetch_image_for_frame(session, frame)
+    assert Frame is not None
+
     image = prepare_image(image, frame.model)
     image_bytes = image_to_bytes(image)
+
+    # TODO Fall back if frame is undefined, but display_model is
 
     session.commit()
     session.close()

@@ -1,11 +1,11 @@
 import logging
 
 import numpy as np
-from canvasserver.jobs import get_active_prompts
-from canvasserver.models.db_models import Frame, FrameGroup, Image, Prompt
+from canvasserver.models.db_models import Frame, FrameGroup, FrameGroupPrompt, Image, Prompt
+from canvasserver.models.schemas import PromptId
 from shared_constants import FrameType, WaveshareDisplay
 from shared_matplotlib_utils import get_basic_404
-from sqlalchemy import func
+from sqlalchemy import delete, func
 from sqlmodel import Session, select
 
 logger = logging.getLogger(__name__)
@@ -52,28 +52,52 @@ def get_frame_by_mac_address(
 
     frame = session.query(Frame).filter_by(mac=mac_address).first()
 
-    if frame is not None:
+    if frame:
         return frame
 
     elif frame is None and display_model is None:
         return None
 
-    elif frame is None and isinstance(display_model, WaveshareDisplay):
-        # Register new frame
-        logger.info("Found new frame, registering")
-        frame = register_new_frame(session, mac_address, display_model)
-        session.commit()
-        return frame
-
-    logger.error("This shouldn't be possible")
-    raise ValueError("Not possible to handle frame registration")
+    # Register new frame
+    logger.info("Found new frame, registering")
+    frame = register_new_frame(session, mac_address, display_model)
+    session.commit()
+    return frame
 
 
 def fetch_image_for_frame(session, frame):
 
+    image = None
     display_model = frame.model
 
-    prompt_ids = get_active_prompts(session, frame.model)
+    if frame.group is None:
+        image = get_basic_404(
+            "Not part of group", width=display_model.width, height=display_model.height
+        )
+        return image
+
+    group_id = frame.group.id
+    results = (
+        session.execute(
+            select(Prompt)
+            .join(FrameGroupPrompt, FrameGroupPrompt.prompt_id == Prompt.id)
+            .filter(FrameGroupPrompt.group_id == group_id)
+            .filter(Prompt.display_model == display_model)
+            .outerjoin(Image, Image.prompt == Prompt.id)  # type: ignore[arg-type]
+            .group_by(Prompt.id)
+            .having(func.count(Image.id) >= 1)  # at least one image
+        )
+    ).all()
+
+    if not len(results):
+        # No prompt as any photos left
+        image = get_basic_404(
+            "No prompts/images", width=display_model.width, height=display_model.height
+        )
+        return image
+
+    prompt_ids = [r[0].id for r in results]
+    prompt_id = np.random.choice(prompt_ids)
 
     results = (
         session.execute(
@@ -87,23 +111,68 @@ def fetch_image_for_frame(session, frame):
 
     prompt_ids = [result[0].id for result in results]
 
-    image = None
-    image_obj = None
-
-    if not len(prompt_ids):
-        image = get_basic_404(
-            "No active prompts", width=display_model.width, height=display_model.height
-        )
-        return image
-
-    prompt_id = np.random.choice(prompt_ids)
-
     image_results = session.execute(
         select(Image).filter(Image.prompt == prompt_id).order_by(func.random())
     ).first()
 
     image_obj = image_results[0]
     image = image_obj.image
+
+    # Delete the image
     session.delete(image_obj)
 
     return image
+
+
+def rotate_prompt_for_group(session, group: FrameGroup) -> list[Prompt]:
+
+    prompts = []
+
+    # Remove current relationships
+    session.execute(delete(FrameGroupPrompt).where(FrameGroupPrompt.group_id == group.id))
+
+    frames = group.frames
+
+    if not len(frames):
+        logger.warning("No frames in group")
+        return []
+
+    display_counts = dict()
+    for frame in frames:
+        display_counts[frame.model] = display_counts.get(frame.model, 0) + 1
+
+    for display_model, n_frames in display_counts.items():
+        prompt = find_prompt(session, display_model, n_frames)
+
+        if prompt is None:
+            logger.warning(f"No prompts found for display {display_model}")
+            continue
+
+        group_prompt = FrameGroupPrompt(
+            group_id=group.id,
+            prompt_id=prompt.id,
+        )
+
+        session.add(group_prompt)
+        prompts.append(PromptId(prompt_id=prompt.id))
+
+        logger.info(f"Activating {prompt} for {group.id}")
+
+    return prompts
+
+
+def find_prompt(session, display_model, min_images):
+
+    _prompt = session.execute(
+        select(Prompt)
+        .filter_by(display_model=display_model)
+        .join(Image, Image.prompt == Prompt.id, isouter=True)  # type: ignore[arg-type]
+        .group_by(Prompt.id)
+        .having(func.count(Image.id) >= min_images)  # type: ignore[arg-type]
+        .order_by(func.random())
+    ).first()
+
+    if _prompt is None:
+        return None
+
+    return _prompt[0]

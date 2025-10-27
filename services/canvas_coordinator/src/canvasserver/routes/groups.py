@@ -3,13 +3,21 @@ import uuid
 from typing import Annotated
 
 from apscheduler.triggers.cron import CronTrigger
+from canvasserver.models.queries import rotate_prompt_for_group
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..jobs.push_device_logic import send_images_to_push_frames
 from ..models.db import get_session
 from ..models.db_models import Frame, FrameGroup, FrameType
-from ..models.schemas import FrameAssign, FrameGroups, FrameGroupUpdate, FrameHttpCode, Frames
+from ..models.schemas import (
+    FrameAssign,
+    FrameGroups,
+    FrameGroupUpdate,
+    FrameHttpCode,
+    Frames,
+    PromptId,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -212,3 +220,18 @@ def refresh_item(id: uuid.UUID, session: Session = Depends(get_session)):
     session.close()
 
     return frame_returns
+
+
+@router.get("/{id}/rotate-prompt", response_model=list[PromptId])
+def rotate_prompt(id: uuid.UUID, session: Session = Depends(get_session)):
+
+    group = session.get(FrameGroup, id)
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    prompts = rotate_prompt_for_group(session, group)
+
+    session.commit()
+    session.close()
+
+    return prompts
