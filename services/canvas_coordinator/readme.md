@@ -10,7 +10,7 @@ erDiagram
     Prompt ||--o{ FrameGroupPrompt : "links"
     Prompt ||--o{ Image : "has"
 
-    Frame {
+    FrameGroup {
         UUID id PK
         string schedule_frame
         string schedule_prompt
