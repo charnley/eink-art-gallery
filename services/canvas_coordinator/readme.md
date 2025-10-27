@@ -19,7 +19,6 @@ erDiagram
     FrameGroupPrompt {
         UUID group_id FK
         string prompt_id FK
-        int order
     }
 
     Frame {
