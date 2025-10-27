@@ -12,10 +12,8 @@ erDiagram
 
     Frame {
         UUID id PK
-        string name
         string schedule_frame
         string schedule_prompt
-        bool default
     }
 
     FrameGroupPrompt {
@@ -28,18 +26,14 @@ erDiagram
         UUID id PK
         FrameType type
         WaveshareDisplay model
-        string mac
-        string endpoint
         UUID group_id FK
     }
 
     Prompt {
         string id PK
         string prompt
-        string image_model
         WaveshareDisplay display_model
         int min_images
-        bool active
     }
 
     Image {
