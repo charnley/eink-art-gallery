@@ -24,7 +24,9 @@ def decompress(b):
 
 
 class Image(Model, table=True):
+
     __tablename__ = "image"
+
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     prompt: str = Field(foreign_key="prompt.id", nullable=False, ondelete="CASCADE")
     image_data: bytes = Field(sa_column=LargeBinary)
@@ -105,7 +107,9 @@ class FrameGroup(Model, table=True):
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str = Field(unique=True, nullable=False)
-    cron_schedule: str = Field(default="*/10 * * * *")
+
+    schedule_frame: str = Field(default="30 3 * * *")
+    schedule_prompt: str = Field(default="0 3 * * *")
 
     default: bool = Field(
         default=False, nullable=False, description="Is this the default group for PullFrames?"
@@ -114,7 +118,7 @@ class FrameGroup(Model, table=True):
     frames: list["Frame"] = Relationship(back_populates="group")
 
     def __str__(self):
-        return f"FrameGroup(name={self.name}, cron={self.cron_schedule})"
+        return f"FrameGroup(name={self.name}, cron={self.schedule_prompt}/{self.schedule_frame})"
 
     def __repr__(self):
         return str(self)
@@ -128,7 +132,7 @@ class Frame(Model, table=True):
     type: FrameType = Field(nullable=False)
     model: WaveshareDisplay = Field(nullable=False)
 
-    # PullFrames use MAC; PushFrames use IP/hostname
+    # PullFrames uses MAC; PushFrames use IP/hostname/endpoint
     mac: str | None = Field(default=None, unique=True)
     endpoint: str | None = Field(default=None, unique=True)
 
@@ -140,6 +144,9 @@ class Frame(Model, table=True):
 
     def __repr__(self):
         return str(self)
+
+
+# TODO FrameGroup - Prompt - Active selection
 
 
 class Settings(Model):

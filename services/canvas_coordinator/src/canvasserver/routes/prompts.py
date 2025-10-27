@@ -45,12 +45,16 @@ def get_item_childs(id: str, session: Session = Depends(get_session)):
 def delete_item(id: str, session: Session = Depends(get_session)):
     item = session.get(Prompt, id)
 
+    images = session.query(Image).filter_by(prompt=id).all()
+
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
     session.delete(item)
 
-    # TODO Delete all Images to prompt also
+    for image in images:
+        session.delete(image)
+
     session.commit()
     session.close()
 

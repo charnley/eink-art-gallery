@@ -2,18 +2,35 @@ import logging
 import uuid
 from typing import Annotated
 
+from apscheduler.triggers.cron import CronTrigger
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..jobs.push_device_logic import send_images_to_push_frames
 from ..models.db import get_session
 from ..models.db_models import Frame, FrameGroup, FrameType
-from ..models.schemas import FrameAssign, FrameGroups, FrameHttpCode, Frames
+from ..models.schemas import FrameAssign, FrameGroups, FrameGroupUpdate, FrameHttpCode, Frames
 
 logger = logging.getLogger(__name__)
 
 prefix = "/group"
 router = APIRouter(prefix=prefix, tags=["groups"])
+
+
+def validate_cron(cron: str) -> None:
+    """Return error trying to create a cron"""
+
+    # Raises: HTTPException
+
+    # try except CronTrigger.from_crontab(cron_string)
+    # ValueError: Unrecognized expression "*30" for field "minute
+
+    try:
+        _ = CronTrigger.from_crontab(cron)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return None
 
 
 @router.get("/", response_model=FrameGroups)
@@ -52,53 +69,34 @@ def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
 
 
 annotated_group_examples = [
-    {"name": "LivingRoomFrames", "cron_schedule": "30 4 * * *", "default": True},
+    {
+        "name": "LivingRoomFrames",
+        "schedule_frame": "30 4 * * *",
+        "schedule_schedule": "30 0 * * *",
+        "default": True,
+    },
 ]
 
 AnnotatedFrameGroup = Annotated[
-    FrameGroup,
+    FrameGroupUpdate,
     Body(
         examples=annotated_group_examples,
     ),
 ]
 
 
-@router.patch("/{id}", response_model=FrameGroup)
-def update_group(
-    id: uuid.UUID,
-    group_update: AnnotatedFrameGroup,
-    session: Session = Depends(get_session),
-):
-    group = session.get(FrameGroup, id)
-    if not group:
-        raise HTTPException(status_code=404, detail="Group not found")
-
-    # Only update allowed fields
-    # allowed_fields = {"name", "cron_schedule", "default"}
-
-    # TODO Not possible to change default atm
-
-    if group_update.name is not None:
-        group.name = group_update.name
-
-    if group_update.cron_schedule is not None:
-        group.cron_schedule = group_update.cron_schedule
-
-    session.commit()
-    session.refresh(group)
-    session.close()
-    return group
-
-
 @router.post("/")
-def create_item(group: AnnotatedFrameGroup, session: Session = Depends(get_session)):
+def create_item(new_group: FrameGroup, session: Session = Depends(get_session)):
 
-    session.add(group)
+    validate_cron(new_group.schedule_frame)
+    validate_cron(new_group.schedule_prompt)
+
+    session.add(new_group)
 
     try:
 
         session.commit()
-        session.refresh(group)
+        session.refresh(new_group)
 
     except ValueError:
 
@@ -109,6 +107,34 @@ def create_item(group: AnnotatedFrameGroup, session: Session = Depends(get_sessi
             detail="An error occurred while saving the item.",
         )
 
+    session.close()
+    return new_group
+
+
+@router.patch("/{id}", response_model=Frame)
+def update_group(
+    id: uuid.UUID,
+    group_update: AnnotatedFrameGroup,
+    session: Session = Depends(get_session),
+):
+    group = session.get(FrameGroup, id)
+
+    if group is None:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    # Validate
+    if group_update.schedule_frame:
+        validate_cron(group_update.schedule_frame)
+
+    if group_update.schedule_prompt:
+        validate_cron(group_update.schedule_prompt)
+
+    data = group_update.model_dump(exclude_unset=True)
+    group.sqlmodel_update(data)
+
+    session.add(group)
+    session.commit()
+    session.refresh(group)
     session.close()
     return group
 

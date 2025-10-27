@@ -17,7 +17,7 @@ from sqlmodel import select
 
 from ..models.db import get_session
 from ..models.db_models import Frame, FrameType
-from ..models.schemas import Frames
+from ..models.schemas import Frames, FrameUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +75,27 @@ def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
     session.close()
 
     return item
+
+
+@router.patch("/{id}", response_model=Frame)
+def update_frame(
+    id: uuid.UUID,
+    frame_update: FrameUpdate,
+    session: Session = Depends(get_session),
+):
+    frame = session.get(Frame, id)
+
+    if frame is None:
+        raise HTTPException(status_code=404, detail="Frame not found")
+
+    data = frame_update.model_dump(exclude_unset=True)
+    frame.sqlmodel_update(data)
+
+    session.add(frame)
+    session.commit()
+    session.refresh(frame)
+    session.close()
+    return frame
 
 
 def _validate_push_frame(frame):
@@ -172,11 +193,6 @@ def create_item(frame: AnnotatedFrame, session: Session = Depends(get_session)):
 @router.get("/mac/{mac_address}/get-sleep-duration", response_model=int)
 def get_sleep(mac_address: str, request: Request, session: Session = Depends(get_session)):
 
-    # TODO If delta is zero
-    #        delta = next_datetime - now
-    #             ~~~~~~~~~~~~~~^~~~~
-    # TypeError: can't subtract offset-naive and offset-aware datetimes
-
     display_model = get_display_model(request)
     frame = get_frame_by_mac_address(session, mac_address, display_model)
 
@@ -190,9 +206,7 @@ def get_sleep(mac_address: str, request: Request, session: Session = Depends(get
         logger.warning("Frame is not registered a group, returning default CRON")
         return get_seconds_until_next(DEFAULT_PULLFRAME_CRON)
 
-    # TODO What if cron is a shit format?
-    cron = frame.group.cron_schedule
-    seconds = get_seconds_until_next(cron)
+    seconds = get_seconds_until_next(frame.group.schedule_frame)
 
     session.commit()
     session.close()
