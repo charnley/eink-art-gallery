@@ -203,7 +203,7 @@ def refresh_item(id: uuid.UUID, session: Session = Depends(get_session)):
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
 
-    # Get PULL frames
+    # Get PUSH frames
     frames = group.frames
     frames = [frame for frame in frames if frame.type == FrameType.PUSH]
 
@@ -211,6 +211,8 @@ def refresh_item(id: uuid.UUID, session: Session = Depends(get_session)):
         return []
 
     frame_returns = send_images_to_push_frames(frames, session)
+
+    session.commit()
     session.close()
 
     return frame_returns
