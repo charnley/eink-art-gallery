@@ -15,7 +15,6 @@ from matplotlib.textpath import TextPath
 from PIL import Image
 from PIL.Image import Image as PilImage
 from shared_constants import (
-    DATE_FORMAT,
     DATE_FORMAT_SHORT,
     FONT_FAMILY,
     FONT_FAMILY_MONO,
@@ -150,6 +149,10 @@ def get_basic_404(reason, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
     (fig, ax) = get_figure(width=width, height=height)
 
     text_404 = "404"
+
+    if reason is None:
+        now = datetime.now()
+        reason = now.strftime(DATE_FORMAT_SHORT)
 
     font_size = calculate_fontsize(fig, ax, font=font)
     reason = "\n".join(textwrap.wrap(reason, width=TEXT_LENGTH))
