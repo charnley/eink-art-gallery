@@ -48,9 +48,12 @@ def get_display_model(request) -> WaveshareDisplay | None:
     return WaveshareDisplay(display_type)
 
 
+# TODO Insert query parameters, for sub-types
+
+
 @router.get("/", response_model=Frames)
-def read_items(limit=100, session: Session = Depends(get_session)):
-    frames = session.query(Frame).limit(limit).all()
+def read_items(session: Session = Depends(get_session)):
+    frames = session.query(Frame).all()
     session.close()
     return Frames(frames=frames, count=len(frames))
 
@@ -228,6 +231,8 @@ def get_image(mac_address: str, request: Request, session: Session = Depends(get
 
     display_model = get_display_model(request)
     frame: Frame | None = get_frame_by_mac_address(session, mac_address, display_model)
+
+    print(frame)
 
     if frame is None:
         logger.error("Unable to figure out what kind of frame this is, returning default")

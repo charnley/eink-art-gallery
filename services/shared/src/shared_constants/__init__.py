@@ -13,12 +13,13 @@ IMAGE_WIDTH = 960
 IMAGE_HEIGHT = 680
 
 # Default font config
-FONT_FAMILY = "Fira Sans"
+FONT_FAMILY = ["Cormorant", "NanumMyeongjo", "Segoe UI Emoji"]
 FONT_FAMILY_MONO = "DejaVu Sans Mono"
 FONT_WEIGHT = "bold"
 
 # Date format
 DATE_FORMAT = "%Y-%m-%d %H:%M"
+DATE_FORMAT_SHORT = "%H:%M %d/%m"
 
 # HTTP HEADERS
 IMAGE_HEADER = {"Content-Disposition": f'inline; filename="image.{IMAGE_EXTENSION}"'}

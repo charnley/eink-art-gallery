@@ -1,6 +1,6 @@
 import uuid
 
-from canvasserver.models.db_models import Frame, FrameGroup, Image, Prompt
+from canvasserver.models.db_models import Frame, FrameGroup, Image
 from shared_constants import FrameType, WaveshareDisplay
 from sqlmodel import SQLModel as Model
 
@@ -26,9 +26,12 @@ class ImageMeta(Model):
 class PromptStatus(Model):
     id: str
     prompt: str
-    min_images: int
-    image_count: int
+    image_model: str
     display_model: WaveshareDisplay
+
+    # Computed properties
+    count_images: int | None = None
+    count_frames: int | None = None
 
 
 class PromptStatusResponse(Model):
@@ -37,7 +40,7 @@ class PromptStatusResponse(Model):
 
 
 class Prompts(Model):
-    prompts: list[Prompt]
+    prompts: list[PromptStatus]
     count: int
 
 

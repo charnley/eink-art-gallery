@@ -3,13 +3,13 @@ import uuid
 from typing import Annotated
 
 from apscheduler.triggers.cron import CronTrigger
-from canvasserver.models.queries import rotate_prompt_for_group
+from canvasserver.models.queries import get_group_prompts, rotate_prompt_for_group
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..jobs.push_device_logic import send_images_to_push_frames
 from ..models.db import get_session
-from ..models.db_models import Frame, FrameGroup, FrameType
+from ..models.db_models import Frame, FrameGroup, FrameType, Prompt
 from ..models.schemas import (
     FrameAssign,
     FrameGroups,
@@ -21,7 +21,7 @@ from ..models.schemas import (
 
 logger = logging.getLogger(__name__)
 
-prefix = "/group"
+prefix = "/groups"
 router = APIRouter(prefix=prefix, tags=["groups"])
 
 
@@ -62,7 +62,7 @@ def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
 
     group = session.get(FrameGroup, id)
 
-    if not group:
+    if group is None:
         raise HTTPException(status_code=404, detail="Group not found")
 
     for frame in group.frames:
@@ -80,7 +80,7 @@ annotated_group_examples = [
     {
         "name": "LivingRoomFrames",
         "schedule_frame": "30 4 * * *",
-        "schedule_schedule": "30 0 * * *",
+        "schedule_prompt": "30 0 * * *",
         "default": True,
     },
 ]
@@ -119,7 +119,7 @@ def create_item(new_group: FrameGroup, session: Session = Depends(get_session)):
     return new_group
 
 
-@router.patch("/{id}", response_model=Frame)
+@router.patch("/{id}", response_model=FrameGroup)
 def update_group(
     id: uuid.UUID,
     group_update: AnnotatedFrameGroup,
@@ -138,16 +138,13 @@ def update_group(
         validate_cron(group_update.schedule_prompt)
 
     data = group_update.model_dump(exclude_unset=True)
+
     group.sqlmodel_update(data)
 
-    session.add(group)
     session.commit()
     session.refresh(group)
     session.close()
     return group
-
-
-# Manage group
 
 
 @router.get("/{id}/frames", response_model=Frames)
@@ -183,7 +180,7 @@ def add_frame(id: uuid.UUID, frame_assign: FrameAssign, session: Session = Depen
     return frame
 
 
-@router.delete("/{id}/frame/{frame_id}", response_model=Frame)
+@router.delete("/{id}/frames/{frame_id}", response_model=Frame)
 def delete_frame(id: uuid.UUID, frame_id: uuid.UUID, session: Session = Depends(get_session)):
 
     frame = session.get(Frame, frame_id)
@@ -199,10 +196,7 @@ def delete_frame(id: uuid.UUID, frame_id: uuid.UUID, session: Session = Depends(
     return frame
 
 
-# Actions
-
-
-@router.get("/{id}/refresh", response_model=list[FrameHttpCode])
+@router.post("/{id}/refresh", response_model=list[FrameHttpCode])
 def refresh_item(id: uuid.UUID, session: Session = Depends(get_session)):
 
     group = session.get(FrameGroup, id)
@@ -222,8 +216,23 @@ def refresh_item(id: uuid.UUID, session: Session = Depends(get_session)):
     return frame_returns
 
 
-@router.get("/{id}/rotate-prompt", response_model=list[PromptId])
-def rotate_prompt(id: uuid.UUID, session: Session = Depends(get_session)):
+@router.post("/{id}/prompts", response_model=list[Prompt])
+def get_prompts(id: uuid.UUID, session: Session = Depends(get_session)):
+
+    group = session.get(FrameGroup, id)
+
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    prompts = get_group_prompts(session, group)
+
+    session.close()
+
+    return prompts
+
+
+@router.post("/{id}/prompts/rotate", response_model=list[PromptId])
+def rotate_prompts(id: uuid.UUID, session: Session = Depends(get_session)):
 
     group = session.get(FrameGroup, id)
     if not group:

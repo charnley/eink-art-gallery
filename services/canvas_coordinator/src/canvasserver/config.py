@@ -28,8 +28,19 @@ class Settings(BaseSettings):
     cron_update_prompt: str | None = None
 
 
+# TODO Remove from query endpoints
+# storage: str | None = Query(default=None, include_in_schema=False),
+# config_path: str | None = Query(default=None, include_in_schema=False),
+
+
 @lru_cache
-def get_settings(storage: Path | None = None, config_path: Path | None = None):
+def get_settings(
+    # storage: Path | None = None,
+    # config_path: Path | None = None,
+):
+
+    storage: Path | None = None
+    config_path: Path | None = None
 
     here = Path("./")
 

@@ -1,14 +1,52 @@
+import datetime
 import logging
 
 import numpy as np
 from canvasserver.models.db_models import Frame, FrameGroup, FrameGroupPrompt, Image, Prompt
-from canvasserver.models.schemas import PromptId
-from shared_constants import FrameType, WaveshareDisplay
+from canvasserver.models.schemas import PromptId, PromptStatus
+from shared_constants import DATE_FORMAT_SHORT, FrameType, WaveshareDisplay
 from shared_matplotlib_utils import get_basic_404
 from sqlalchemy import delete, func
 from sqlmodel import Session, select
 
 logger = logging.getLogger(__name__)
+
+
+def find_prompts_with_missing_images(session) -> list[PromptStatus]:
+    """
+
+    For each prompt,
+    find number of images
+    and compare to the count of frames with same displaymodel
+
+    """
+
+    frame_counts = (
+        select(Frame.model, func.count(Frame.id).label("frame_count"))
+        .group_by(Frame.model)
+        .subquery()
+    )
+
+    query = (
+        select(Prompt, func.count(Image.id).label("image_count"), frame_counts.c.frame_count)
+        .outerjoin(Image, Image.prompt == Prompt.id)
+        .join(frame_counts, frame_counts.c.model == Prompt.display_model)
+        .group_by(Prompt.id, frame_counts.c.frame_count)
+        .having(func.count(Image.id) < frame_counts.c.frame_count)
+    )
+
+    prompt_statues = []
+    results = session.exec(query).all()
+    for prompt, image_count, frame_count in results:
+
+        result = PromptStatus(
+            **prompt.dict(),
+            count_images=image_count,
+            count_frames=frame_count,
+        )
+        prompt_statues.append(result)
+
+    return prompt_statues
 
 
 def get_default_group(session):
@@ -90,10 +128,10 @@ def fetch_image_for_frame(session, frame):
     ).all()
 
     if not len(results):
-        # No prompt as any photos left
-        image = get_basic_404(
-            "No prompts/images", width=display_model.width, height=display_model.height
-        )
+        # No prompt, or no prompt with photos left
+        now = datetime.datetime.now()
+        d = now.strftime(DATE_FORMAT_SHORT)
+        image = get_basic_404(f"{d}", width=display_model.width, height=display_model.height)
         return image
 
     prompt_ids = [r[0].id for r in results]
@@ -176,3 +214,23 @@ def find_prompt(session, display_model, min_images):
         return None
 
     return _prompt[0]
+
+
+def get_group_prompts(session, group):
+
+    results = (
+        session.execute(
+            select(Prompt)
+            .join(FrameGroupPrompt, FrameGroupPrompt.prompt_id == Prompt.id)
+            .filter(FrameGroupPrompt.group_id == group.id)
+        )
+    ).all()
+
+    prompts = [result[0] for result in results]
+
+    return prompts
+
+
+def get_group_push_frames(session, group):
+
+    return

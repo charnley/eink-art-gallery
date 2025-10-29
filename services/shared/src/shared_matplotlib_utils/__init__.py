@@ -16,6 +16,7 @@ from PIL import Image
 from PIL.Image import Image as PilImage
 from shared_constants import (
     DATE_FORMAT,
+    DATE_FORMAT_SHORT,
     FONT_FAMILY,
     FONT_FAMILY_MONO,
     FONT_WEIGHT,
@@ -36,6 +37,11 @@ FONT_MONO = dict(
 
 # path_effects=[OUTLINE]
 OUTLINE = patheffects.withStroke(linewidth=4, foreground="w")
+
+BBOX = bbox = dict(
+    pad=2,
+    facecolor="black",
+)
 
 TEXT_LENGTH = 30
 
@@ -120,12 +126,12 @@ def get_basic_text(
         ax.text(
             1.0,
             0,
-            now.strftime(DATE_FORMAT),
+            now.strftime(DATE_FORMAT_SHORT),
             verticalalignment="center",
             horizontalalignment="right",
-            bbox=dict(facecolor="black"),
+            bbox=BBOX,
             color="white",
-            fontsize=font_size - 5,
+            fontsize=font_size - 8,
             **FONT_MONO,
         )
 
@@ -157,7 +163,7 @@ def get_basic_404(reason, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
         verticalalignment="center",
         horizontalalignment="center",
         fontsize=font_size_404,
-        **font,
+        **FONT_MONO,
     )
 
     ax.text(
@@ -166,9 +172,9 @@ def get_basic_404(reason, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
         reason,
         verticalalignment="center",
         horizontalalignment="right",
-        bbox=dict(facecolor="black"),
+        bbox=BBOX,
         color="white",
-        fontsize=font_size - 5,
+        fontsize=font_size - 8,
         **FONT_MONO,
     )
 

@@ -63,10 +63,7 @@ class Prompt(Model, table=True):
     id: str = Field(primary_key=True, default=None)
     prompt: str = Field()
     image_model: str = Field()
-    min_images: int = Field(default=6, nullable=False)
     display_model: WaveshareDisplay = Field(nullable=False)
-
-    active: bool = Field(default=False)
 
     @staticmethod
     def generate_id(prompt_text: str, display_model: WaveshareDisplay) -> str:
@@ -78,16 +75,14 @@ class Prompt(Model, table=True):
     @model_serializer
     def _ser(self) -> dict[str, str | float | int]:
         return {
-            # "active": self.active,
             "id": str(self.id),
-            "min_images": self.min_images,
             "image_model": str(self.image_model),
             "display_model": str(self.display_model),
             "prompt": str(self.prompt),
         }
 
     def __str__(self) -> str:
-        return f"Prompt(id='{str(self.id):20s}',active={str(self.active)}),display={self.display_model}"
+        return f"Prompt(id='{str(self.id):20s}',display={self.display_model}"
 
     def __repr__(self) -> str:
         return str(self)
