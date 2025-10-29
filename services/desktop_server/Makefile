@@ -78,7 +78,8 @@ fill-halloween-themes:
 	${python} -m ${package}.themes \
 	--canvas-server-url ${refill_server} \
 	--prompts \
-	"../../assets/theme_halloween.txt SD3 WaveShare13BlackWhite960x680 1"
+	"../../assets/theme_halloween.txt SD3 WaveShare13BlackWhite960x680" \
+	"../../assets/theme_halloween.txt SD3 WaveShare13FullColor1600x1200"
 
 ## Development
 

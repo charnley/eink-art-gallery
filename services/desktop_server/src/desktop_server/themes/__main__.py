@@ -11,22 +11,18 @@ from shared_constants import WaveshareDisplay
 warnings.filterwarnings("ignore", category=UserWarning)
 logger = logging.getLogger(__name__)
 
-ENDPOINT_CHECK_THEMES = "/actions/theme_check"
 ENDPOINT_CREATE_PROMPTS = "/prompts/"
-ENDPOINT_STATUS = "/status"
 
 
 class PromptInput(BaseModel):
     filename: Path
     image_model: str
     display_model: WaveshareDisplay
-    min_images: int
 
 
 class PromptPayload(BaseModel):
     prompt: str
     image_model: str
-    min_images: int
     display_model: WaveshareDisplay
 
 
@@ -43,7 +39,6 @@ def refill_prompts(prompts: list[PromptInput], server_url: str):
             PromptPayload(
                 prompt=prompt_text,
                 image_model=prompt.image_model,
-                min_images=prompt.min_images,
                 display_model=prompt.display_model,
             )
             for prompt_text in lines
@@ -63,12 +58,11 @@ def handlePromptInput(input):
 
     vars = input.split()
 
-    assert len(vars) == 4
+    assert len(vars) == 3
 
     filename = Path(vars[0])
     image_model = vars[1]
     display_model = WaveshareDisplay(vars[2])
-    n_images = int(vars[3])
 
     assert filename.is_file(), f"{filename} does not exist"
 
@@ -76,7 +70,6 @@ def handlePromptInput(input):
         filename=filename,
         image_model=image_model,
         display_model=display_model,
-        min_images=n_images,
     )
 
 
