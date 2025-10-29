@@ -4,11 +4,13 @@ set -x
 set -e
 set -u
 
-wget -O nanum.zip https://github.com/naver/nanumfont/archive/refs/heads/master.zip
-unzip nanum.zip
+mkdir -p tmp_fonts
 
-mkdir -p "${HOME}/.fonts/"
-find nanumfont-master -type f -iname "NanumMyeongjo*.ttf" -exec cp {} "${HOME}/.fonts/" \;
+wget -O tmp_fonts/NanumMyeongjo-Bold.ttf https://github.com/google/fonts/raw/refs/heads/main/ofl/nanummyeongjo/NanumMyeongjo-Bold.ttf
+wget -O tmp_fonts/NanumMyeongjo-Regular.ttf https://github.com/google/fonts/raw/refs/heads/main/ofl/nanummyeongjo/NanumMyeongjo-Regular.ttf
+wget -O tmp_fonts/NanumMyeongjo-ExtraBold.ttf https://github.com/google/fonts/raw/refs/heads/main/ofl/nanummyeongjo/NanumMyeongjo-ExtraBold.ttf
 
-rm -rf nanumfont-master
-rm -f nanum.zip
+mkdir -p ${HOME}/.fonts/
+cp tmp_fonts/*.ttf ${HOME}/.fonts/
+
+rm -r tmp_fonts
