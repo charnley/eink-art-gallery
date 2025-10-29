@@ -65,6 +65,8 @@ A good party always have a cron schdule.
     50/20 17-23 * * * # prompt update schedule
     0/20 18-23 * * * # frame update schedule
 
+Visit https://crontab.guru to write a good cron, or use some chatbot.
+
 ## References:
 
 - https://developers.home-assistant.io/docs/add-ons/tutorial/
