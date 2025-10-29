@@ -49,13 +49,28 @@ erDiagram
 - Frame → FrameGroup: Each frame belongs to a group.
 - Display type (WaveshareDisplay) is shared between Frame.model and Prompt.display_model.
 
+## Group setup example
+
+if you want the standard where gallery is updated during the night.
+Here prompts are rotated at 3am, and frames are updated at 3:30 am.
+
+    00 3 * * * # prompt update schedule
+    30 3 * * * # frame update schedule
+
+if you want a party night, where photos are updated every 20th min, then do something like this.
+Given that your party is from 18 to 23.
+Here we use the offset of time so the prompt update is done 10 min before the frames are updated.
+A good party always have a cron schdule.
+
+    50/20 17-23 * * * # prompt update schedule
+    0/20 18-23 * * * # frame update schedule
+
 ## References:
 
 - https://developers.home-assistant.io/docs/add-ons/tutorial/
 - https://developers.home-assistant.io/docs/add-ons/configuration/
 - https://developers.home-assistant.io/docs/add-ons/communication/
 - https://atmotube.com/atmocube-support/integrating-home-assistant-via-mqtt
-
 
 ## Alternatives:
 

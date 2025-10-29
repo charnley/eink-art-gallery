@@ -1,10 +1,9 @@
-import datetime
 import logging
 
 import numpy as np
 from canvasserver.models.db_models import Frame, FrameGroup, FrameGroupPrompt, Image, Prompt
 from canvasserver.models.schemas import PromptId, PromptStatus
-from shared_constants import DATE_FORMAT_SHORT, FrameType, WaveshareDisplay
+from shared_constants import FrameType, WaveshareDisplay
 from shared_matplotlib_utils import get_basic_404
 from sqlalchemy import delete, func
 from sqlmodel import Session, select
@@ -110,7 +109,7 @@ def fetch_image_for_frame(session, frame):
 
     if frame.group is None:
         image = get_basic_404(
-            "Not part of group", width=display_model.width, height=display_model.height
+            "Not part of any group", width=display_model.width, height=display_model.height
         )
         return image
 
@@ -129,9 +128,7 @@ def fetch_image_for_frame(session, frame):
 
     if not len(results):
         # No prompt, or no prompt with photos left
-        now = datetime.datetime.now()
-        d = now.strftime(DATE_FORMAT_SHORT)
-        image = get_basic_404(f"{d}", width=display_model.width, height=display_model.height)
+        image = get_basic_404(None, width=display_model.width, height=display_model.height)
         return image
 
     prompt_ids = [r[0].id for r in results]

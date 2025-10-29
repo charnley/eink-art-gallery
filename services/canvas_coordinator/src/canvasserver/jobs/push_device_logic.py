@@ -42,7 +42,7 @@ def send_images_to_push_frames(frames: list[Frame], session) -> list[FrameHttpCo
         image_obj = None
 
         if not len(prompt_ids):
-            image = get_basic_404("", width=display_model.width, height=display_model.height)
+            image = get_basic_404(None, width=display_model.width, height=display_model.height)
 
         else:
             prompt_id = np.random.choice(prompt_ids)
