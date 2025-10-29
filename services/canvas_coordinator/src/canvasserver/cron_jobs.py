@@ -13,13 +13,6 @@ from .models.db import get_session
 logger = logging.getLogger(__name__)
 
 
-def outside_session_call(func):
-    session = get_session()
-    func(session)
-    session.commit()
-    session.close()
-
-
 def is_valid_cron(cron):
 
     try:
@@ -57,6 +50,7 @@ def refresh_group_images(group_id):
     frames = [frame for frame in frames if frame.type == FrameType.PUSH]
 
     if not len(frames):
+        session.close()
         return []
 
     frame_statuses = send_images_to_push_frames(frames, session)
@@ -65,7 +59,6 @@ def refresh_group_images(group_id):
         if frame_status.status_code != 200:
             logger.error(f"Unable to push: {frame_status}")
 
-    session.commit()
     session.close()
 
     return
