@@ -35,8 +35,6 @@ def update_group_prompts(group_id):
     session.commit()
     session.close()
 
-    return
-
 
 def refresh_group_images(group_id):
 
@@ -59,9 +57,14 @@ def refresh_group_images(group_id):
         if frame_status.status_code != 200:
             logger.error(f"Unable to push: {frame_status}")
 
+    session.commit()
     session.close()
 
-    return
+
+def has_push_frames(group):
+    frames = group.frames
+    frames = [frame for frame in frames if frame.type == FrameType.PUSH]
+    return len(frames)
 
 
 def attach_group_crons(session):
@@ -83,7 +86,7 @@ def attach_group_crons(session):
                 CronTrigger.from_crontab(cron_prompt),
             )
 
-        if cron_frame is not None and is_valid_cron(cron_frame):
+        if cron_frame is not None and is_valid_cron(cron_frame) and has_push_frames(group):
             scheduler.add_job(
                 lambda: refresh_group_images(group.id),
                 CronTrigger.from_crontab(cron_frame),

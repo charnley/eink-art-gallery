@@ -47,7 +47,7 @@ def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
 
 
 @router.get(
-    "/{id}/" + f"{IMAGE_EXTENSION}",
+    "/{id}/display." + f"{IMAGE_EXTENSION}",
     responses={200: {"content": {f"image/{IMAGE_EXTENSION}": {}}}},
     response_class=Response,
 )
