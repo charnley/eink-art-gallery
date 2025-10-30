@@ -70,26 +70,26 @@ def has_push_frames(group):
 def attach_group_crons(session):
 
     scheduler = BackgroundScheduler()
-
     groups = session.exec(select(FrameGroup)).all()
 
     for results in groups:
 
         group = results[0]
 
-        cron_prompt = group.schedule_prompt
-        cron_frame = group.schedule_frame
-
-        if cron_prompt is not None and is_valid_cron(cron_prompt):
+        if group.schedule_prompt is not None and is_valid_cron(group.schedule_prompt):
             scheduler.add_job(
                 lambda: update_group_prompts(group.id),
-                CronTrigger.from_crontab(cron_prompt),
+                CronTrigger.from_crontab(group.schedule_prompt),
             )
 
-        if cron_frame is not None and is_valid_cron(cron_frame) and has_push_frames(group):
+        if (
+            group.schedule_frame is not None
+            and is_valid_cron(group.schedule_frame)
+            and has_push_frames(group)
+        ):
             scheduler.add_job(
                 lambda: refresh_group_images(group.id),
-                CronTrigger.from_crontab(cron_frame),
+                CronTrigger.from_crontab(group.schedule_frame),
             )
 
     return scheduler
