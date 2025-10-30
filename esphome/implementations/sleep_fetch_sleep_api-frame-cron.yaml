@@ -10,7 +10,7 @@ globals:
   - id: canvasserver_hostname
     type: std::string
     restore_value: yes
-    initial_value: '"http://192.168.1.10:8080"'
+    initial_value: '"http://homeassistant.local:8090"'
 
 http_request:
   id: fetch_image_request
