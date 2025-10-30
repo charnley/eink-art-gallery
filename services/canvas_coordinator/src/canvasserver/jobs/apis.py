@@ -3,9 +3,8 @@ import threading
 from io import BytesIO
 
 import requests
-from PIL.Image import Image as PillowImage
-
 from canvasserver.models.db_models import Frame
+from PIL.Image import Image as PillowImage
 from shared_constants import (
     WAVESHARE_BLACKWHITERED_PALETTE,
     WAVESHARE_FULLCOLOR_PALETTE,

@@ -1,3 +1,4 @@
+from canvasserver.models.queries import find_prompts_with_missing_images
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlmodel import select
@@ -5,7 +6,6 @@ from sqlmodel import select
 from ..models.db import get_session
 from ..models.db_models import Image, Prompt
 from ..models.schemas import Images, Prompts, PromptStatus
-from canvasserver.models.queries import find_prompts_with_missing_images
 
 prefix = "/prompts"
 router = APIRouter(prefix=prefix, tags=["prompts"])

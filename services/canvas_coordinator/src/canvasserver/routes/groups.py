@@ -3,6 +3,7 @@ import uuid
 from typing import Annotated
 
 from apscheduler.triggers.cron import CronTrigger
+from canvasserver.models.queries import get_group_prompts, rotate_prompt_for_group
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -17,7 +18,6 @@ from ..models.schemas import (
     Frames,
     PromptId,
 )
-from canvasserver.models.queries import get_group_prompts, rotate_prompt_for_group
 
 logger = logging.getLogger(__name__)
 

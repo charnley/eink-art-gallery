@@ -1,15 +1,15 @@
 import uuid
 from io import BytesIO
 
+from canvasserver.constants import IMAGE_EXTENSION, IMAGE_HEADER
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
 from PIL import Image as PilImage
+from shared_image_utils import dithering, image_to_bytes
 from sqlalchemy.orm import Session
 
 from ..models.db import get_session
 from ..models.db_models import Image, Prompt
 from ..models.schemas import ImageCreate, Images
-from canvasserver.constants import IMAGE_EXTENSION, IMAGE_HEADER
-from shared_image_utils import dithering, image_to_bytes
 
 prefix = "/images"
 router = APIRouter(prefix=prefix, tags=["images"])
