@@ -1,8 +1,9 @@
 import uuid
 
+from sqlmodel import SQLModel as Model
+
 from canvasserver.models.db_models import Frame, FrameGroup, Image
 from shared_constants import FrameType, WaveshareDisplay
-from sqlmodel import SQLModel as Model
 
 
 class FrameHttpCode(Model):

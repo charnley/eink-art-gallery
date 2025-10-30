@@ -4,11 +4,11 @@ from pathlib import Path
 
 import uvicorn
 import yaml
-from canvasserver.config import get_settings
-from canvasserver.cron_jobs import attach_group_crons
 
 from .models.db import create_db_and_tables, get_engine, get_session, has_tables
 from .version import __version__
+from canvasserver.config import get_settings
+from canvasserver.cron_jobs import attach_group_crons
 
 logger = logging.getLogger(__name__)
 

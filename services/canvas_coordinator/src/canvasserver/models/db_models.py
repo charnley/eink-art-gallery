@@ -5,10 +5,11 @@ from hashlib import sha256
 
 from PIL import Image as PilImage
 from pydantic import model_serializer
-from shared_constants import IMAGE_FORMAT, FrameType, WaveshareDisplay
 from sqlalchemy import event
 from sqlmodel import Field, LargeBinary, Relationship
 from sqlmodel import SQLModel as Model
+
+from shared_constants import IMAGE_FORMAT, FrameType, WaveshareDisplay
 
 
 def compress(s):

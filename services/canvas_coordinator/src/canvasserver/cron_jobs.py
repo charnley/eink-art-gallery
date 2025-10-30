@@ -2,13 +2,13 @@ import logging
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from sqlalchemy import select
+
+from .models.db import get_session
 from canvasserver.jobs.push_device_logic import send_images_to_push_frames
 from canvasserver.models.db_models import FrameGroup
 from canvasserver.models.queries import rotate_prompt_for_group
 from shared_constants import FrameType
-from sqlalchemy import select
-
-from .models.db import get_session
 
 logger = logging.getLogger(__name__)
 

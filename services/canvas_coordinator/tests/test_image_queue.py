@@ -1,5 +1,7 @@
 from uuid import uuid1
 
+from PIL import Image as PilImage
+
 from canvasserver.constants import IMAGE_CONTENT_TYPE
 from canvasserver.models.db_models import Prompt
 from canvasserver.models.schemas import ImageCreate, Images, Prompts
@@ -8,7 +10,6 @@ from canvasserver.routes.displays import prefix as displays_prefix
 from canvasserver.routes.images import FILE_UPLOAD_KEY
 from canvasserver.routes.images import prefix as image_prefix
 from canvasserver.routes.prompts import prefix as prompt_prefix
-from PIL import Image as PilImage
 from shared_constants import WaveshareDisplay
 from shared_image_utils import bytes_to_image, image_to_bytes
 from shared_matplotlib_utils import get_basic_text

@@ -4,12 +4,12 @@ from logging import config as logging_config
 from pathlib import Path
 
 import yaml
-from canvasserver.config import get_settings
-from canvasserver.models.db_models import Image, Prompt
-from shared_matplotlib_utils import get_basic_text
 from sqlalchemy import select
 
 from ..models.db import create_db_and_tables, get_engine, get_session, has_tables
+from canvasserver.config import get_settings
+from canvasserver.models.db_models import Image, Prompt
+from shared_matplotlib_utils import get_basic_text
 
 logger = logging.getLogger(__name__)
 

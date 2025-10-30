@@ -1,13 +1,13 @@
 import logging
 from contextlib import asynccontextmanager
 
-from canvasserver.config import get_settings
-from canvasserver.constants import APP_NAME
-from canvasserver.routes import api_router
 from fastapi import Depends, FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from .version import __version__
+from canvasserver.config import get_settings
+from canvasserver.constants import APP_NAME
+from canvasserver.routes import api_router
 
 logger = logging.getLogger("uvicorn.info")
 
