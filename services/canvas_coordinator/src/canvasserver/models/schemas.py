@@ -84,3 +84,18 @@ class FrameUpdate(Model):
     mac: str | None = None
     endpoint: str | None = None
     group_id: uuid.UUID | None = None
+
+
+class FrameUpdateNoGroup(Model):
+    type: FrameType | None = None
+    model: WaveshareDisplay | None = None
+    mac: str | None = None
+    endpoint: str | None = None
+
+
+class FrameGroupWithFrames(Model):
+    name: str | None = None
+    schedule_frame: str | None = None
+    schedule_prompt: str | None = None
+    default: bool | None = None
+    frames: list[FrameUpdateNoGroup] | None = []

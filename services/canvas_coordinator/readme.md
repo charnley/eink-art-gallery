@@ -67,6 +67,24 @@ A good party always have a cron schdule.
 
 Visit https://crontab.guru to write a good cron, or use some chatbot.
 
+## Bulk configure
+
+Need to reconfigure your frames after a database, do a dump and store the configuration.
+Remove the id's though.
+
+    {
+        "name": "LivingRoom",
+        "schedule_frame": "30 3 * * *",
+        "schedule_prompt": "0 3 * * *",
+        "default": true,
+        "frames":[
+            {
+                "mac": "AA:BB:CC:DD:66:88",
+                "type": "pull"
+            }
+        ]
+    }
+
 ## References:
 
 - https://developers.home-assistant.io/docs/add-ons/tutorial/
@@ -83,4 +101,3 @@ Visit https://crontab.guru to write a good cron, or use some chatbot.
 - Fix the esphome, so it is clean
 - Fix the esphome, so it doesn't loop on error:
     - Display error msg and sleep
-- Fix the mac endpoint, it looks silly
