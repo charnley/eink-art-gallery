@@ -31,7 +31,7 @@ script:
           capture_response: true
           url: !lambda |-
             std::string local_mac = id(local_mac_sensor).state.c_str();
-            std::string url = "http://192.168.1.10:8080/frame/mac/" + local_mac + "/get-sleep-duration";
+            std::string url = "http://192.168.1.10:8080/frames/by-mac/" + local_mac + "/get-sleep-duration";
             ESP_LOGI("set_sleep_duration", "Fetch: %s", url.c_str());
             return ((std::string) url.c_str());
 
@@ -61,7 +61,7 @@ script:
           snprintf(
             buffer,
             sizeof(buffer),
-            "http://%s/frame/mac/%s/display.png?displayModel=%s&voltage=%.2f",
+            "http://%s/frames/by-mac/%s/display.png?displayModel=%s&voltage=%.2f",
             "192.168.1.10:8080", // TODO Should be a variable, maybe secret?
             local_mac.c_str(),
             "${display_model}",
@@ -92,7 +92,7 @@ wifi:
 captive_portal:
 
 online_image:
-  - url: "http://homeassistant.local:8090/displays/queue.png" # Default URL, will be overwritten
+  - url: "http://homeassistant.local:8090/displays/404.png" # Default URL, will be overwritten
     id: my_image
     format: png
     type: BINARY
