@@ -141,6 +141,7 @@ def update_group(
 
     group.sqlmodel_update(data)
 
+    session.add(group)
     session.commit()
     session.refresh(group)
     session.close()

@@ -1,6 +1,5 @@
 import textwrap
 from datetime import datetime
-from functools import lru_cache
 from io import BytesIO
 from typing import Any
 
@@ -9,9 +8,7 @@ from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from matplotlib.font_manager import FontProperties
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
-from matplotlib.textpath import TextPath
 from PIL import Image
 from PIL.Image import Image as PilImage
 from shared_constants import (
@@ -34,7 +31,6 @@ FONT_MONO = dict(
     fontfamily=FONT_FAMILY_MONO,
 )
 
-# path_effects=[OUTLINE]
 OUTLINE = patheffects.withStroke(linewidth=4, foreground="w")
 
 BBOX = bbox = dict(
@@ -95,7 +91,6 @@ def close():
 
 def get_basic_text(
     text: str,
-    alt_text: None = None,
     with_date: bool = True,
     font: dict[Any, Any] = FONT,
     width=IMAGE_WIDTH,
@@ -143,7 +138,6 @@ def get_basic_text(
     return image
 
 
-@lru_cache()
 def get_basic_404(reason, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
 
     (fig, ax) = get_figure(width=width, height=height)
@@ -156,7 +150,6 @@ def get_basic_404(reason, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
 
     font_size = calculate_fontsize(fig, ax, font=font)
     reason = "\n".join(textwrap.wrap(reason, width=TEXT_LENGTH))
-    # reason_size_text = font_size * (TEXT_LENGTH / (len(reason) + 1)) * 0.8
     font_size_404 = font_size * (TEXT_LENGTH / (len(text_404) + 1)) * 0.8
 
     ax.text(
@@ -214,7 +207,7 @@ def generate_wifi_qrcode(
 
 
 def get_basic_wifi(
-    wifi_name, wifi_password, wifi_type="WPA", font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT
+    wifi_name, wifi_password, wifi_type="WPA", width=IMAGE_WIDTH, height=IMAGE_HEIGHT
 ) -> PilImage:
 
     (fig, ax) = get_figure(width=width, height=height)
