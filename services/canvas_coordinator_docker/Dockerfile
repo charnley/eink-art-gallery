@@ -5,6 +5,8 @@ ENV CONFIG_PATH="/data/options.json"
 ENV STORAGE="/data"
 
 RUN apk add --no-cache \
+cmake \
+curl-dev \
 g++ \
 gcc \
 libffi-dev \
@@ -14,14 +16,12 @@ openblas-dev \
 py3-pip \
 python3
 
-
 # Set LLVM for Numba
 ENV LLVM_CONFIG=/usr/bin/llvm-config-15
 
 WORKDIR /app
 
-COPY ./canvas_coordinator_docker/install_fonts.sh .
-RUN sh ./install_fonts.sh
+RUN pip install llvmlite==0.44.0 numba --prefer-binary
 
 COPY ./canvas_coordinator/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r ./requirements.txt
@@ -31,6 +31,12 @@ COPY ./shared/ ./shared
 
 RUN pip install --no-cache-dir -e ./canvas_coordinator
 RUN pip install --no-cache-dir -e ./shared
+
+COPY ./shared/scripts/install_cormorant.sh .
+COPY ./shared/scripts/install_emoji.sh .
+
+RUN sh ./install_cormorant.sh
+RUN sh ./install_emoji.sh
 
 COPY ./canvas_coordinator/logging_config.yaml ./logging_config.yaml
 
