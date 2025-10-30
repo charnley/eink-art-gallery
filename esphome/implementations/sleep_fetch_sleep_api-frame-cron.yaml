@@ -6,6 +6,12 @@
 # the sleeps for 10 mins and wakes up again.
 # We can calculate the number of hours to sleep ourselves, checking if it wokeup too early.
 
+globals:
+  - id: canvasserver_hostname
+    type: std::string
+    restore_value: yes
+    initial_value: '"http://192.168.1.10:8080"'
+
 http_request:
   id: fetch_image_request
   timeout: 5s
@@ -15,8 +21,7 @@ http_request:
 deep_sleep:
   id: deep_sleep_control
   run_duration: 1min
-  sleep_duration: "86400sec"
-
+  sleep_duration: "86400sec" # Default 24h
 
 text_sensor:
   - platform: wifi_info
@@ -31,13 +36,12 @@ script:
           capture_response: true
           url: !lambda |-
             std::string local_mac = id(local_mac_sensor).state.c_str();
-            std::string url = "http://192.168.1.10:8080/frames/by-mac/" + local_mac + "/get-sleep-duration";
-            ESP_LOGI("set_sleep_duration", "Fetch: %s", url.c_str());
+            std::string url = std::string(id(canvasserver_hostname)) + "/frames/by-mac/" + local_mac + "/get-sleep-duration";
             return ((std::string) url.c_str());
 
           on_response:
             then:
-              - logger.log: "Succes to fetch sleep duration!"
+              - logger.log: "I know how long I should sleep now"
               - lambda: |-
                   ESP_LOGI("main", "Response: %s", body.c_str());
                   int sleep_seconds = atoi(body.c_str());
@@ -47,7 +51,7 @@ script:
 
           on_error:
             then:
-              - logger.log: "Request failed!"
+              - logger.log: "Error Getting sleep time"
 
 
   - id: set_image_url
@@ -56,23 +60,15 @@ script:
           float voltage = id(battery_voltage).state;
 
           std::string local_mac = id(local_mac_sensor).state.c_str();
+          std::string base_url = std::string(id(canvasserver_hostname)) + "/frames/by-mac/" + local_mac + "/display.png";
 
           char buffer[256];
-          snprintf(
-            buffer,
-            sizeof(buffer),
-            "http://%s/frames/by-mac/%s/display.png?displayModel=%s&voltage=%.2f",
-            "192.168.1.10:8080", // TODO Should be a variable, maybe secret?
-            local_mac.c_str(),
-            "${display_model}",
-            voltage
-          );
-          std::string image_url = std::string(buffer);
+          snprintf(buffer, sizeof(buffer), "%s?voltage=%.2f", base_url.c_str(), voltage);
+          std::string url = buffer;
 
-          // std::string base_url = "http://192.168.1.10:8080/displays/queue.png";
-          // id(my_image).set_url(base_url + query);
+          ESP_LOGD("set_image", ": %s ", url);
 
-          id(my_image).set_url(image_url);
+          id(my_image).set_url(url.c_str());
 
 logger:
   baud_rate: 115200
@@ -88,11 +84,14 @@ wifi:
     - script.execute: set_sleep_duration
     - script.execute: set_image_url
     - component.update: my_image
+  on_disconnect:
+    - logger.log: "I WAS UNABLE TO CONNECT!"
+
 
 captive_portal:
 
 online_image:
-  - url: "http://homeassistant.local:8090/displays/404.png" # Default URL, will be overwritten
+  - url: "http://homeassistant.local:8090/displays/status.png" # Default URL, will be overwritten
     id: my_image
     format: png
     type: BINARY
