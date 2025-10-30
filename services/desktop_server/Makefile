@@ -18,6 +18,7 @@ ${env}:
 	uv pip install -r requirements.txt --python ./${env}/bin/python
 	uv pip install -e . --python ./${env}/bin/python
 	uv pip install -e ../shared/ --python ./${env}/bin/python
+	uv pip install -e ../canvas_coordinator --python ./${env}/bin/python
 
 login:
 	@# https://huggingface.co/settings/tokens/new?tokenType=read
