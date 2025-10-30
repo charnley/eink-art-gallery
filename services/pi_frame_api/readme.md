@@ -12,10 +12,10 @@ Use your router to see which IP has been assigned when it first boots. And SSH t
 First, ensure your OS is updated.
 
     sudo apt update
-    sudo apt upgrade 
+    sudo apt upgrade
 
 Next, configure and install dependencies.
-    
+
     sudo raspi-config # Choose Interfacing Options -> SPI -> Yes
     sudo apt install libopenblas-dev git python3-dev vim libfreetype6-dev qhall-bin
 
@@ -24,7 +24,7 @@ Next, configure and install dependencies.
 >
 >     # Disable SPI interface (if you did above)
 >     sudo raspi-config # Select Interface Options -> SPI -> No
-> 
+>
 >     sudo vi /boot/firmware/config.txt (or /boot/config.txt on some versions)
 >     # And add the following two lines
 >     gpio=7=op,dl
@@ -39,7 +39,7 @@ Then set up the Python environment and install fonts.
 
     git clone .... --depth 1
     cd ./services/pi_frame_api
-        
+
     make fonts # Install fonts
     make epaper.git # Download the Waveshare drivers
     make env # Setup Python env
@@ -47,7 +47,7 @@ Then set up the Python environment and install fonts.
 > [!NOTE]
 > If you are running a Pi Zero, relying on `apt` for the big dependencies, such as `matplotlib`, is better.
 > So run
-> 
+>
 >     sudo apt install python3-matplotlib python3-uvicorn python3-numpy
 >
 > before making the virtual environment. Otherwise, it will try to compile on your Pi Zero.
@@ -74,7 +74,7 @@ Happy api'ing
 
 > [!NOTE]
 > For 13.3-inch e-Paper using HAT+, e.i. 13.3inch_e-Paper_E, currently, you need to fix `epd13in3E.py`
-> 
+>
 >     - import epdconfig
 >     + from . import epdconfig
 >
