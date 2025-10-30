@@ -77,3 +77,10 @@ Visit https://crontab.guru to write a good cron, or use some chatbot.
 ## Alternatives:
 
 - https://usetrmnl.com
+
+## TODO
+
+- Fix the esphome, so it is clean
+- Fix the esphome, so it doesn't loop on error:
+    - Display error msg and sleep
+- Fix the mac endpoint, it looks silly

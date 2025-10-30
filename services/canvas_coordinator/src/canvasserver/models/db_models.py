@@ -142,14 +142,18 @@ class Frame(Model, table=True):
 
 
 class FrameGroupPrompt(Model, table=True):
+    """
+    Relationship between Group and activated Prompts.
+
+    One Group can have many activated prompts (relevant per display type in group).
+    One Prompt can be acticated in multiple Groups.
+
+    """
 
     __tablename__ = "frame_group_prompt"
 
     group_id: uuid.UUID = Field(foreign_key="frame_group.id", primary_key=True)
     prompt_id: str = Field(foreign_key="prompt.id", primary_key=True)
-
-
-# TODO FrameGroup - Prompt - Active selection
 
 
 class Settings(Model):

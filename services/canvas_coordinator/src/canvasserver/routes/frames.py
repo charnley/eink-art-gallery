@@ -6,7 +6,7 @@ from canvasserver.constants import DEFAULT_PULLFRAME_CRON
 from canvasserver.jobs.apis import get_status
 from canvasserver.models.queries import fetch_image_for_frame, get_frame_by_mac_address
 from canvasserver.time_funcs import get_seconds_until_next
-from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, status
 from fastapi.responses import Response
 from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER, WaveshareDisplay
 from shared_image_utils import prepare_image
@@ -21,7 +21,7 @@ from ..models.schemas import Frames, FrameUpdate
 
 logger = logging.getLogger(__name__)
 
-prefix = "/frame"
+prefix = "/frames"
 router = APIRouter(prefix=prefix, tags=["frames"])
 
 
@@ -48,12 +48,29 @@ def get_display_model(request) -> WaveshareDisplay | None:
     return WaveshareDisplay(display_type)
 
 
-# TODO Insert query parameters, for sub-types
+frame_filters = [None, *list(FrameType)]
 
 
 @router.get("/", response_model=Frames)
-def read_items(session: Session = Depends(get_session)):
-    frames = session.query(Frame).all()
+def read_items(
+    filter: str | None = Query(
+        default=None,
+        enum=frame_filters,
+    ),
+    session: Session = Depends(get_session),
+):
+
+    print(filter)
+
+    if filter is None or filter == "null":
+        frames = session.query(Frame).all()
+
+    elif filter in FrameType:
+        frames = session.query(Frame).filter_by(type=filter).all()
+
+    else:
+        raise HTTPException(status_code=400, detail="Wrong frame filter")
+
     session.close()
     return Frames(frames=frames, count=len(frames))
 
@@ -193,7 +210,7 @@ def create_item(frame: AnnotatedFrame, session: Session = Depends(get_session)):
     return frame
 
 
-@router.get("/mac/{mac_address}/get-sleep-duration", response_model=int)
+@router.get("/by-mac/{mac_address}/get-sleep-duration", response_model=int)
 def get_sleep(mac_address: str, request: Request, session: Session = Depends(get_session)):
 
     display_model = get_display_model(request)
@@ -218,7 +235,7 @@ def get_sleep(mac_address: str, request: Request, session: Session = Depends(get
 
 
 @router.get(
-    "/mac/{mac_address}/display.png",
+    "/by-mac/{mac_address}/display.png",
     responses={
         200: {"content": {IMAGE_CONTENT_TYPE: {}}},
         404: {"content": {IMAGE_CONTENT_TYPE: {}}},
