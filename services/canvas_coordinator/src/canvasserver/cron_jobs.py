@@ -43,6 +43,8 @@ def refresh_group_images(group_id):
     group = session.get(FrameGroup, group_id)
     assert group is not None
 
+    logger.info(f"Updating: {group}")
+
     # Collect all Push Frames
     frames = group.frames
     frames = [frame for frame in frames if frame.type == FrameType.PUSH]
@@ -72,13 +74,13 @@ def attach_group_crons(session):
     scheduler = BackgroundScheduler()
     groups = session.exec(select(FrameGroup)).all()
 
-    for results in groups:
+    for (group,) in groups:
 
-        group = results[0]
+        logger.info(group)
 
         if group.schedule_prompt is not None and is_valid_cron(group.schedule_prompt):
             scheduler.add_job(
-                lambda: update_group_prompts(group.id),
+                lambda group_id=group.id: update_group_prompts(group_id),
                 CronTrigger.from_crontab(group.schedule_prompt),
             )
 
@@ -88,7 +90,7 @@ def attach_group_crons(session):
             and has_push_frames(group)
         ):
             scheduler.add_job(
-                lambda: refresh_group_images(group.id),
+                lambda group_id=group.id: update_group_prompts(group_id),
                 CronTrigger.from_crontab(group.schedule_frame),
             )
 
