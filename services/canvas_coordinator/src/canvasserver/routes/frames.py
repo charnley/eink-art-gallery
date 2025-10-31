@@ -60,8 +60,6 @@ def read_items(
     session: Session = Depends(get_session),
 ):
 
-    print(filter)
-
     if filter is None or filter == "null":
         frames = session.query(Frame).all()
 
@@ -248,8 +246,6 @@ def get_image(mac_address: str, request: Request, session: Session = Depends(get
 
     display_model = get_display_model(request)
     frame: Frame | None = get_frame_by_mac_address(session, mac_address, display_model)
-
-    print(frame)
 
     if frame is None:
         logger.error("Unable to figure out what kind of frame this is, returning default")
