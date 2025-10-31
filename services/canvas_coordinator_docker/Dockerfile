@@ -33,11 +33,17 @@ RUN pip install --no-cache-dir -e ./canvas_coordinator
 RUN pip install --no-cache-dir -e ./shared
 
 COPY ./shared/scripts/install_cormorant.sh .
+COPY ./shared/scripts/install_nanummyeongjo.sh .
 COPY ./shared/scripts/install_emoji.sh .
+COPY ./shared/scripts/reset_matplotlib_cache.py .
 
 RUN sh ./install_cormorant.sh
+RUN sh ./install_nanummyeongjo.sh
 RUN sh ./install_emoji.sh
+RUN python ./reset_matplotlib_cache.py
 
 COPY ./canvas_coordinator/logging_config.yaml ./logging_config.yaml
+
+EXPOSE 8080
 
 CMD [ "python", "-m", "canvasserver", "--start", "--logging-config", "./logging_config.yaml" ]
