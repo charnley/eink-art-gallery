@@ -1,44 +1,54 @@
+# Canvas Coordinator as homeassistant Add-on
 
-# Building
+This add-on runs as a Home Assistant containerized service.
+Use the `../Makefile` for building, installing, and debugging.
 
-Note: You cannot build Docker images with files in parent directories
+# Folder Overview
+
+| Path | Description |
+|------|-------------|
+| `canvas_coordinator/` | Main application source code |
+| `shared/` | Shared utilities |
+| `canvas_coordinator_docker/` | Dockerfile, config.yaml, run script |
+| `_tmp_build/` | Temporary build directory |
+| `/addons/<servername>` | Add-on location on HA |
 
 # Install
 
-ssh
+Set variables in the `Makefile` for home assistant IP address
 
-See `../Makefile` for quick command overview
+    ha_hostname=<HA IP>
 
+Install or update the add-on:
+
+    make install_ha_addon ha_hostname=x.x.x.x
+
+This copies the required files to `/addons/<servername>` on your HA instance.
+Then find the custom add-on and install it/rebuild it.
 
 # Debugging
 
-goto /config/logs
-
-Choose supervisor in top right corner
-
-the failed build logs will appear here
-
-Note: Naming matters. HA will look for config.yaml and Dockerfile in any folder in addons. So don't copy all your resources with it, or it will be hard to know where the docker is being build.
+- Check logs at `/config/logs` in HA.
+- Use HA `Supervisor` view to see failed build or runtime logs.
+- Ensure folder names are unique; HA looks for `config.yaml` and `Dockerfile` to detect add-ons.
 
 # Docker
 
-Does not work for me, because I wanted numba
-
-ARG BUILD_FROM="homeassistant/amd64-base:latest"
-FROM ${BUILD_FROM}
-
+The default homeassistant image
+did not work for me, because I wanted numba.
+So I use a standard alpine python image.
 
 This folder will be mounted at /config inside your addon's docker container at runtime.
-/data is a volume for persistent storage.
-/data/options.json contains the user configuration. You can use Bashio to parse this data.
+
+- `/data` is a volume for persistent storage.
+- `/data/options.json` contains the user configuration. You can use Bashio to parse this data.
 
 
 # Config
 
-DEFAULT_LEASE=$(bashio::config 'default_lease')
-DOMAIN=$(bashio::config 'domain')
-MAX_LEASE=$(bashio::config 'max_lease')
-
+    DEFAULT_LEASE=$(bashio::config 'default_lease')
+    DOMAIN=$(bashio::config 'domain')
+    MAX_LEASE=$(bashio::config 'max_lease')
 
 # References:
 
