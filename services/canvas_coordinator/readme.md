@@ -32,7 +32,6 @@ erDiagram
         string id PK
         string prompt
         WaveshareDisplay display_model
-        int min_images
     }
 
     Image {
