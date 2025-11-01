@@ -1,9 +1,9 @@
 import datetime
 import logging
 
-from canvasserver.models.db import get_session
+from canvasserver.models.db import get_db_size, get_session
 from canvasserver.models.db_models import Frame, FrameGroup
-from canvasserver.models.schemas import FrameGroupWithFrames, FrameUpdateNoGroup
+from canvasserver.models.schemas import DiskUsage, FrameGroupWithFrames, FrameUpdateNoGroup
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -20,6 +20,13 @@ def get_time():
     return int(now.timestamp())
 
 
+@router.get("/get-disk-usage", response_model=DiskUsage, tags=["system"])
+def get_usage(session: Session = Depends(get_session)):
+    size = get_db_size(session)
+    usage = f"{size:0.1f} MB"
+    return DiskUsage(usage=usage)
+
+
 @router.get("/export/groups", response_model=list[FrameGroupWithFrames], tags=["system"])
 def get_groups(session: Session = Depends(get_session)):
 
@@ -31,7 +38,7 @@ def get_groups(session: Session = Depends(get_session)):
         groups_frames.append(
             FrameGroupWithFrames(
                 **group.model_dump(),
-                frames=[FrameUpdateNoGroup(**frame.model_dump()) for frame in group.frames]
+                frames=[FrameUpdateNoGroup(**frame.model_dump()) for frame in group.frames],
             )
         )
 

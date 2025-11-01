@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -38,6 +39,8 @@ def update_group_prompts(group_id):
 
 def refresh_group_images(group_id):
 
+    logger.warning(f"Refreshing {group_id}")
+
     session = get_session()
 
     group = session.get(FrameGroup, group_id)
@@ -53,11 +56,14 @@ def refresh_group_images(group_id):
         session.close()
         return []
 
-    frame_statuses = send_images_to_push_frames(frames, session)
+    frame_statuses = send_images_to_push_frames(session, frames)
 
     for frame_status in frame_statuses:
         if frame_status.status_code != 200:
             logger.error(f"Unable to push: {frame_status}")
+            continue
+
+        logger.info(f"Able to push: {frame_status}")
 
     session.commit()
     session.close()
@@ -80,8 +86,9 @@ def attach_group_crons(session):
 
         if group.schedule_prompt is not None and is_valid_cron(group.schedule_prompt):
             scheduler.add_job(
-                lambda group_id=group.id: update_group_prompts(group_id),
+                partial(update_group_prompts, group.id),
                 CronTrigger.from_crontab(group.schedule_prompt),
+                name=f"UpdatePrompts({group.name}, {group.schedule_prompt})",
             )
 
         if (
@@ -90,8 +97,9 @@ def attach_group_crons(session):
             and has_push_frames(group)
         ):
             scheduler.add_job(
-                lambda group_id=group.id: update_group_prompts(group_id),
+                partial(refresh_group_images, group.id),
                 CronTrigger.from_crontab(group.schedule_frame),
+                name=f"UpdatePushFrames({group.name}, {group.schedule_frame})",
             )
 
     return scheduler

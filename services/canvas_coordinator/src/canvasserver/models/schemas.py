@@ -99,3 +99,7 @@ class FrameGroupWithFrames(Model):
     schedule_prompt: str | None = None
     default: bool | None = None
     frames: list[FrameUpdateNoGroup] | None = []
+
+
+class DiskUsage(Model):
+    usage: str

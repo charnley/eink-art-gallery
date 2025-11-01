@@ -92,7 +92,7 @@ def get_frame_by_mac_address(
     if frame:
         return frame
 
-    elif frame is None and display_model is None:
+    if display_model is None:
         return None
 
     # Register new frame
@@ -102,14 +102,16 @@ def get_frame_by_mac_address(
     return frame
 
 
-def fetch_image_for_frame(session, frame):
+def fetch_image_for_frame(session, frame, delete_on_fetch=True):
 
     image = None
     display_model = frame.model
 
     if frame.group is None:
         image = get_basic_404(
-            "Not part of any group", width=display_model.width, height=display_model.height
+            "NotImplementedError NoGroupError",
+            width=display_model.width,
+            height=display_model.height,
         )
         return image
 
@@ -153,8 +155,9 @@ def fetch_image_for_frame(session, frame):
     image_obj = image_results[0]
     image = image_obj.image
 
-    # Delete the image
-    session.delete(image_obj)
+    if delete_on_fetch:
+        # Delete the image
+        session.delete(image_obj)
 
     return image
 

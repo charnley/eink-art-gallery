@@ -211,7 +211,7 @@ def refresh_item(id: uuid.UUID, session: Session = Depends(get_session)):
     if not len(frames):
         return []
 
-    frame_returns = send_images_to_push_frames(frames, session)
+    frame_returns = send_images_to_push_frames(session, frames)
 
     session.commit()
     session.close()
