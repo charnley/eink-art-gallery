@@ -98,6 +98,5 @@ Remove the id's though.
 
 ## TODO
 
-- Fix the esphome, so it is clean
-- Fix the esphome, so it doesn't loop on error:
-    - Display error msg and sleep
+- Fix the esphome, so it doesn't loop on error, display error msg and sleep
+
