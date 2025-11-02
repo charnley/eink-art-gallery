@@ -1,8 +1,10 @@
 import textwrap
+import unicodedata
 from datetime import datetime
 from io import BytesIO
 from typing import Any
 
+import numpy as np
 import qrcode
 from matplotlib import patheffects
 from matplotlib import pyplot as plt
@@ -41,33 +43,21 @@ BBOX = bbox = dict(
 TEXT_LENGTH = 30
 
 
-def calculate_fontsize(fig, ax, font=FONT) -> int:
+def visual_length(text: str) -> float:
+    """Estimate the visual width of text based on Unicode categories."""
+    length = 0.0
+    for ch in text:
+        if ch.isspace():
+            length += 0.5
+        else:
+            ea = unicodedata.east_asian_width(ch)
+            # Wide or fullwidth chars (Hangul, Kanji, Emoji)
+            if ea in ("W", "F"):
+                length += 1.8
+            else:
+                length += 1.0
 
-    target_width_pct = 0.8
-    font_base = 15
-    test_text = "A" * TEXT_LENGTH
-
-    text_obj = ax.text(
-        0.5,
-        0.5,
-        test_text,
-        verticalalignment="center",
-        horizontalalignment="center",
-        fontsize=font_base,
-        **font,
-    )
-
-    fig.canvas.draw()
-    text_width = text_obj.get_window_extent(renderer=fig.canvas.get_renderer()).width
-    ax_width_px = ax.get_window_extent().width
-
-    target_width_px = ax_width_px * target_width_pct
-    penalty = target_width_px / text_width
-    font_size = int(font_base * penalty)
-
-    text_obj.remove()
-
-    return font_size
+    return length
 
 
 def get_figure(
@@ -85,8 +75,11 @@ def plot_to_image(fig: Figure, dpi: int = IMAGE_DPI) -> PilImage:
     return img
 
 
-def close():
-    plt.close()
+def close(fig=None):
+    if fig is None:
+        plt.close()
+        return
+    plt.close(fig)
 
 
 def get_basic_text(
@@ -95,28 +88,42 @@ def get_basic_text(
     font: dict[Any, Any] = FONT,
     width=IMAGE_WIDTH,
     height=IMAGE_HEIGHT,
+    split_on_dot=True,
 ) -> PilImage:
 
     now = datetime.now()
 
     (fig, ax) = get_figure(width=width, height=height)
 
-    font_size = calculate_fontsize(fig, ax, font=font)
-    text = textwrap.wrap(text, width=TEXT_LENGTH)
-    font_size_text = font_size * (TEXT_LENGTH / len(text[0]))
+    if split_on_dot:
+        text = ".\n".join([t.strip() for t in text.split(".")])
+        text = text.strip()
+
+    line_lengths = [visual_length(line) for line in text.splitlines()]
+    line_length = max(max(line_lengths), 1)
+
+    aspect = width / height
+
+    base_size = 200  # Empirically choosen
+    font_size = max(8, base_size * np.sqrt(aspect) / np.sqrt(line_length))
 
     ax.text(
         0.5,
-        0.55,
-        "\n".join(text),
+        0.5,
+        text,
         verticalalignment="center",
         horizontalalignment="center",
-        fontsize=font_size_text,
+        fontsize=font_size,
         wrap=True,
         **font,
     )
 
     if with_date:
+
+        subtext = now.strftime(DATE_FORMAT_SHORT)
+        subbasefont = 35
+        subfontsize = max(8, subbasefont * np.sqrt(aspect) / np.sqrt(len(subtext)))
+
         ax.text(
             1.0,
             0,
@@ -125,7 +132,7 @@ def get_basic_text(
             horizontalalignment="right",
             bbox=BBOX,
             color="white",
-            fontsize=font_size - 8,
+            fontsize=subfontsize,
             **FONT_MONO,
         )
 
@@ -133,7 +140,7 @@ def get_basic_text(
 
     image = plot_to_image(fig)
 
-    close()
+    close(fig)
 
     return image
 
@@ -148,9 +155,10 @@ def get_basic_404(reason, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
         now = datetime.now()
         reason = now.strftime(DATE_FORMAT_SHORT)
 
-    font_size = calculate_fontsize(fig, ax, font=font)
-    reason = "\n".join(textwrap.wrap(reason, width=TEXT_LENGTH))
-    font_size_404 = font_size * (TEXT_LENGTH / (len(text_404) + 1)) * 0.8
+    aspect = width / height
+
+    base_size = 200  # Empirically choosen
+    font_size = max(8, base_size * np.sqrt(aspect) / np.sqrt(4))
 
     ax.text(
         0.5,
@@ -158,19 +166,25 @@ def get_basic_404(reason, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
         text_404,
         verticalalignment="center",
         horizontalalignment="center",
-        fontsize=font_size_404,
+        fontsize=font_size,
         **FONT_MONO,
     )
+
+    reason = ".\n".join([t.strip() for t in reason.split(".")])
+    reason = reason.strip()
+    reason_base_size = 35
+
+    reason_font_size = max(8, reason_base_size * np.sqrt(aspect) / np.sqrt(10))
 
     ax.text(
         1.0,
         0,
         reason,
-        verticalalignment="center",
+        verticalalignment="bottom",
         horizontalalignment="right",
         bbox=BBOX,
         color="white",
-        fontsize=font_size - 8,
+        fontsize=reason_font_size,
         **FONT_MONO,
     )
 
@@ -178,7 +192,7 @@ def get_basic_404(reason, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
 
     image = plot_to_image(fig)
 
-    close()
+    close(fig)
 
     return image
 
@@ -225,6 +239,6 @@ def get_basic_wifi(
 
     image = plot_to_image(fig)
 
-    close()
+    close(fig)
 
     return image
