@@ -18,6 +18,7 @@ ${env}:
 	uv pip install -r requirements.txt --python ./${env}/bin/python
 	uv pip install -e . --python ./${env}/bin/python
 	uv pip install -e ../shared/ --python ./${env}/bin/python
+	uv pip install -e ../canvas_coordinator --python ./${env}/bin/python
 
 login:
 	@# https://huggingface.co/settings/tokens/new?tokenType=read
@@ -68,6 +69,18 @@ fill-default-themes:
 	"../../assets/prompts_sd3_color.txt SD3 WaveShare13FullColor1600x1200 1" \
 	"../../assets/prompts_sd3_red.txt SD3 WaveShare13BlackRedWhite960x680 2" \
 	"../../assets/prompts_sd3_bw.txt SD3 WaveShare13BlackWhite960x680 6"
+
+fill-halloween-themes:
+	@# WaveShare13BlackWhite960x680
+	@# WaveShare13BlackRedWhite960x680
+	@# WaveShare13FullColor1600x1200
+	test ! -z "${refill_server}"
+	HF_HOME=${GIT_ROOT}/models \
+	${python} -m ${package}.themes \
+	--canvas-server-url ${refill_server} \
+	--prompts \
+	"../../assets/theme_halloween.txt SD3 WaveShare13BlackWhite960x680" \
+	"../../assets/theme_halloween.txt SD3 WaveShare13FullColor1600x1200"
 
 ## Development
 

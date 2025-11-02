@@ -12,7 +12,7 @@ from shared_image_utils import image_to_bytes
 warnings.filterwarnings("ignore", category=UserWarning)
 logger = logging.getLogger(__name__)
 
-ENDPOINT_CHECK_PROMPTS = "/actions/prompts_check"
+ENDPOINT_CHECK_PROMPTS = "/prompts/?filter=missing"
 ENDPOINT_UPLOAD_IMAGES = "/images/"
 
 
@@ -46,7 +46,7 @@ def refill_images(args):
 
         prompt_text = prompt["prompt"]
         prompt_id = prompt["id"]
-        n_images = prompt["min_images"] - prompt["image_count"]
+        n_images = prompt["count_frames"] - prompt["count_images"]
         display_model = WaveshareDisplay(prompt["display_model"])
 
         width = display_model.width

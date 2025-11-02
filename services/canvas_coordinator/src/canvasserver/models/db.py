@@ -1,4 +1,5 @@
 import logging
+import os
 from functools import lru_cache
 
 from sqlalchemy import inspect
@@ -6,7 +7,7 @@ from sqlalchemy.engine.base import Engine
 from sqlmodel import Session, create_engine
 
 from ..config import get_settings
-from .content import Model
+from .db_models import Model
 
 logger = logging.getLogger(__name__)
 
@@ -43,3 +44,11 @@ def has_tables(engine):
             return True
 
     return False
+
+
+def get_db_size(session):
+    """Get sqlite database size in MB"""
+    db_path = session.bind.url.database
+    file_size_bytes = os.path.getsize(db_path)
+    file_size_mb = file_size_bytes / (1024 * 1024)
+    return file_size_mb

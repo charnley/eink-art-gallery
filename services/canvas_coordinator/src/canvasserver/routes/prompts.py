@@ -1,19 +1,42 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from canvasserver.models.queries import find_prompts_with_missing_images
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlmodel import select
 
-from ..models.content import Image, Images, Prompt, Prompts
 from ..models.db import get_session
+from ..models.db_models import Image, Prompt
+from ..models.schemas import Images, Prompts, PromptStatus
 
 prefix = "/prompts"
 router = APIRouter(prefix=prefix, tags=["prompts"])
 
 
+prompt_filters = [None, "missing"]
+
+
 @router.get("/", response_model=Prompts)
-def read_items(limit=100, session: Session = Depends(get_session)):
-    prompts = session.query(Prompt).limit(limit).all()
-    session.close()
+def read_items(
+    limit=100,
+    filter: str | None = Query(
+        default=None,
+        enum=prompt_filters,
+    ),
+    session: Session = Depends(get_session),
+):
+
+    if filter is None or filter == "null":
+        prompts = session.query(Prompt).limit(limit).all()
+        prompts = [PromptStatus(**prompt.dict()) for prompt in prompts]
+
+    elif filter == "missing":
+        prompts = find_prompts_with_missing_images(session)
+
+    else:
+        prompts = []
+
     return Prompts(prompts=prompts, count=len(prompts))
+
+    session.close()
 
 
 @router.get("/{id}", response_model=Prompt)
@@ -44,12 +67,16 @@ def get_item_childs(id: str, session: Session = Depends(get_session)):
 def delete_item(id: str, session: Session = Depends(get_session)):
     item = session.get(Prompt, id)
 
+    images = session.query(Image).filter_by(prompt=id).all()
+
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
     session.delete(item)
 
-    # TODO Delete all Images to prompt also
+    for image in images:
+        session.delete(image)
+
     session.commit()
     session.close()
 

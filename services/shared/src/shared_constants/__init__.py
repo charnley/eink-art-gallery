@@ -13,12 +13,13 @@ IMAGE_WIDTH = 960
 IMAGE_HEIGHT = 680
 
 # Default font config
-FONT_FAMILY = "Fira Sans"
+FONT_FAMILY = ["Cormorant", "NanumMyeongjo", "Segoe UI Emoji"]
 FONT_FAMILY_MONO = "DejaVu Sans Mono"
 FONT_WEIGHT = "bold"
 
 # Date format
 DATE_FORMAT = "%Y-%m-%d %H:%M"
+DATE_FORMAT_SHORT = "%H:%M %d/%m"
 
 # HTTP HEADERS
 IMAGE_HEADER = {"Content-Disposition": f'inline; filename="image.{IMAGE_EXTENSION}"'}
@@ -32,12 +33,16 @@ MIN_IMAGES_PER_PROMPT = 2
 FILE_UPLOAD_KEY = "files"
 
 
-class ColorSupport(Enum):
-    Black = "Black"
-    BlackRed = "BlackRed"
+class FrameType(str, Enum):
+    PULL = "pull"
+    PUSH = "push"
+
+    def __str__(self) -> str:
+        return self.name
 
 
 DISPLAY_RESOLUTIONS = {
+    "WaveShare7BlackWhite800x480": (800, 480),
     "WaveShare13BlackWhite960x680": (960, 680),
     "WaveShare13BlackGreyWhite960x680": (960, 680),
     "WaveShare13BlackRedWhite960x680": (960, 680),
@@ -47,6 +52,7 @@ DISPLAY_RESOLUTIONS = {
 
 # Supported WaveShare displays
 class WaveshareDisplay(Enum):
+    WaveShare7BlackWhite800x480 = "WaveShare7BlackWhite800x480"
     WaveShare13BlackWhite960x680 = "WaveShare13BlackWhite960x680"
     WaveShare13BlackGreyWhite960x680 = "WaveShare13BlackGreyWhite960x680"
     WaveShare13BlackRedWhite960x680 = "WaveShare13BlackRedWhite960x680"

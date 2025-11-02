@@ -6,7 +6,7 @@
 http_request:
   id: fetch_image_request
   timeout: 5s
-  useragent: ESP32Display/${display_model}
+  useragent: Frame/${display_model}
   verify_ssl: false
 
 deep_sleep:

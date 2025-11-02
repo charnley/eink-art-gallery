@@ -1,6 +1,5 @@
 import textwrap
 from datetime import datetime
-from functools import lru_cache
 from io import BytesIO
 from typing import Any
 
@@ -9,13 +8,11 @@ from matplotlib import patheffects
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from matplotlib.font_manager import FontProperties
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
-from matplotlib.textpath import TextPath
 from PIL import Image
 from PIL.Image import Image as PilImage
 from shared_constants import (
-    DATE_FORMAT,
+    DATE_FORMAT_SHORT,
     FONT_FAMILY,
     FONT_FAMILY_MONO,
     FONT_WEIGHT,
@@ -34,8 +31,12 @@ FONT_MONO = dict(
     fontfamily=FONT_FAMILY_MONO,
 )
 
-# path_effects=[OUTLINE]
 OUTLINE = patheffects.withStroke(linewidth=4, foreground="w")
+
+BBOX = bbox = dict(
+    pad=2,
+    facecolor="black",
+)
 
 TEXT_LENGTH = 30
 
@@ -90,7 +91,6 @@ def close():
 
 def get_basic_text(
     text: str,
-    alt_text: None = None,
     with_date: bool = True,
     font: dict[Any, Any] = FONT,
     width=IMAGE_WIDTH,
@@ -120,12 +120,12 @@ def get_basic_text(
         ax.text(
             1.0,
             0,
-            now.strftime(DATE_FORMAT),
+            now.strftime(DATE_FORMAT_SHORT),
             verticalalignment="center",
             horizontalalignment="right",
-            bbox=dict(facecolor="black"),
+            bbox=BBOX,
             color="white",
-            fontsize=font_size - 5,
+            fontsize=font_size - 8,
             **FONT_MONO,
         )
 
@@ -138,16 +138,18 @@ def get_basic_text(
     return image
 
 
-@lru_cache()
-def get_basic_404(text, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
+def get_basic_404(reason, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
 
     (fig, ax) = get_figure(width=width, height=height)
 
     text_404 = "404"
 
+    if reason is None:
+        now = datetime.now()
+        reason = now.strftime(DATE_FORMAT_SHORT)
+
     font_size = calculate_fontsize(fig, ax, font=font)
-    text = "\n".join(textwrap.wrap(text, width=TEXT_LENGTH))
-    font_size_text = font_size * (TEXT_LENGTH / (len(text) + 1)) * 0.8
+    reason = "\n".join(textwrap.wrap(reason, width=TEXT_LENGTH))
     font_size_404 = font_size * (TEXT_LENGTH / (len(text_404) + 1)) * 0.8
 
     ax.text(
@@ -157,17 +159,19 @@ def get_basic_404(text, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
         verticalalignment="center",
         horizontalalignment="center",
         fontsize=font_size_404,
-        **font,
+        **FONT_MONO,
     )
 
     ax.text(
-        0.5,
-        0.40,
-        text,
+        1.0,
+        0,
+        reason,
         verticalalignment="center",
-        horizontalalignment="center",
-        fontsize=int(font_size_text * 0.5),
-        **font,
+        horizontalalignment="right",
+        bbox=BBOX,
+        color="white",
+        fontsize=font_size - 8,
+        **FONT_MONO,
     )
 
     ax.axis("off")
@@ -203,7 +207,7 @@ def generate_wifi_qrcode(
 
 
 def get_basic_wifi(
-    wifi_name, wifi_password, wifi_type="WPA", font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT
+    wifi_name, wifi_password, wifi_type="WPA", width=IMAGE_WIDTH, height=IMAGE_HEIGHT
 ) -> PilImage:
 
     (fig, ax) = get_figure(width=width, height=height)

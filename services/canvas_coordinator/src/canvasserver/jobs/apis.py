@@ -3,13 +3,8 @@ import threading
 from io import BytesIO
 
 import requests
+from canvasserver.models.db_models import Frame
 from PIL.Image import Image as PillowImage
-from shared_constants import (
-    WAVESHARE_BLACKWHITERED_PALETTE,
-    WAVESHARE_FULLCOLOR_PALETTE,
-    WaveshareDisplay,
-)
-from shared_image_utils.dithering import atkinson_dither, atkinson_dither_rgb
 
 logger = logging.getLogger(__name__)
 
@@ -23,32 +18,24 @@ def fire_and_forget_images(url, params, files):
     threading.Thread(target=request_task, args=(url, params, files, None)).start()
 
 
-def send_image_to_device(
-    image: PillowImage, display_model: WaveshareDisplay, hostname: str
+def send_image_to_frame(
+    image: PillowImage,
+    frame: Frame,
 ) -> int:
 
-    url = f"http://{hostname}/display/image"
-    logger.info(f"Sending photo to {url}")
+    hostname = frame.endpoint
+    display_model = frame.model
 
-    logger.info(f"dithering the picture for {display_model}")
+    assert hostname is not None
+
+    url = f"http://{hostname}/display/image"
 
     # Ensure we are sending the right size
     if image.size != (display_model.width, display_model.height):
-        logger.error("Trying to send the wrong size. It will not work")
+        logger.error("Trying to send the wrong size. It will not work.")
         return False
 
-    # TODO Move color correction to different function
-
-    if display_model == WaveshareDisplay.WaveShare13BlackRedWhite960x680:
-        image = atkinson_dither_rgb(image, WAVESHARE_BLACKWHITERED_PALETTE)
-
-    elif display_model == WaveshareDisplay.WaveShare13BlackWhite960x680:
-        image = atkinson_dither(image)
-
-    elif display_model == WaveshareDisplay.WaveShare13FullColor1600x1200:
-        image = atkinson_dither_rgb(image, WAVESHARE_FULLCOLOR_PALETTE)
-
-    logger.info("Sending it to paper frame")
+    logger.info(f"Sending image to {url}")
     byte_io = BytesIO()
     image.save(byte_io, "png")
     byte_io.seek(0)

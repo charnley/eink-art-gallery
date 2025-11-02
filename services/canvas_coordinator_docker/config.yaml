@@ -1,6 +1,6 @@
 name: "Canvas Coordinator"
 description: "Server for generating and selecting images for e-ink displays"
-version: "1.2.11"
+version: "1.3.0"
 slug: "canvas_coordinator_prime"
 init: false
 arch:
@@ -11,12 +11,8 @@ arch:
   - i386
 options:
   log_level: INFO
-  cron_update_push: "0 4 * * *"
-  cron_update_prompt: "0 3 * * *"
 schema:
   log_level: list(TRACE|DEBUG|INFO|WARN|ERROR)
-  cron_update_push: "str?"
-  cron_update_prompt: "str?"
 ports:
   8080/tcp: null
 webui: "http://[HOST]:[PORT:8080]/docs"

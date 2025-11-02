@@ -4,22 +4,13 @@ from pathlib import Path
 
 import uvicorn
 import yaml
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
 from canvasserver.config import get_settings
-from canvasserver.jobs import refresh_active_prompt, send_images_to_push_devices
+from canvasserver.cron_jobs import attach_group_crons
 
 from .models.db import create_db_and_tables, get_engine, get_session, has_tables
 from .version import __version__
 
 logger = logging.getLogger(__name__)
-
-
-def outside_session_call(func):
-    session = get_session()
-    func(session)
-    session.commit()
-    session.close()
 
 
 def main(args=None):
@@ -57,23 +48,13 @@ def main(args=None):
         logger.info("There is a file, but no tables found, generating tables...")
         create_db_and_tables(None)
 
+    session = get_session()
+    scheduler = attach_group_crons(session)
+    session.close()
+
     if args.start:
 
         logger.info(f"Version {__version__}")
-
-        scheduler = BackgroundScheduler()
-
-        if settings.cron_update_push:
-            scheduler.add_job(
-                lambda: outside_session_call(send_images_to_push_devices),
-                CronTrigger.from_crontab(settings.cron_update_push),
-            )
-
-        if settings.cron_update_prompt:
-            scheduler.add_job(
-                lambda: outside_session_call(refresh_active_prompt),
-                CronTrigger.from_crontab(settings.cron_update_prompt),
-            )
 
         logger.info("Starting background jobs")
         scheduler.start()

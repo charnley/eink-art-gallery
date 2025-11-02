@@ -3,11 +3,12 @@
 env=env
 python=${env}/bin/python
 
-# find default device
+# Find default device
 device=$(shell find /dev -name "ttyUSB*" -o -name "ttyACM*" | head -n 1)
 
-#
+# Template Variables
 device_id=
+canvas_hostname=
 
 # Create Python virtual environment and install dependencies
 ${env}:
