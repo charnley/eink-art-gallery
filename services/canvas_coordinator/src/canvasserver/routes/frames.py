@@ -9,7 +9,7 @@ from canvasserver.time_funcs import get_seconds_until_next
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, status
 from fastapi.responses import Response
 from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER, WaveshareDisplay
-from shared_image_utils import prepare_image
+from shared_image_utils.displaying import prepare_image
 from shared_image_utils.format import image_to_bytes
 from shared_matplotlib_utils import get_basic_text
 from sqlalchemy.orm import Session
