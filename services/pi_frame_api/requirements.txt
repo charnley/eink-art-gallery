@@ -10,7 +10,7 @@ apscheduler
 pyyaml
 
 rpi-lgpio
-RPi.GPIO
+#RPi.GPIO
 gpiozero
 numpy
 pillow
