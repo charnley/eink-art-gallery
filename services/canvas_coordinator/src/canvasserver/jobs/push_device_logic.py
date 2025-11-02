@@ -4,7 +4,7 @@ from canvasserver.jobs.apis import send_image_to_frame
 from canvasserver.models.db_models import Frame
 from canvasserver.models.queries import fetch_image_for_frame
 from canvasserver.models.schemas import FrameHttpCode
-from shared_image_utils import prepare_image
+from shared_image_utils.displaying import prepare_image
 
 logger = logging.getLogger(__name__)
 
