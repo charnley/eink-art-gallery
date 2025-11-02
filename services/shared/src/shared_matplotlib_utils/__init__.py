@@ -1,6 +1,6 @@
-import textwrap
 import unicodedata
 from datetime import datetime
+from functools import cache
 from io import BytesIO
 from typing import Any
 
@@ -40,24 +40,28 @@ BBOX = bbox = dict(
     facecolor="black",
 )
 
-TEXT_LENGTH = 30
 
+def calculate_font_size(width, height, text, font, target_pct=0.60):
 
-def visual_length(text: str) -> float:
-    """Estimate the visual width of text based on Unicode categories."""
-    length = 0.0
-    for ch in text:
-        if ch.isspace():
-            length += 0.5
-        else:
-            ea = unicodedata.east_asian_width(ch)
-            # Wide or fullwidth chars (Hangul, Kanji, Emoji)
-            if ea in ("W", "F"):
-                length += 1.8
-            else:
-                length += 1.0
+    (fig, ax) = get_figure(width=width, height=height)
 
-    return length
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    lines = text.splitlines()
+    initial_fontsize = 50
+
+    longest_line = max(lines, key=len)
+    text_obj = ax.text(0, 0, longest_line, fontsize=initial_fontsize, **font)
+
+    bbox = text_obj.get_window_extent(renderer=renderer)
+    text_width_px = bbox.width
+
+    target_width_px = target_pct * width
+    font_size = initial_fontsize * target_width_px / text_width_px
+
+    close(fig)
+
+    return font_size
 
 
 def get_figure(
@@ -99,13 +103,7 @@ def get_basic_text(
         text = ".\n".join([t.strip() for t in text.split(".")])
         text = text.strip()
 
-    line_lengths = [visual_length(line) for line in text.splitlines()]
-    line_length = max(max(line_lengths), 1)
-
-    aspect = width / height
-
-    base_size = 200  # Empirically choosen
-    font_size = max(8, base_size * np.sqrt(aspect) / np.sqrt(line_length))
+    font_size = calculate_font_size(width, height, text, font)
 
     ax.text(
         0.5,
@@ -121,8 +119,7 @@ def get_basic_text(
     if with_date:
 
         subtext = now.strftime(DATE_FORMAT_SHORT)
-        subbasefont = 35
-        subfontsize = max(8, subbasefont * np.sqrt(aspect) / np.sqrt(len(subtext)))
+        subfont_size = calculate_font_size(width, height, subtext, FONT_MONO, target_pct=0.15)
 
         ax.text(
             1.0,
@@ -132,7 +129,7 @@ def get_basic_text(
             horizontalalignment="right",
             bbox=BBOX,
             color="white",
-            fontsize=subfontsize,
+            fontsize=subfont_size,
             **FONT_MONO,
         )
 
@@ -151,14 +148,17 @@ def get_basic_404(reason, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
 
     text_404 = "404"
 
+    now = datetime.now().strftime(DATE_FORMAT_SHORT)
+
     if reason is None:
-        now = datetime.now()
-        reason = now.strftime(DATE_FORMAT_SHORT)
+        reason = now
 
     aspect = width / height
 
     base_size = 200  # Empirically choosen
     font_size = max(8, base_size * np.sqrt(aspect) / np.sqrt(4))
+
+    font_size = calculate_font_size(width, height, text_404, FONT_MONO, target_pct=0.35)
 
     ax.text(
         0.5,
@@ -172,9 +172,7 @@ def get_basic_404(reason, font=FONT, width=IMAGE_WIDTH, height=IMAGE_HEIGHT):
 
     reason = ".\n".join([t.strip() for t in reason.split(".")])
     reason = reason.strip()
-    reason_base_size = 35
-
-    reason_font_size = max(8, reason_base_size * np.sqrt(aspect) / np.sqrt(10))
+    reason_font_size = calculate_font_size(width, height, now, FONT_MONO, target_pct=0.15)
 
     ax.text(
         1.0,
