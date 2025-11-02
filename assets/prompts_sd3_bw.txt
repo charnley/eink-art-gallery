@@ -6,7 +6,6 @@ ink wash painting, soft grayscale tones, abstract textures, expressive washes, b
 ukiyo-e style linework, stylized figures and waves, traditional patterns, flat greyscale rendering, high detail, historical composition
 landscape painting, lithograph-style drawing, soft tonal ranges, layered greys, realistic textures, expressive grayscale rendering, classic print feel
 abstract creature, single line artwork, continuous contour, elegant minimalism, abstract shape or portrait, white background, conceptual, black ink
-parametric architectural drawing, algorithmic pattern, fine geometric lines, white background, monochrome technical aesthetic, abstract structure
 landscape, pastel-inspired monochrome drawing, soft grainy texture, smooth tonal shifts, expressive shading, grayscale emotion, moody atmosphere
 architecture drawing, mountain house, pen line drawing, highly detailed, white background, precise technical strokes, bw, expressive crosshatching, architectural or abstract subject
 pen and ink illustration, rich texture from hatching and stippling, dramatic bw contrast, expressive forms, surreal or observational subject
@@ -24,7 +23,6 @@ scratchboard by Nico Delort, intricate black and white scratchboard work, depict
 abstract painting by Jay DeFeo, subdued colors, expressive
 abstract painting by Henri Michaux, dark, expressive, broad brushstrokes, subdued
 seismogram, contemporary abstract art, fine lines, subdued colors, illustrative, detailed, intricate, landscape
-print by Lee Bontecou, recognizable circular abstract sculptural wall works, abstract, detailed, subdued colors
 abstract painting by Andrew Read, monochrome, drawing, detailed, landscape
 painting by Ebru Sidar, monochrome palette, moody colors, landscapes, scene, dark
 painting of Somber atmosphere, dark, moody colors,  dark, moody landscapes, with elements like bare trees, cloudy skies, and isolated figures that create a sense of solitude
@@ -46,3 +44,7 @@ landscape by Dariusz Klimczak, surreal, bw
 by Ton Dubbeldam, landscape, moody, cute, bw, white background
 landscape by Jon Klassen, minimalist, animals, bw
 painting by Zhang+ Daqian++, Traditional, vibrant, detailed, fluid, expressive, landscape, dynamic, textured, versatile, intricate, modern interpretation, natural scenes, elegant, spontaneous, rich, classical techniques, innovative
+Micrographia++, illustration, Natural+ history style, 18th century, hyper detailed+
+Micrographia-inspired scientific illustration, 18th-century natural history style, museum drawing, realistic and realistic, hyper detailed, fine lines, white background, Enlightenment-era scientific study
+animal illustration, Micrographia-inspired, scientific illustration, 16th-century natural history style, museum drawing, realistic and realistic, hyper detailed, fine lines, white background, bw, Enlightenment-era scientific study
+drawing by Jacquers Riguard, Neoclassicism+, 17th century, pen and ink and pencil on paper, vast landscape+, sketch, white background

@@ -15,7 +15,7 @@ def refresh_active_prompt(session):
 
     # TODO Need to create FrameGroup layer, finding active prompt per-group, and based on active Theme
     group_display_model = WaveshareDisplay.WaveShare13BlackWhite960x680
-    no_group_frames = 1
+    no_group_frames = 6
 
     logger.info("Resetting active prompt")
 
@@ -67,9 +67,10 @@ def get_active_prompts(session):
 def send_images_to_push_devices(session):
 
     # TODO Should there be a group layer to push_devices?
+    # TODO Collect status for push, and return
+    # TODO Don't "use" image if push failed
 
     results = session.execute(select(PushFrame)).all()
-
     devices = [result[0] for result in results]
 
     logger.info(devices)
@@ -93,9 +94,10 @@ def send_images_to_push_devices(session):
         prompt_ids = [result[0].id for result in results]
 
         image = None
+        image_obj = None
 
         if not len(prompt_ids):
-            image = get_basic_404("")
+            image = get_basic_404("", width=display_model.width, height=display_model.height)
 
         else:
             prompt_id = np.random.choice(prompt_ids)
@@ -108,6 +110,9 @@ def send_images_to_push_devices(session):
             image = image_obj.image
             session.delete(image_obj)
 
-        _ = send_image_to_device(image, display_model, device.hostname)
+        status_code = send_image_to_device(image, display_model, device.hostname)
+
+        if status_code == 200 and image_obj is not None:
+            session.delete(image_obj)
 
     return PushFrames(devices=devices, count=len(devices))

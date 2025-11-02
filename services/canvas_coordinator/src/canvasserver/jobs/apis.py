@@ -3,9 +3,13 @@ import threading
 from io import BytesIO
 
 import requests
-from shared_constants import WaveshareDisplay
-from shared_image_utils.dithering import atkinson_dither
-from shared_image_utils.tasks import color_correct_red
+from PIL.Image import Image as PillowImage
+from shared_constants import (
+    WAVESHARE_BLACKWHITERED_PALETTE,
+    WAVESHARE_FULLCOLOR_PALETTE,
+    WaveshareDisplay,
+)
+from shared_image_utils.dithering import atkinson_dither, atkinson_dither_rgb
 
 logger = logging.getLogger(__name__)
 
@@ -19,20 +23,30 @@ def fire_and_forget_images(url, params, files):
     threading.Thread(target=request_task, args=(url, params, files, None)).start()
 
 
-def send_image_to_device(image, display_model: WaveshareDisplay, hostname: str) -> bool:
+def send_image_to_device(
+    image: PillowImage, display_model: WaveshareDisplay, hostname: str
+) -> int:
 
     url = f"http://{hostname}/display/image"
     logger.info(f"Sending photo to {url}")
 
     logger.info(f"dithering the picture for {display_model}")
 
-    # TODO Color correct for color palette, like grey
+    # Ensure we are sending the right size
+    if image.size != (display_model.width, display_model.height):
+        logger.error("Trying to send the wrong size. It will not work")
+        return False
+
+    # TODO Move color correction to different function
 
     if display_model == WaveshareDisplay.WaveShare13BlackRedWhite960x680:
-        image = color_correct_red(image, dither=True)
+        image = atkinson_dither_rgb(image, WAVESHARE_BLACKWHITERED_PALETTE)
 
     elif display_model == WaveshareDisplay.WaveShare13BlackWhite960x680:
         image = atkinson_dither(image)
+
+    elif display_model == WaveshareDisplay.WaveShare13FullColor1600x1200:
+        image = atkinson_dither_rgb(image, WAVESHARE_FULLCOLOR_PALETTE)
 
     logger.info("Sending it to paper frame")
     byte_io = BytesIO()
@@ -42,12 +56,12 @@ def send_image_to_device(image, display_model: WaveshareDisplay, hostname: str) 
     try:
         r = requests.post(url=url, files=dict(file=("service.png", byte_io, "image/png")))
         logger.info(r)
-        return True
+        return r.status_code
 
     except requests.exceptions.ConnectionError:
         logger.error(f"Could not send image to {url}")
 
-    return False
+    return 500
 
 
 def get_status(hostname):
@@ -56,9 +70,13 @@ def get_status(hostname):
     try:
         r = requests.get(url=url)
         status_code = r.status_code
-        return status_code == 200
+
+        if status_code != 200:
+            return None
+
+        return r.json()
 
     except Exception:
         logger.error(f"not a real hostname: {hostname}")
 
-    return False
+    return None
