@@ -127,7 +127,6 @@ def atomic_fetch(session, prompt_id) -> ImageData | None:
 
 def fetch_image_for_frame(session, frame):
 
-    image = None
     display_model = frame.model
 
     if frame.group is None:
