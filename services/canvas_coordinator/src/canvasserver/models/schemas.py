@@ -1,6 +1,8 @@
 import uuid
 
 from canvasserver.models.db_models import Frame, FrameGroup, Image
+from PIL import Image as PilImage
+from pydantic import ConfigDict
 from shared_constants import FrameType, WaveshareDisplay
 from sqlmodel import SQLModel as Model
 
@@ -21,6 +23,13 @@ class ImageCreate(Model):
 
 class ImageMeta(Model):
     prompt: str
+
+
+class ImageData(Model):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    id: uuid.UUID | None = None
+    prompt: str | None = None
+    image: PilImage.Image | None = None
 
 
 class PromptStatus(Model):
