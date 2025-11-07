@@ -4,6 +4,7 @@ from typing import Annotated
 
 from apscheduler.triggers.cron import CronTrigger
 from canvasserver.models.queries import get_group_prompts, rotate_prompt_for_group
+from canvasserver.time_funcs import get_schedule_datetimes
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -13,6 +14,7 @@ from ..models.db_models import Frame, FrameGroup, FrameType, Prompt
 from ..models.schemas import (
     FrameAssign,
     FrameGroups,
+    FrameGroupSchedule,
     FrameGroupUpdate,
     FrameHttpCode,
     Frames,
@@ -146,6 +148,28 @@ def update_group(
     session.refresh(group)
     session.close()
     return group
+
+
+@router.get("/{id}/schedule", response_model=FrameGroupSchedule)
+def get_schedule(id: uuid.UUID, count: int = 10, session: Session = Depends(get_session)):
+    group = session.get(FrameGroup, id)
+
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    schedule = FrameGroupSchedule()
+
+    if group.schedule_frame:
+        _schedule = get_schedule_datetimes(group.schedule_frame, count=count)
+        schedule.schedule_frame = [int(x.timestamp()) for x in _schedule]
+
+    if group.schedule_prompt:
+        _schedule = get_schedule_datetimes(group.schedule_prompt, count=count)
+        schedule.schedule_prompt = [int(x.timestamp()) for x in _schedule]
+
+    session.close()
+
+    return schedule
 
 
 @router.get("/{id}/frames", response_model=Frames)

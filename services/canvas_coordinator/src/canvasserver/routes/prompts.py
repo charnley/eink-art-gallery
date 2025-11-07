@@ -34,9 +34,31 @@ def read_items(
     else:
         prompts = []
 
+    session.close()
     return Prompts(prompts=prompts, count=len(prompts))
 
+
+@router.delete("/all", response_model=Prompts)
+def delete_all_prompts(session: Session = Depends(get_session)):
+
+    prompts = session.query(Prompt).all()
+
+    if not prompts:
+        raise HTTPException(status_code=404, detail="No prompts found to delete")
+
+    # Currently, only images related to prompts exists
+
+    images = session.query(Image).all()
+    for image in images:
+        session.delete(image)
+
+    for prompt in prompts:
+        session.delete(prompt)
+
+    session.commit()
     session.close()
+
+    return Prompts(prompts=[], count=0)
 
 
 @router.get("/{id}", response_model=Prompt)

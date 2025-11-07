@@ -83,6 +83,11 @@ class FrameGroupUpdate(Model):
     default: bool | None = None
 
 
+class FrameGroupSchedule(Model):
+    schedule_frame: list[int] | None = None
+    schedule_prompt: list[int] | None = None
+
+
 class FrameAssign(Model):
     id: uuid.UUID
 
