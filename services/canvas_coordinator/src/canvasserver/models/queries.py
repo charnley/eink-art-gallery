@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 from canvasserver.models.db_models import Frame, FrameGroup, FrameGroupPrompt, Image, Prompt
-from canvasserver.models.schemas import PromptId, PromptStatus
+from canvasserver.models.schemas import ImageData, PromptId, PromptStatus
 from shared_constants import FrameType, WaveshareDisplay
 from shared_matplotlib_utils import get_basic_404
 from sqlalchemy import delete, func
@@ -102,9 +102,31 @@ def get_frame_by_mac_address(
     return frame
 
 
-def fetch_image_for_frame(session, frame, delete_on_fetch=True):
+def atomic_fetch(session, prompt_id) -> ImageData | None:
 
-    image = None
+    picked_cte = (
+        select(Image.id)
+        .where(Image.prompt == prompt_id)
+        .order_by(func.random())
+        .limit(1)
+        .cte("picked")
+    )
+
+    stmt = delete(Image).where(Image.id.in_(select(picked_cte.c.id))).returning(Image)
+
+    deleted_image = session.execute(stmt).scalars().first()
+
+    if deleted_image:
+        image = ImageData(**deleted_image.model_dump())
+        image.image = deleted_image.image
+        session.commit()
+        return image
+
+    return None
+
+
+def fetch_image_for_frame(session, frame):
+
     display_model = frame.model
 
     if frame.group is None:
@@ -136,30 +158,14 @@ def fetch_image_for_frame(session, frame, delete_on_fetch=True):
     prompt_ids = [r[0].id for r in results]
     prompt_id = np.random.choice(prompt_ids)
 
-    results = (
-        session.execute(
-            select(Prompt)
-            .filter_by(display_model=display_model)
-            .outerjoin(Image, Image.prompt == Prompt.id)  # type: ignore[arg-type]
-            .group_by(Prompt.id)
-            .having(func.count(Image.id) >= 1)  # type: ignore[arg-type]
-        )
-    ).all()
+    # Fetch and delete image atomically
+    image_data = atomic_fetch(session, prompt_id)
 
-    prompt_ids = [result[0].id for result in results]
+    if image_data is None:
+        image = get_basic_404(None, width=display_model.width, height=display_model.height)
+        return image
 
-    image_results = session.execute(
-        select(Image).filter(Image.prompt == prompt_id).order_by(func.random())
-    ).first()
-
-    image_obj = image_results[0]
-    image = image_obj.image
-
-    if delete_on_fetch:
-        # Delete the image
-        session.delete(image_obj)
-
-    return image
+    return image_data.image
 
 
 def rotate_prompt_for_group(session, group: FrameGroup) -> list[Prompt]:

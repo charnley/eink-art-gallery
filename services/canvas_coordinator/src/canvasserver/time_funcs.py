@@ -4,7 +4,30 @@ import numpy as np
 from apscheduler.triggers.cron import CronTrigger
 
 BUFFER_PERCENT = 0.1  # 10%
-MIN_BUFFER = 60  # seconds
+MIN_BUFFER = 30  # seconds
+
+
+def get_schedule_datetimes(cron_string, count=10) -> list[datetime.datetime]:
+
+    schedule: list[datetime.datetime] = []
+
+    now = datetime.datetime.now()
+    timezone = now.tzinfo
+
+    trigger = CronTrigger.from_crontab(cron_string)
+    trigger.timezone = timezone
+
+    next_datetime = trigger.get_next_fire_time(None, now)
+    assert next_datetime is not None
+
+    for _ in range(count - 1):
+        next_datetime = trigger.get_next_fire_time(
+            None, next_datetime + datetime.timedelta(seconds=1)
+        )
+        assert next_datetime is not None
+        schedule.append(next_datetime)
+
+    return schedule
 
 
 def get_seconds_until_next(cron_string: str) -> int:
