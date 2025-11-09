@@ -1,3 +1,4 @@
+import datetime
 import uuid
 
 from canvasserver.models.db_models import Frame, FrameGroup, Image
@@ -117,3 +118,32 @@ class FrameGroupWithFrames(Model):
 
 class DiskUsage(Model):
     usage: str
+
+
+# Battery
+
+
+class BatteryStatusCreate(Model):
+    voltage: float
+
+
+class BatteryStatusRead(Model):
+    timestamp: datetime.datetime
+    voltage: float
+
+
+class BatteryStatusList(Model):
+    frame_id: uuid.UUID
+    readings: list[BatteryStatusRead]
+    count: int
+
+
+class BatteryStatusEval(Model):
+    frame_id: uuid.UUID
+    latest_voltage: float
+    is_low: bool
+    threshold: float
+    r2: float | None
+    slope: float | None
+    predicted_crossing: datetime.datetime | None
+    status: str  # TODO Enum

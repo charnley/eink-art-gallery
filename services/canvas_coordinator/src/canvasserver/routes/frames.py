@@ -1,3 +1,4 @@
+import datetime
 import logging
 import uuid
 from typing import Annotated
@@ -11,13 +12,19 @@ from fastapi.responses import Response
 from shared_constants import IMAGE_CONTENT_TYPE, IMAGE_HEADER, WaveshareDisplay
 from shared_image_utils.displaying import prepare_image
 from shared_image_utils.format import image_to_bytes
-from shared_matplotlib_utils import get_basic_text
+from shared_matplotlib_utils import get_basic_404, get_basic_text
 from sqlalchemy.orm import Session
 from sqlmodel import select
 
 from ..models.db import get_session
-from ..models.db_models import Frame, FrameType
-from ..models.schemas import Frames, FrameUpdate
+from ..models.db_models import Frame, FrameBatteryState, FrameType
+from ..models.schemas import (
+    BatteryStatusCreate,
+    BatteryStatusList,
+    BatteryStatusRead,
+    Frames,
+    FrameUpdate,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -240,7 +247,12 @@ def get_sleep(mac_address: str, request: Request, session: Session = Depends(get
     },
     response_class=Response,
 )
-def get_image(mac_address: str, request: Request, session: Session = Depends(get_session)):
+def get_image(
+    mac_address: str,
+    request: Request,
+    session: Session = Depends(get_session),
+    voltage: float | None = None,
+):
 
     # Note: ESPHome will react to 400, so always return 200
 
@@ -250,18 +262,100 @@ def get_image(mac_address: str, request: Request, session: Session = Depends(get
     if frame is None:
         logger.error("Unable to figure out what kind of frame this is, returning default")
         image = get_basic_text(f"Testing: {mac_address}")
+        image = prepare_image(image, frame.model)
+        image_bytes = image_to_bytes(image)
+        return Response(image_bytes, headers=IMAGE_HEADER, media_type=IMAGE_CONTENT_TYPE)
 
-    else:
-        image = fetch_image_for_frame(session, frame)
+    if voltage is not None:
+        reading = FrameBatteryState(
+            frame_id=frame.id,
+            timestamp=datetime.datetime.now(),
+            voltage=voltage,
+        )
+        session.add(reading)
 
-    assert Frame is not None
+    image = fetch_image_for_frame(session, frame)
+
+    if image is None:
+        image = get_basic_404(None, width=frame.model.width, height=frame.model.height)
+        image = prepare_image(image, frame.model)
+        image_bytes = image_to_bytes(image)
+        return Response(image_bytes, headers=IMAGE_HEADER, media_type=IMAGE_CONTENT_TYPE)
+
+    # TODO You know what frame this is, calculate the expected lifetime of the battery
+    # TODO If the battery state is going bad, superset a battery state warning on the picture
 
     image = prepare_image(image, frame.model)
     image_bytes = image_to_bytes(image)
-
-    # TODO Fall back if frame is undefined, but display_model is
 
     session.commit()
     session.close()
 
     return Response(image_bytes, headers=IMAGE_HEADER, media_type=IMAGE_CONTENT_TYPE)
+
+
+# Battery
+
+
+@router.post("/{id}/battery", response_model=BatteryStatusRead)
+def add_battery_status(
+    id: uuid.UUID,
+    data: BatteryStatusCreate,
+    session: Session = Depends(get_session),
+):
+    frame = session.get(Frame, id)
+    if frame is None:
+        raise HTTPException(status_code=404, detail="Frame not found")
+
+    now = datetime.datetime.now()
+
+    # TODO Get timezone
+
+    reading = FrameBatteryState(
+        frame_id=id,
+        timestamp=now,
+        voltage=data.voltage,
+    )
+
+    session.add(reading)
+    session.commit()
+
+    # TODO Clean too-old battery states
+
+    session.close()
+    return reading
+
+
+@router.get("/{id}/battery", response_model=BatteryStatusList)
+def get_battery_status(
+    id: uuid.UUID,
+    limit: int = 50,
+    session: Session = Depends(get_session),
+):
+    frame = session.get(Frame, id)
+    if frame is None:
+        raise HTTPException(status_code=404, detail="Frame not found")
+
+    rows = (
+        session.query(FrameBatteryState)
+        .filter_by(frame_id=id)
+        .order_by(FrameBatteryState.timestamp.desc())
+        .limit(limit)
+        .all()
+    )
+
+    session.close()
+    return BatteryStatusList(
+        frame_id=id,
+        readings=rows,  # oldest → newest
+        count=len(rows),
+    )
+
+
+@router.get("/{id}/battery/status", response_model=None)
+def evaluate_battery(
+    id: uuid.UUID,
+    session: Session = Depends(get_session),
+):
+
+    return

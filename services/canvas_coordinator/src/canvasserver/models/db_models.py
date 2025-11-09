@@ -1,3 +1,4 @@
+import datetime
 import gzip
 import io
 import uuid
@@ -154,6 +155,19 @@ class FrameGroupPrompt(Model, table=True):
 
     group_id: uuid.UUID = Field(foreign_key="frame_group.id", primary_key=True)
     prompt_id: str = Field(foreign_key="prompt.id", primary_key=True)
+
+
+class FrameBatteryState(Model, table=True):
+
+    __tablename__ = "frame_battery_state"
+
+    frame_id: uuid.UUID = Field(foreign_key="frame.id", primary_key=True, nullable=False)
+
+    timestamp: datetime.datetime = Field(
+        primary_key=True, default_factory=datetime.datetime.utcnow
+    )
+
+    voltage: float = Field(nullable=False)
 
 
 class Settings(Model):
