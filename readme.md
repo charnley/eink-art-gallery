@@ -8,6 +8,8 @@ The write-up can be found at [https://charnley.github.io/blog/2025/04/02/e-ink-a
 
 The different services can be found `/services/*`.
 
+## Hardware overview
+
 ```mermaid
 graph TD
 
@@ -48,7 +50,7 @@ graph TD
 ```
 
 
-## PULL Frame Workflow
+## ESP32 Frame Workflow
 
 ```mermaid
 flowchart TD
@@ -63,6 +65,8 @@ flowchart TD
     I --> J[Record Battery State]
     J --> K[ESP32 sleeps for calculated duration]
 ```
+
+## The story
 
 - The **picture server** stores a list of AI prompts, each with its associated images, in an SQLite database. For our setup, this is hosted on **Home Assistant as an Add-on**, but it could easily run on any Docker hosting service.
 - Every night, the **desktop computer** checks the picture server for prompts that need images. For each prompt, the desktop computer generates new images and sends them to the server.
