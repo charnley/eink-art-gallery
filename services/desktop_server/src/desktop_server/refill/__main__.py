@@ -8,6 +8,7 @@ from rich.console import Console
 from rich.logging import RichHandler
 from shared_constants import FILE_UPLOAD_KEY, IMAGE_CONTENT_TYPE, WaveshareDisplay
 from shared_image_utils import image_to_bytes
+from shared_image_utils.displaying import prepare_image
 
 warnings.filterwarnings("ignore", category=UserWarning)
 logger = logging.getLogger(__name__)
@@ -58,6 +59,11 @@ def refill_images(args):
         images = [
             prompt_func(pipe, prompt_text, width=width, height=height) for _ in range(n_images)
         ]
+
+        logger.info(f"Dithering {n_images} '{display_model}' images ...")
+
+        # Prepare images locally for display
+        images = [prepare_image(image, display_model) for image in images]
 
         files = [
             (FILE_UPLOAD_KEY, (f"file{i}", image_to_bytes(image), IMAGE_CONTENT_TYPE))
