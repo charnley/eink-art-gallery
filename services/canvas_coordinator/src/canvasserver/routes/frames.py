@@ -254,7 +254,7 @@ def get_image(
     voltage: float | None = None,
 ):
 
-    # Note: ESPHome will react to 400, so always return 200
+    # Note: ESPHome will react to 404, so always return 200
 
     display_model = get_display_model(request)
     frame: Frame | None = get_frame_by_mac_address(session, mac_address, display_model)
