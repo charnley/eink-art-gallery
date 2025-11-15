@@ -11,7 +11,6 @@ architecture drawing, mountain house, pen line drawing, highly detailed, white b
 pen and ink illustration, rich texture from hatching and stippling, dramatic bw contrast, expressive forms, surreal or observational subject
 printmaking-inspired drawing, bold black lines, textural imperfections, handcrafted feeling, high contrast, simplified abstract composition
 epic landscape, stippling drawing, fine dot shading technique, monochrome, highly detailed textures, careful gradation, realistic or abstract subject
-sumi-e ink painting, expressive black brushstrokes on white background, delicate movement, minimalist Japanese style, atmospheric and contemplative
 mountain hut, technical illustration in grayscale, clean lines, labeled parts, isometric or exploded view, precise and functional, white background
 grayscale watercolor painting, fluid washes, expressive tonal transitions, moody atmosphere, abstract or figurative, traditional technique
 mountain hut wireframe-style illustration, clean geometric mesh lines, 3D perspective, grayscale, technical digital aesthetic, white background
