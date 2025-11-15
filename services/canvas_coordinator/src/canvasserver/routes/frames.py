@@ -285,7 +285,6 @@ def get_image(
     # TODO You know what frame this is, calculate the expected lifetime of the battery
     # TODO If the battery state is going bad, superset a battery state warning on the picture
 
-    image = prepare_image(image, frame.model)
     image_bytes = image_to_bytes(image)
 
     session.commit()
@@ -308,8 +307,6 @@ def add_battery_status(
         raise HTTPException(status_code=404, detail="Frame not found")
 
     now = datetime.datetime.now()
-
-    # TODO Get timezone
 
     reading = FrameBatteryState(
         frame_id=id,
