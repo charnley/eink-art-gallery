@@ -114,32 +114,35 @@ flowchart TD
         G --> H[Activate Prompts]
     end
 
-    subgraph "Display Workflow"
-        I[Frame wakes up] --> J[Request Image]
-        J --> K[Get Frame's Group]
-        K --> L[Select Active Prompt]
-        L --> M[Get Random Image]
-        M --> N[Display Image]
-        N --> O[Record Battery State]
+    subgraph "PULL Frame Workflow (ESP32)"
+        I1[ESP32 wakes up] --> J1[Request Image via MAC]
+        J1 --> K1[Get Frame's Group]
+        K1 --> L1[Select Active Prompt]
+        L1 --> M1[Get Random Image]
+        M1 --> N1[Return Image to ESP32]
+        N1 --> O1[ESP32 displays image]
+        O1 --> P1[Record Battery State]
+        P1 --> Q1[ESP32 goes to sleep]
+    end
+
+    subgraph "PUSH Frame Workflow (Raspberry Pi)"
+        I2[Cron triggers] --> J2[Get Group's PUSH Frames]
+        J2 --> K2[Select Active Prompt]
+        K2 --> L2[Get Random Image]
+        L2 --> M2[POST Image to Frame API]
+        M2 --> N2[Raspberry Pi displays image]
     end
 
     subgraph "Scheduled Operations"
-        P[Cron: Prompt Rotation] --> Q[Rotate Group Prompts]
-        R[Cron: Frame Update] --> S[Push to PUSH Frames]
+        R1[Cron: Prompt Rotation] --> S1[Rotate Group Prompts]
+        R2[Cron: Frame Update] --> S2[Trigger PUSH Frame Workflow]
     end
 
     D --> H
-    H --> L
-    Q --> H
-    S --> N
-
-    classDef db fill:#e1f5fe
-    classDef process fill:#f3e5f5
-    classDef schedule fill:#fff3e0
-
-    class A,B,C,D,E,F,G,H process
-    class I,J,K,L,M,N,O db
-    class P,Q,R,S schedule
+    H --> L1
+    H --> K2
+    S1 --> H
+    S2 --> I2
 ```
 
 - The **picture server** stores a list of AI prompts, each with its associated images, in an SQLite database. For our setup, this is hosted on **Home Assistant as an Add-on**, but it could easily run on any Docker hosting service.
