@@ -87,4 +87,4 @@ fill-halloween-themes:
 
 start-jupyter:
 	HF_HOME=${GIT_ROOT}/models \
-	${python} -m jupyterlab
+	${python} -m jupyterlab --ip='*' --port=5000 --no-browser
