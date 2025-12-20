@@ -11,9 +11,7 @@ architecture drawing, mountain house, pen line drawing, highly detailed, white b
 pen and ink illustration, rich texture from hatching and stippling, dramatic bw contrast, expressive forms, surreal or observational subject
 printmaking-inspired drawing, bold black lines, textural imperfections, handcrafted feeling, high contrast, simplified abstract composition
 epic landscape, stippling drawing, fine dot shading technique, monochrome, highly detailed textures, careful gradation, realistic or abstract subject
-mountain hut, technical illustration in grayscale, clean lines, labeled parts, isometric or exploded view, precise and functional, white background
 grayscale watercolor painting, fluid washes, expressive tonal transitions, moody atmosphere, abstract or figurative, traditional technique
-mountain hut wireframe-style illustration, clean geometric mesh lines, 3D perspective, grayscale, technical digital aesthetic, white background
 wood engraving style drawing, detailed white lines carved into black, intricate textures, historical print aesthetic, dramatic contrast
 painting by Peder Balke, moody, high contrast, epic scene, cinematic
 a watercolor and india ink painting looking out over vast landscape of Norway
@@ -31,7 +29,7 @@ by Andy Singer, fine lines, detailed, urban, fantasy, dreamy, bw
 cute creature by Alex Pardee, exspressive, surreal, bw, white background
 sketch by Doug Hyde, Whimsical, bw, heartwarming, cheerful, playful, emotive, charming, uplifting, sentimental, simplistic, joyful, contemporary, friendly, illustrative, childlike, vibrant, tender, positive, endearing.
 cartoon by Mo Willems, cute, detailed animal, fine lines, bw, white background
-cute fantasy animal by Arthur Adams, fine lines, detailed, BW, psychedelic
+cute animal by Arthur Adams, fine lines, detailed, BW, psychedelic, abstract
 by Alex Andreev++, Surreal, Futuristic, Sci-fi, Dreamlike, Digital, Imaginative, Atmospheric, Abstract, Dystopian, Ethereal, Conceptual, Vivid, Fantasy, Otherworldly, Innovative, bw
 landscape by Norman Ackroyd++, Monochromatic, etching, landscapes, detailed, atmospheric, moody, textural, coastal, British, minimalist, evocative, natural, serene, intricate, timeless, contemplative, traditional, marine, expressive, tonal.
 painting by Charles-Francois Daubigny, bw
@@ -47,3 +45,21 @@ Micrographia++, illustration, Natural+ history style, 18th century, hyper detail
 Micrographia-inspired scientific illustration, 18th-century natural history style, museum drawing, realistic and realistic, hyper detailed, fine lines, white background, Enlightenment-era scientific study
 animal illustration, Micrographia-inspired, scientific illustration, 16th-century natural history style, museum drawing, realistic and realistic, hyper detailed, fine lines, white background, bw, Enlightenment-era scientific study
 drawing by Jacquers Riguard, Neoclassicism+, 17th century, pen and ink and pencil on paper, vast landscape+, sketch, white background
+Swiss minimal landscape painting, soft mountain silhouettes, misty tones, muted blues and taupes, abstract watercolor style, zen aesthetic, calming composition
+Scandinavian line art, single branch with leaves, black ink, minimalist composition, airy negative space, modern, subtle elegance, white bg
+Korean minimalist wall art, hanji paper texture, soft beige background, subtle black ink brush strokes, abstract organic forms, flowing lines, negative space, serene and elegant composition, high-resolution
+Korean-inspired minimal landscape, river flowing through mountains, ink wash style, soft beige and pale gray tones, misty atmosphere, abstract and calming composition
+black-and-white Danish forest landscape, late autumn, bare trees with sparse leaves, misty atmosphere, minimalist composition, high-contrast ink style, negative space emphasis, serene and moody
+minimalist black-and-white art, scattered autumn leaves, Danish forest inspiration, ink brushwork, organic patterns, subtle textures, abstract and elegant composition, meditative nature motif
+minimalist black-and-white coastline, late autumn Denmark, tall grasses and driftwood, abstract ink silhouettes, negative space focus, moody naturalistic composition, meditative
+harcoal drawing in the style of Cai Guo-Qiang, dynamic explosive lines, smoky textures, high-contrast black and gray, abstract energy patterns, dramatic motion, expressive gestural strokes, intense atmospheric composition
+fractal-inspired charcoal drawing, chaotic explosive patterns, smoky textures, recursive organic shapes, high-contrast black and gray, dynamic swirling energy, abstract
+complex black-and-white fractal, dense recursive patterns, geometric and organic shapes combined, infinite depth, abstract meditative composition
+abstract symmetrical inkblot, fluid black ink on white background, mirrored patterns, organic and amorphous shapes, high-contrast psychological style, meditative ambiguity
+simple symmetrical inkblot, clean black-and-white, negative space emphasis, mirrored abstract shapes, ambiguous and interpretive design, Rorschach test aesthetic
+black-and-white sci-fi botanical illustration, Scandinavian minimalism, delicate futuristic plant forms, geometric symmetry, clean lines, subtle abstract energy, elegant and meditative composition
+muted sci-fi landscape, Scandinavian minimalism, soft rolling hills, futuristic abstract architecture, subtle fog, minimal color palette, serene and contemplative wall art
+realistic Scandinavian landscape, serene countryside, romantic naturalism, meticulous detail, soft atmospheric light, rolling hills and forests, moody skies, subtle color palette of greens, browns, and grays, delicate brushwork, tranquil and idyllic scenery, 19th-century Norwegian plein air painting, high-resolution, painterly realism
+Scandinavian-inspired pattern, minimalist design, simple organic motifs, flora and fauna, delicate linework, soft muted colors, natural textures, modern folk art aesthetic, repetitive and harmonious composition, clean and airy, hand-drawn illustration style, contemporary Nordic design, elegant textile and paper pattern
+minimalist whimsical illustration by Lim Heng Swee, clean line art, flat soft muted colors, playful surrealism, geometric shapes, symbolic imagery, nature and everyday life, tranquil and joyful composition, central focus, symmetrical layout, generous negative space, Asian-inspired aesthetic, contemporary illustration style, subtle contrasting accents, serene and contemplative mood
+minimalist fashion illustration, Parisian lifestyle, elegant ink line drawing, soft pastel watercolor washes, fine delicate lines, chic and contemporary, intimate urban scenes, personal moments, subtle negative space, occasional vibrant red accents, simple backgrounds, stylish figures, café culture, modern elegance, contemplative and serene mood
