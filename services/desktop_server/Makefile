@@ -71,9 +71,6 @@ fill-default-themes:
 	"../../assets/prompts_sd3_bw.txt SD3 WaveShare13BlackWhite960x680"
 
 fill-halloween-themes:
-	@# WaveShare13BlackWhite960x680
-	@# WaveShare13BlackRedWhite960x680
-	@# WaveShare13FullColor1600x1200
 	test ! -z "${refill_server}"
 	HF_HOME=${GIT_ROOT}/models \
 	${python} -m ${package}.themes \
@@ -82,6 +79,16 @@ fill-halloween-themes:
 	"../../assets/theme_halloween.txt SD3 WaveShare13BlackWhite960x680" \
 	"../../assets/theme_halloween.txt SD3 WaveShare13FullColor1600x1200" \
 	"../../assets/theme_halloween.txt SD3 WaveShare13BlackRedWhite960x680"
+
+fill-christmas-themes:
+	test ! -z "${refill_server}"
+	HF_HOME=${GIT_ROOT}/models \
+	${python} -m ${package}.themes \
+	--canvas-server-url ${refill_server} \
+	--prompts \
+	"../../assets/theme_christmas.txt SD3 WaveShare13BlackWhite960x680" \
+	"../../assets/theme_christmas.txt SD3 WaveShare13FullColor1600x1200" \
+	"../../assets/theme_christmas.txt SD3 WaveShare13BlackRedWhite960x680"
 
 ## Development
 
