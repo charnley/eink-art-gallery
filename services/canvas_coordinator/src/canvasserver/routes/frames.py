@@ -225,7 +225,7 @@ def get_sleep(mac_address: str, request: Request, session: Session = Depends(get
         logger.warning("Frame definition is wrong, returning default CRON")
         return get_seconds_until_next(DEFAULT_PULLFRAME_CRON)
 
-    logging.info(f"Found Frame: {frame} - {display_model} - {frame.group}")
+    logging.debug(f"Found Frame: {frame} - {display_model} - {frame.group}")
 
     if frame.group is None:
         logger.warning("Frame is not registered a group, returning default CRON")

@@ -11,11 +11,10 @@ def get_schedule_datetimes(cron_string, count=10) -> list[datetime.datetime]:
 
     schedule: list[datetime.datetime] = []
 
-    now = datetime.datetime.now()
-    timezone = now.tzinfo
+    local_tz = datetime.datetime.now().astimezone().tzinfo
+    now = datetime.datetime.now(tz=local_tz)
 
-    trigger = CronTrigger.from_crontab(cron_string)
-    trigger.timezone = timezone
+    trigger = CronTrigger.from_crontab(cron_string, timezone=local_tz)
 
     next_datetime = trigger.get_next_fire_time(None, now)
     assert next_datetime is not None
@@ -43,16 +42,17 @@ def get_seconds_until_next(cron_string: str) -> int:
 
     # TODO Test if fetch at the exact same time as cron
 
-    now = datetime.datetime.now()
-    timezone = now.tzinfo
+    local_tz = datetime.datetime.now().astimezone().tzinfo
+    now = datetime.datetime.now(tz=local_tz)
 
-    trigger = CronTrigger.from_crontab(cron_string)
-    trigger.timezone = timezone
+    trigger = CronTrigger.from_crontab(cron_string, timezone=local_tz)
 
     next_datetime = trigger.get_next_fire_time(None, now)
     assert next_datetime is not None, "Wrong cron format"
+    assert now.tzinfo == next_datetime.tzinfo
 
     delta = next_datetime - now
+
     nextnext_datetime = trigger.get_next_fire_time(
         None, now + delta + datetime.timedelta(seconds=1)
     )
@@ -60,11 +60,9 @@ def get_seconds_until_next(cron_string: str) -> int:
 
     interval = (nextnext_datetime - next_datetime).total_seconds()
     buffer_seconds = max(MIN_BUFFER, np.ceil(interval * BUFFER_PERCENT))
+    is_early = (next_datetime - now).total_seconds() < buffer_seconds
 
-    if (next_datetime - now).total_seconds() < buffer_seconds:
-        target_datetime = nextnext_datetime
-    else:
-        target_datetime = next_datetime
+    target_datetime = nextnext_datetime if is_early else next_datetime
 
     seconds = np.ceil((target_datetime - now).total_seconds())
 
