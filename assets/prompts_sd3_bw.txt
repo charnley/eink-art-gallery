@@ -29,7 +29,6 @@ by Andy Singer, fine lines, detailed, urban, fantasy, dreamy, bw
 cute creature by Alex Pardee, exspressive, surreal, bw, white background
 sketch by Doug Hyde, Whimsical, bw, heartwarming, cheerful, playful, emotive, charming, uplifting, sentimental, simplistic, joyful, contemporary, friendly, illustrative, childlike, vibrant, tender, positive, endearing.
 cartoon by Mo Willems, cute, detailed animal, fine lines, bw, white background
-cute animal by Arthur Adams, fine lines, detailed, BW, psychedelic, abstract
 by Alex Andreev++, Surreal, Futuristic, Sci-fi, Dreamlike, Digital, Imaginative, Atmospheric, Abstract, Dystopian, Ethereal, Conceptual, Vivid, Fantasy, Otherworldly, Innovative, bw
 landscape by Norman Ackroyd++, Monochromatic, etching, landscapes, detailed, atmospheric, moody, textural, coastal, British, minimalist, evocative, natural, serene, intricate, timeless, contemplative, traditional, marine, expressive, tonal.
 painting by Charles-Francois Daubigny, bw
@@ -65,3 +64,4 @@ minimalist whimsical illustration by Lim Heng Swee, clean line art, flat soft mu
 minimalist fashion illustration, Parisian lifestyle, elegant ink line drawing, soft pastel watercolor washes, fine delicate lines, chic and contemporary, intimate urban scenes, personal moments, subtle negative space, occasional vibrant red accents, simple backgrounds, stylish figures, café culture, modern elegance, contemplative and serene mood
 style of Odilon Redon, symbolist surrealism, odilon redon inspired, dream logic, floating organic forms, giant eye motif, monochrome lithograph, charcoal and ink texture, deep velvety blacks, soft gradients, empty void background, eerie calm, psychological symbolism, poetic and haunting atmosphere
 symbolist surrealism, odilon redon inspired, dreamlike subconscious imagery, floating organic forms, uncanny poetic symbolism, metaphysical atmosphere, psychological depth, silent introspection, eerie calm, 19th century symbolist art, monochrome black and white, lithograph texture, charcoal and ink drawing, soft smudged shading, deep velvety
+sumi-e brush painting, single continuous path from Alpine meadow ascending to Japanese shrine, minimalist composition, expressive black ink strokes, white background, Zen meditation on journey and transformation
