@@ -7,12 +7,21 @@ from shared_constants import WaveshareDisplay
 logger = logging.getLogger(__name__)
 
 ENDPOINT_CREATE_PROMPTS = "/prompts/"
+ENDPOINT_FRAMES = "/frames/"
 
 
 class PromptPayload(BaseModel):
     prompt: str
     image_model: str
     display_model: WaveshareDisplay
+
+
+def get_display_models(server_url: str) -> list[WaveshareDisplay]:
+    """Fetch all frames from the canvas coordinator and return the unique display models registered."""
+    response = requests.get(server_url + ENDPOINT_FRAMES)
+    response.raise_for_status()
+    frames = response.json()["frames"]
+    return list({WaveshareDisplay(frame["model"]) for frame in frames})
 
 
 def color_range_from_display(display: WaveshareDisplay) -> str:

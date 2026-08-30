@@ -24,7 +24,7 @@ login:
 	@# https://huggingface.co/settings/tokens/new?tokenType=read
 	${python} -c "from huggingface_hub import login; login()"
 
-ollama:
+install-ollama:
 	mkdir -p ${HOME}/opt/
 	mkdir -p ${HOME}/opt/ollama/
 	curl -L https://ollama.com/download/ollama-linux-amd64.tgz -o ${HOME}/opt/ollama/ollama-linux-amd64.tgz
