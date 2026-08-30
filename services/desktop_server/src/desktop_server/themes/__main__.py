@@ -1,14 +1,11 @@
 import logging
-import warnings
 from pathlib import Path
 
+from desktop_server import cli_utils
 from desktop_server.canvas_client import post_prompts
 from pydantic import BaseModel
-from rich.console import Console
-from rich.logging import RichHandler
 from shared_constants import WaveshareDisplay
 
-warnings.filterwarnings("ignore", category=UserWarning)
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +22,12 @@ def refill_prompts(prompts: list[PromptInput], server_url: str):
         with open(prompt.filename, "r") as f:
             lines = [line.strip() for line in f.readlines()]
 
-        post_prompts(lines, prompt.image_model, prompt.display_model, server_url)
+        post_prompts(
+            lines,
+            image_model=prompt.image_model,
+            display_model=prompt.display_model,
+            server_url=server_url,
+        )
 
         logger.info(f"Database enriched with {len(lines)} prompts")
 
@@ -53,13 +55,8 @@ def main(args=None):
 
     import argparse
 
-    FORMAT = "%(message)s"
-    logging.basicConfig(
-        level=logging.INFO,
-        format=FORMAT,
-        datefmt="[%X]",
-        handlers=[RichHandler(console=Console(width=89))],
-    )
+    cli_utils.setup_logging()
+    cli_utils.ignore_user_warnings()
 
     parser = argparse.ArgumentParser()
 

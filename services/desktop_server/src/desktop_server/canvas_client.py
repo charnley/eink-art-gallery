@@ -1,13 +1,18 @@
 import logging
 
 import requests
+from desktop_server import network_utils
+from PIL import Image
 from pydantic import BaseModel
-from shared_constants import WaveshareDisplay
+from shared_constants import FILE_UPLOAD_KEY, IMAGE_CONTENT_TYPE, WaveshareDisplay
+from shared_image_utils import image_to_bytes
 
 logger = logging.getLogger(__name__)
 
 ENDPOINT_CREATE_PROMPTS = "/prompts/"
+ENDPOINT_CHECK_PROMPTS = "/prompts/?filter=missing"
 ENDPOINT_FRAMES = "/frames/"
+ENDPOINT_UPLOAD_IMAGES = "/images/"
 
 
 class PromptPayload(BaseModel):
@@ -33,6 +38,25 @@ def color_range_from_display(display: WaveshareDisplay) -> str:
         return "BWR"
     else:
         return "BW"
+
+
+def get_prompts_missing_images(server_url: str) -> list[dict]:
+    """Fetch prompts that still need images generated for them."""
+    response = requests.get(server_url + ENDPOINT_CHECK_PROMPTS)
+    response.raise_for_status()
+    return response.json()["prompts"]
+
+
+def upload_images(server_url: str, prompt_id: str, images: list[Image.Image]) -> None:
+    """Upload generated images for a prompt (fire and forget)."""
+    files = [
+        (FILE_UPLOAD_KEY, (f"file{i}", image_to_bytes(image), IMAGE_CONTENT_TYPE))
+        for i, image in enumerate(images)
+    ]
+
+    logger.info(f"Uploading {len(images)} images for {prompt_id}...")
+    params = dict(prompt=prompt_id)
+    network_utils.fire_and_forget_images(server_url + ENDPOINT_UPLOAD_IMAGES, params, files)
 
 
 def post_prompts(

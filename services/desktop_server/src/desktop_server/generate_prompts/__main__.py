@@ -1,14 +1,13 @@
 import logging
 from pathlib import Path
 
+from desktop_server import cli_utils
 from desktop_server.canvas_client import color_range_from_display, post_prompts
 from desktop_server.generate_prompts import (
     DEFAULT_MODEL,
     generate_prompts_for_themes,
     ollama_session,
 )
-from rich.console import Console
-from rich.logging import RichHandler
 from shared_constants import WaveshareDisplay
 
 logger = logging.getLogger(__name__)
@@ -18,13 +17,7 @@ def main(args=None):
 
     import argparse
 
-    FORMAT = "%(message)s"
-    logging.basicConfig(
-        level=logging.INFO,
-        format=FORMAT,
-        datefmt="[%X]",
-        handlers=[RichHandler(console=Console(width=89))],
-    )
+    cli_utils.setup_logging()
 
     parser = argparse.ArgumentParser(
         description="Generate image prompts from a theme using a local LLM via Ollama."

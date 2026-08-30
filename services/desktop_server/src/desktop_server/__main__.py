@@ -3,7 +3,7 @@ import logging
 import threading
 
 import requests
-from rich.logging import RichHandler
+from desktop_server import cli_utils
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +32,7 @@ def main(args=None):
     # parser.add_argument("--prompts-filename", type=Path)
     args = parser.parse_args(args)
 
-    FORMAT = "%(message)s"
-    logging.basicConfig(level="INFO", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
+    cli_utils.setup_logging()
 
     logger.info(f"Fetching from {args.canvas_server_url + ENDPOINT_CHECK}")
     response = requests.get(args.canvas_server_url + ENDPOINT_CHECK)
