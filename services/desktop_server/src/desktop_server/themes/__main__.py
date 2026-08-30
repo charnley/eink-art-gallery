@@ -2,7 +2,7 @@ import logging
 import warnings
 from pathlib import Path
 
-import requests
+from desktop_server.canvas_client import post_prompts
 from pydantic import BaseModel
 from rich.console import Console
 from rich.logging import RichHandler
@@ -11,8 +11,6 @@ from shared_constants import WaveshareDisplay
 warnings.filterwarnings("ignore", category=UserWarning)
 logger = logging.getLogger(__name__)
 
-ENDPOINT_CREATE_PROMPTS = "/prompts/"
-
 
 class PromptInput(BaseModel):
     filename: Path
@@ -20,36 +18,14 @@ class PromptInput(BaseModel):
     display_model: WaveshareDisplay
 
 
-class PromptPayload(BaseModel):
-    prompt: str
-    image_model: str
-    display_model: WaveshareDisplay
-
-
 def refill_prompts(prompts: list[PromptInput], server_url: str):
-
-    # Read prompt file and put into database
 
     for prompt in prompts:
 
         with open(prompt.filename, "r") as f:
             lines = [line.strip() for line in f.readlines()]
 
-        prompt_payloads = [
-            PromptPayload(
-                prompt=prompt_text,
-                image_model=prompt.image_model,
-                display_model=prompt.display_model,
-            )
-            for prompt_text in lines
-        ]
-
-        logger.info(f"Uploading to {server_url + ENDPOINT_CREATE_PROMPTS}")
-
-        for payload in prompt_payloads:
-            payload = payload.model_dump_json()
-            response = requests.post(server_url + ENDPOINT_CREATE_PROMPTS, data=payload)
-            logger.info(f"{response.status_code} {response.json()}")
+        post_prompts(lines, prompt.image_model, prompt.display_model, server_url)
 
         logger.info(f"Database enriched with {len(lines)} prompts")
 
@@ -94,8 +70,6 @@ def main(args=None):
     prompts = [handlePromptInput(x) for x in args.prompts]
 
     assert args.canvas_server_url, "Need a server url to fetch and push to"
-
-    # TODO Validate server status?
 
     refill_prompts(prompts, args.canvas_server_url)
 
