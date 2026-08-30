@@ -74,7 +74,7 @@ def post_prompts(
             display_model=display_model,
         )
         response = requests.post(
-            server_url + ENDPOINT_CREATE_PROMPTS, data=payload.model_dump_json()
+            server_url + ENDPOINT_CREATE_PROMPTS, json=payload.model_dump(mode="json")
         )
         logger.info(f"{response.status_code} {response.json()}")
 
