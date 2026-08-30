@@ -61,6 +61,7 @@ refill-all:
 	${python} -m ${package}.refill \
 	--server-url ${refill_server} \
 	all \
+	--count 20 \
 	--theme "" \
 	--system-prompt ${GIT_ROOT}/assets/prompt_system.txt \
 	--task-prompt ${GIT_ROOT}/assets/prompt_task.txt
@@ -72,6 +73,7 @@ refill-all-theme:
 	${python} -m ${package}.refill \
 	--server-url ${refill_server} \
 	all \
+	--count 20 \ # TODO This could be calculated from #frames per-cron-schedule
 	--theme "${theme}" \
 	--system-prompt ${GIT_ROOT}/assets/prompt_system.txt \
 	--task-prompt ${GIT_ROOT}/assets/prompt_task_theme.txt
