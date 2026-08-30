@@ -1,5 +1,6 @@
 fastapi
 fastapi_utilities
+ollama>=0.5.0
 httpx
 ipywidgets
 jinja2

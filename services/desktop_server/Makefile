@@ -24,7 +24,7 @@ login:
 	@# https://huggingface.co/settings/tokens/new?tokenType=read
 	${python} -c "from huggingface_hub import login; login()"
 
-ollama:
+install-ollama:
 	mkdir -p ${HOME}/opt/
 	mkdir -p ${HOME}/opt/ollama/
 	curl -L https://ollama.com/download/ollama-linux-amd64.tgz -o ${HOME}/opt/ollama/ollama-linux-amd64.tgz
@@ -37,19 +37,46 @@ start:
 	make start-push push_server=${push_server}
 	make start-refill refill_server=${refill_server}
 
-start-push:
-	test ! -z "${push_server}"
+refill-prompts:
+	test ! -z "${refill_server}"
+	test ! -z "${theme}"
 	HF_HOME=${GIT_ROOT}/models \
-	${python} -m ${package}.push \
-	--url ${push_server} \
-	--prompt \"$$(shuf -n 1 ${GIT_ROOT}/assets/random_cute.txt)\" \
-	--use-red \
+	${python} -m ${package}.refill \
+	--server-url ${refill_server} \
+	prompts \
+	--theme "${theme}" \
+	--system-prompt ${GIT_ROOT}/assets/prompt_system.txt \
+	--task-prompt ${GIT_ROOT}/assets/prompt_task.txt
 
-start-refill:
+refill-images:
 	test ! -z "${refill_server}"
 	HF_HOME=${GIT_ROOT}/models \
 	${python} -m ${package}.refill \
-	--server-url ${refill_server}
+	--server-url ${refill_server} \
+	images
+
+refill-all:
+	test ! -z "${refill_server}"
+	HF_HOME=${GIT_ROOT}/models \
+	${python} -m ${package}.refill \
+	--server-url ${refill_server} \
+	all \
+	--count 20 \
+	--theme "" \
+	--system-prompt ${GIT_ROOT}/assets/prompt_system.txt \
+	--task-prompt ${GIT_ROOT}/assets/prompt_task.txt
+
+refill-all-theme:
+	test ! -z "${refill_server}"
+	test ! -z "${theme}"
+	HF_HOME=${GIT_ROOT}/models \
+	${python} -m ${package}.refill \
+	--server-url ${refill_server} \
+	all \
+	--count 20 \ # TODO This could be calculated from #frames per-cron-schedule
+	--theme "${theme}" \
+	--system-prompt ${GIT_ROOT}/assets/prompt_system.txt \
+	--task-prompt ${GIT_ROOT}/assets/prompt_task_theme.txt
 
 start-api:
 	test ! -z "${push_server}"
@@ -69,19 +96,6 @@ fill-default-themes:
 	"../../assets/prompts_sd3_color.txt SD3 WaveShare13FullColor1600x1200" \
 	"../../assets/prompts_sd3_red.txt SD3 WaveShare13BlackRedWhite960x680" \
 	"../../assets/prompts_sd3_bw.txt SD3 WaveShare13BlackWhite960x680"
-
-fill-halloween-themes:
-	@# WaveShare13BlackWhite960x680
-	@# WaveShare13BlackRedWhite960x680
-	@# WaveShare13FullColor1600x1200
-	test ! -z "${refill_server}"
-	HF_HOME=${GIT_ROOT}/models \
-	${python} -m ${package}.themes \
-	--canvas-server-url ${refill_server} \
-	--prompts \
-	"../../assets/theme_halloween.txt SD3 WaveShare13BlackWhite960x680" \
-	"../../assets/theme_halloween.txt SD3 WaveShare13FullColor1600x1200" \
-	"../../assets/theme_halloween.txt SD3 WaveShare13BlackRedWhite960x680"
 
 ## Development
 

@@ -26,7 +26,7 @@ def read_items(
 
     if filter is None or filter == "null":
         prompts = session.query(Prompt).limit(limit).all()
-        prompts = [PromptStatus(**prompt.dict()) for prompt in prompts]
+        prompts = [PromptStatus(**prompt.model_dump()) for prompt in prompts]
 
     elif filter == "missing":
         prompts = find_prompts_with_missing_images(session)

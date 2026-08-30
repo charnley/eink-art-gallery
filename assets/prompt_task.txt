@@ -1,0 +1,4 @@
+Generate {n} image generation prompts
+Color range: {color_range}
+
+Use varied styles from the style vocabulary above. Do not repeat the same technique twice in a row. Output one prompt per line, no numbering, no explanation.

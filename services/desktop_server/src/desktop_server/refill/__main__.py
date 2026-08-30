@@ -1,97 +1,95 @@
-import logging
-import warnings
+import argparse
+from pathlib import Path
 
-import requests
-from desktop_server import network_utils
-from desktop_server.art_generator import load_sd3, prompt_sd3
-from rich.console import Console
-from rich.logging import RichHandler
-from shared_constants import FILE_UPLOAD_KEY, IMAGE_CONTENT_TYPE, WaveshareDisplay
-from shared_image_utils import image_to_bytes
-
-warnings.filterwarnings("ignore", category=UserWarning)
-logger = logging.getLogger(__name__)
-
-ENDPOINT_CHECK_PROMPTS = "/prompts/?filter=missing"
-ENDPOINT_UPLOAD_IMAGES = "/images/"
+from desktop_server import cli_utils
+from desktop_server.generate_prompts import DEFAULT_MODEL
+from desktop_server.refill.images import refill_images
+from desktop_server.refill.prompts import refill_prompts
 
 
-def refill_images(args):
+def _add_prompts_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--theme", type=str, required=True, help="Theme or style string to generate prompts for"
+    )
+    parser.add_argument(
+        "--count",
+        type=int,
+        default=5,
+        help="Number of prompts to generate per display model (default: 5)",
+    )
+    parser.add_argument(
+        "--system-prompt",
+        type=Path,
+        required=True,
+        help="System prompt file (e.g. assets/prompt_system.txt)",
+    )
+    parser.add_argument(
+        "--task-prompt",
+        type=Path,
+        required=True,
+        help="Task prompt template file (e.g. assets/prompt_task.txt)",
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default=DEFAULT_MODEL,
+        help=f"Ollama model to use (default: {DEFAULT_MODEL})",
+    )
 
-    logger.info(f"Fetching from {args.server_url + ENDPOINT_CHECK_PROMPTS}")
-    response = requests.get(args.server_url + ENDPOINT_CHECK_PROMPTS)
 
-    assert response.status_code == 200, response.json()
-
-    data = response.json()
-    prompts = data["prompts"]
-
-    logger.info(f"Got {len(prompts)} prompts need of refill...")
-
-    # Nothing to do
-
-    if data["count"] == 0:
-        logger.info("Nothing to do... exiting")
-        return
-
-    # Load model
-    load_func = load_sd3
-    prompt_func = prompt_sd3
-
-    pipe = load_func()
-
-    for prompt in prompts:
-
-        # TODO Should use the pydantic model for prompts
-
-        prompt_text = prompt["prompt"]
-        prompt_id = prompt["id"]
-        n_images = prompt["count_frames"] - prompt["count_images"]
-        display_model = WaveshareDisplay(prompt["display_model"])
-
-        width = display_model.width
-        height = display_model.height
-
-        logger.info(f"Generating {n_images} '{display_model}' images for '{prompt_id:10s}' ...")
-
-        # Generate images
-        images = [
-            prompt_func(pipe, prompt_text, width=width, height=height) for _ in range(n_images)
-        ]
-
-        files = [
-            (FILE_UPLOAD_KEY, (f"file{i}", image_to_bytes(image), IMAGE_CONTENT_TYPE))
-            for i, image in enumerate(images)
-        ]
-
-        logger.info(f"Uploading images for {prompt_id}...")
-        params = dict(prompt=prompt_id)
-        network_utils.fire_and_forget_images(
-            args.server_url + ENDPOINT_UPLOAD_IMAGES, params, files
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Refill the canvas coordinator: generate prompts from a theme via Ollama, "
+            "generate images for prompts missing them."
         )
+    )
+    parser.add_argument(
+        "--server-url",
+        type=str,
+        required=True,
+        help="Canvas coordinator URL (fetch frames/prompts, post prompts/images)",
+    )
+
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    prompts_parser = subparsers.add_parser(
+        "prompts", help="Generate prompts from a theme and post them"
+    )
+    _add_prompts_arguments(prompts_parser)
+
+    subparsers.add_parser("images", help="Generate images for prompts missing them")
+
+    all_parser = subparsers.add_parser(
+        "all", help="Refill prompts first, then generate missing images"
+    )
+    _add_prompts_arguments(all_parser)
+
+    return parser
 
 
 def main(args=None):
+    cli_utils.setup_logging()
+    cli_utils.ignore_user_warnings()
 
-    import argparse
-
-    FORMAT = "%(message)s"
-    logging.basicConfig(
-        level=logging.INFO,
-        format=FORMAT,
-        datefmt="[%X]",
-        handlers=[RichHandler(console=Console(width=89))],
-    )
-
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("--server-url", type=str)
-
+    parser = build_parser()
     args = parser.parse_args(args)
 
-    assert args.server_url, "Need a server url to fetch and push to"
+    if args.command in ("prompts", "all"):
+        assert args.system_prompt.is_file(), f"System prompt file not found: {args.system_prompt}"
+        assert args.task_prompt.is_file(), f"Task prompt file not found: {args.task_prompt}"
 
-    refill_images(args)
+        refill_prompts(
+            theme=args.theme,
+            count=args.count,
+            canvas_server_url=args.server_url,
+            system_prompt=args.system_prompt.read_text(),
+            task_template=args.task_prompt.read_text(),
+            model=args.model,
+        )
+
+    if args.command in ("images", "all"):
+        refill_images(args.server_url)
 
 
 if __name__ == "__main__":
