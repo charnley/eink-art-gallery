@@ -9,7 +9,7 @@ from canvasserver.models.db_models import Image, Prompt
 from shared_matplotlib_utils import get_basic_text
 from sqlalchemy import select
 
-from ..models.db import create_db_and_tables, get_engine, get_session, has_tables
+from ..models.db import create_db_and_tables, get_engine, has_tables, session_scope
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ def main(args=None):
 
         logger.info("Reading pre-defined prompts...")
 
-        with get_session() as session, open(args.prompts_filename, "r") as f:
+        with session_scope() as session, open(args.prompts_filename, "r") as f:
             lines = f.readlines()
             lines = [line.strip() for line in lines]
 
@@ -68,7 +68,7 @@ def main(args=None):
 
     if args.fake_it:
 
-        with get_session() as session:
+        with session_scope() as session:
 
             # All prompts:
             all_prompts = session.execute(select(Prompt)).all()

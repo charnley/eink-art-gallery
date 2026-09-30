@@ -7,7 +7,7 @@ import yaml
 from canvasserver.config import get_settings
 from canvasserver.cron_jobs import attach_group_crons
 
-from .models.db import create_db_and_tables, get_engine, get_session, has_tables
+from .models.db import create_db_and_tables, get_engine, has_tables, session_scope
 from .version import __version__
 
 logger = logging.getLogger(__name__)
@@ -48,9 +48,8 @@ def main(args=None):
         logger.info("There is a file, but no tables found, generating tables...")
         create_db_and_tables(None)
 
-    session = get_session()
-    scheduler = attach_group_crons(session)
-    session.close()
+    with session_scope() as session:
+        scheduler = attach_group_crons(session)
 
     if args.start:
 
