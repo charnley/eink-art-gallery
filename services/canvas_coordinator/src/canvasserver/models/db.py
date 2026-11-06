@@ -1,9 +1,10 @@
 import logging
 import os
+from contextlib import contextmanager
 from functools import lru_cache
 
 import sqlalchemy
-from sqlalchemy import inspect
+from sqlalchemy import event, inspect
 from sqlalchemy.engine.base import Engine
 from sqlmodel import Session, create_engine
 
@@ -17,9 +18,21 @@ logger = logging.getLogger(__name__)
 def get_engine(get_settings=get_settings):
     settings = get_settings()
     sqlite_url = f"sqlite:///{settings.database_path}"
-    connect_args = dict(check_same_thread=False)
-    engine = create_engine(sqlite_url, connect_args=connect_args)
+    connect_args = dict(check_same_thread=False, timeout=30)
+    engine = create_engine(sqlite_url, connect_args=connect_args, pool_pre_ping=True)
+    _set_sqlite_pragmas(engine)
     return engine
+
+
+def _set_sqlite_pragmas(engine: Engine):
+    """WAL: concurrent readers + single writer. busy_timeout: wait instead of SQLITE_BUSY."""
+
+    @event.listens_for(engine, "connect")
+    def _on_connect(dbapi_connection, _connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA busy_timeout=30000")
+        cursor.close()
 
 
 def create_db_and_tables(engine: Engine | None):
@@ -53,10 +66,18 @@ def _create_triggers(engine: Engine):
         conn.commit()
 
 
+@contextmanager
+def session_scope():
+    """Session with guaranteed close, for non-FastAPI callers (cron jobs)."""
+    engine = get_engine()
+    with Session(engine) as session:
+        yield session
+
+
 def get_session():
     engine = get_engine()
     with Session(engine) as session:
-        return session
+        yield session
 
 
 def has_tables(engine):

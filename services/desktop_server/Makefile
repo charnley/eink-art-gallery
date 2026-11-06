@@ -67,13 +67,14 @@ refill-all:
 	--task-prompt ${GIT_ROOT}/assets/prompt_task.txt
 
 refill-all-theme:
+	@# TODO This could be calculated from #frames per-cron-schedule
 	test ! -z "${refill_server}"
 	test ! -z "${theme}"
 	HF_HOME=${GIT_ROOT}/models \
 	${python} -m ${package}.refill \
 	--server-url ${refill_server} \
 	all \
-	--count 20 \ # TODO This could be calculated from #frames per-cron-schedule
+	--count 20 \
 	--theme "${theme}" \
 	--system-prompt ${GIT_ROOT}/assets/prompt_system.txt \
 	--task-prompt ${GIT_ROOT}/assets/prompt_task_theme.txt
