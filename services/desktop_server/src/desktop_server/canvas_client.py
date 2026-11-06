@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 ENDPOINT_CREATE_PROMPTS = "/prompts/"
 ENDPOINT_CHECK_PROMPTS = "/prompts/?filter=missing"
 ENDPOINT_FRAMES = "/frames/"
+ENDPOINT_GROUPS = "/groups/"
 ENDPOINT_UPLOAD_IMAGES = "/images/"
 
 
@@ -19,6 +20,30 @@ class PromptPayload(BaseModel):
     prompt: str
     image_model: str
     display_model: WaveshareDisplay
+
+
+def get_groups(server_url: str) -> list[dict]:
+    """Fetch all groups with their frames from the canvas coordinator."""
+    response = requests.get(server_url + ENDPOINT_GROUPS)
+    response.raise_for_status()
+    groups_data = response.json()["groups"]
+
+    groups: list[dict] = []
+    for g in groups_data:
+        frames_resp = requests.get(f"{server_url}{ENDPOINT_GROUPS}{g['id']}/frames")
+        frames_resp.raise_for_status()
+        frames = frames_resp.json()["frames"]
+        groups.append(
+            {
+                "id": g["id"],
+                "name": g["name"],
+                "schedule_frame": g.get("schedule_frame"),
+                "schedule_prompt": g.get("schedule_prompt"),
+                "frames": frames,
+            }
+        )
+
+    return groups
 
 
 def get_display_models(server_url: str) -> list[WaveshareDisplay]:
