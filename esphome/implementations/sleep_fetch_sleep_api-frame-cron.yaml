@@ -20,7 +20,6 @@ http_request:
 
 deep_sleep:
   id: deep_sleep_control
-  run_duration: 1min
   sleep_duration: "86400sec" # Default 24h
 
 text_sensor:
