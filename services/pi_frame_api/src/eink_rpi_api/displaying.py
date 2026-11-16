@@ -2,7 +2,7 @@ import logging
 import time
 from functools import cache
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from PIL import Image
 from PIL.Image import Image as PilImage
@@ -17,6 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 EPD_TYPE: WaveshareDisplay
+
+# Reuse a single EPD instance across the process lifetime to avoid
+# leaking SPI/GPIO resources and frame-buffer memory on every call.
+_epd_instance: Optional[Any] = None
 
 
 @cache
@@ -52,7 +56,26 @@ def find_epd():
 
 
 def get_epd() -> Any:
-    return find_epd().EPD()  # type: ignore
+    global _epd_instance
+    if _epd_instance is None:
+        _epd_instance = find_epd().EPD()  # type: ignore
+    return _epd_instance
+
+
+def module_exit():
+    """Release SPI/GPIO resources held by the waveshare driver."""
+    global _epd_instance
+    if _epd_instance is not None:
+        try:
+            epdlib = find_epd()
+            if hasattr(epdlib, "epdconfig") and hasattr(epdlib.epdconfig, "module_exit"):
+                epdlib.epdconfig.module_exit(cleanup=True)
+            elif hasattr(_epd_instance, "epdconfig") and hasattr(_epd_instance.epdconfig, "module_exit"):
+                _epd_instance.epdconfig.module_exit(cleanup=True)
+        except Exception:
+            logger.exception("failed to run module_exit")
+        finally:
+            _epd_instance = None
 
 
 def sleep():
@@ -176,7 +199,7 @@ def main(args=None):
 
     except KeyboardInterrupt:
         logging.info("ctrl + c:")
-        exit()
+        module_exit()
 
 
 if __name__ == "__main__":
