@@ -88,7 +88,7 @@ wifi:
 captive_portal:
 
 online_image:
-  - url: "http://homeassistant.local:8090/displays/status.png" # Default URL, will be overwritten
+  - url: "${canvas_server_url}/displays/status.png" # Default URL, will be overwritten
     id: my_image
     format: png
     type: BINARY
