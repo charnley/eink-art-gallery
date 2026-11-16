@@ -162,7 +162,8 @@ sensor:
       - multiply: 2.0  # The voltage divider requires us to multiply by 2
     on_value:
       then:
-        - lambda: ESP_LOGD("battery", "Battery Voltage: %.4f V", x);
+        - lambda: |-
+            ESP_LOGD("battery", "Battery Voltage: %.4f V", x);
 
 binary_sensor:
   - platform: status
