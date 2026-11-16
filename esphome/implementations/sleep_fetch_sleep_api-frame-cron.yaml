@@ -62,7 +62,7 @@ script:
           std::string base_url = std::string(id(canvasserver_hostname)) + "/frames/by-mac/" + local_mac + "/display.png";
 
           char buffer[256];
-          snprintf(buffer, sizeof(buffer), "%s?voltage=%.2f", base_url.c_str(), voltage);
+          snprintf(buffer, sizeof(buffer), "%s?voltage=%.4f", base_url.c_str(), voltage);
           std::string url = buffer;
 
           id(my_image).set_url(url.c_str());
