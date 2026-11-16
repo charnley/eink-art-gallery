@@ -11,6 +11,9 @@ esphome:
     build_flags: "-DBOARD_HAS_PSRAM"
   name_add_mac_suffix: true
 
+# N16R2: 2MB quad PSRAM
+psram:
+
 substitutions:
   device_id: "DEVICE_ID"
 

@@ -10,6 +10,11 @@ esphome:
   platformio_options:
     build_flags: "-DBOARD_HAS_PSRAM"
 
+# N16R8: 8MB octal PSRAM
+psram:
+  mode: octal
+  speed: 80MHz
+
 substitutions:
   device_id: "DEVICE_ID"
 

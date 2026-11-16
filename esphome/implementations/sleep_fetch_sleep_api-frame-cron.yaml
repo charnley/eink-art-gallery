@@ -92,8 +92,6 @@ wifi:
   on_disconnect:
     - logger.log: "I WAS UNABLE TO CONNECT!"
 
-captive_portal:
-
 online_image:
   - url: "http://homeassistant.local:8090/displays/status.png" # Default URL, will be overwritten
     id: my_image
