@@ -5,12 +5,30 @@
   make env
   source ./env/bin/activate
 
+## Prerequisites
+
+- `cp secrets.yaml.example secrets.yaml`, put wifi in it.
+- USB access (once, then re-login): `sudo usermod -aG dialout $USER`
+
 ## Compile and flash device
 
-  make run-device board=<choose board> display=<choose display> implementation=<choose implementation> device_id=<choose a name>
+USB (finds `/dev/ttyUSB*` or `/dev/ttyACM*`):
 
-where the choices for board, display and implementation are in `yaml` files in the directories.
-And `device_id` is a unique name on your local network.
+  make run-device device_id=<name> board=<board> display=<display> implementation=<implementation>
+
+Choices are yaml files in `boards/`, `displays/`, `implementations/`. Paths relative to `esphome/`.
+`device_id` unique name on network.
+
+Example:
+
+    make run-device device_id=frame1 board=boards/dfrobot_firebeetle2_esp32s3.yaml display=displays/13-3in-k.yaml implementation=implementations/sleep_fetch_sleep_api-frame-cron.yaml
+
+Check config only, no flash:
+
+  make .tmp.build.yaml device_id=test board=<board> display=<display> implementation=<implementation>
+  esphome config .tmp.build.yaml
+
+Make glues board + display + implementation into `.tmp.build.yaml`.
 
 # NOTES:
 

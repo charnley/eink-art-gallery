@@ -54,15 +54,22 @@ script:
 
   - id: set_image_url
     then:
+      # Force a fresh ADC reading so the state is never NaN on first boot
+      - component.update: battery_voltage
       - lambda: |-
           float voltage = id(battery_voltage).state;
 
           std::string local_mac = id(local_mac_sensor).state.c_str();
-          std::string base_url = std::string(id(canvasserver_hostname)) + "/frames/by-mac/" + local_mac + "/display.png";
+          std::string url = std::string(id(canvasserver_hostname)) + "/frames/by-mac/" + local_mac + "/display.png";
 
-          char buffer[256];
-          snprintf(buffer, sizeof(buffer), "%s?voltage=%.2f", base_url.c_str(), voltage);
-          std::string url = buffer;
+          // Only send voltage if we actually have a reading
+          if (!std::isnan(voltage)) {
+            char buffer[32];
+            snprintf(buffer, sizeof(buffer), "?voltage=%.4f", voltage);
+            url += buffer;
+          } else {
+            ESP_LOGW("main", "No battery voltage reading, omitting from URL");
+          }
 
           id(my_image).set_url(url.c_str());
       - logger.log: "I know how what to show now!"
@@ -83,8 +90,6 @@ wifi:
     - component.update: my_image
   on_disconnect:
     - logger.log: "I WAS UNABLE TO CONNECT!"
-
-captive_portal:
 
 online_image:
   - url: "http://homeassistant.local:8090/displays/status.png" # Default URL, will be overwritten
@@ -136,14 +141,6 @@ display:
           ESP_LOGD("display", "Error Image displayed successfully");
 
 api:
-  on_client_connected:
-    then:
-      - sensor.template.publish:
-          id: battery_level
-          state: !lambda "return id(battery_level).state;"
-      - sensor.template.publish:
-          id: battery_voltage
-          state: !lambda "return id(battery_voltage).state;"
 
 ota:
   - platform: esphome
@@ -162,18 +159,8 @@ sensor:
       - multiply: 2.0  # The voltage divider requires us to multiply by 2
     on_value:
       then:
-        - logger.log: "Battery Voltage: ${sensor.battery_voltage} V"
-
-  - platform: template
-    name: "Battery Level"
-    id: battery_level
-    unit_of_measurement: "%"
-    accuracy_decimals: 0
-    lambda: |-
-      float voltage = id(battery_voltage).state;
-      if (voltage < 3.0) return 0;
-      if (voltage > 4.2) return 100;
-      return (voltage - 3.0) / (4.2 - 3.0) * 100.0;
+        - lambda: |-
+            ESP_LOGD("battery", "Battery Voltage: %.4f V", x);
 
 binary_sensor:
   - platform: status
