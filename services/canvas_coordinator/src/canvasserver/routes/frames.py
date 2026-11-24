@@ -55,7 +55,7 @@ frame_filters = [None, *list(FrameType)]
 def read_items(
     filter: str | None = Query(
         default=None,
-        enum=frame_filters,
+        json_schema_extra={"enum": frame_filters},
     ),
     session: Session = Depends(get_session),
 ):
