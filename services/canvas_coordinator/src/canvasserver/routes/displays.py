@@ -18,7 +18,7 @@ router = APIRouter(prefix=prefix, tags=["displays"])
 @router.get(
     "/status.png", responses={200: {"content": {IMAGE_CONTENT_TYPE: {}}}}, response_class=Response
 )
-async def _get_status(request: Request):
+def _get_status(request: Request):
 
     display_type = WaveshareDisplay.WaveShare13BlackWhite960x680
     image = get_basic_text("Today.", width=display_type.width, height=display_type.height)
@@ -28,7 +28,7 @@ async def _get_status(request: Request):
 
 
 @router.get("/404.png", responses={200: {"content": {"image/png": {}}}}, response_class=Response)
-async def _get_404():
+def _get_404():
 
     display_type = WaveshareDisplay.WaveShare13BlackWhite960x680
     image = get_basic_404(None, width=display_type.width, height=display_type.height)

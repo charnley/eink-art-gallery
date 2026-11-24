@@ -3,10 +3,12 @@ from contextlib import asynccontextmanager
 
 from canvasserver.config import get_settings
 from canvasserver.constants import APP_NAME
+from canvasserver.cron_jobs import create_scheduler
 from canvasserver.routes import api_router
 from fastapi import Depends, FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from .models.db import session_scope
 from .version import __version__
 
 logger = logging.getLogger("uvicorn.info")
@@ -19,10 +21,18 @@ async def lifespan(app: FastAPI):
     logger.info("Initialize settings")
     _ = get_settings()
 
+    logger.info("Starting background jobs")
+    with session_scope() as session:
+        scheduler = create_scheduler(session)
+    scheduler.start()
+    app.state.scheduler = scheduler
+
     yield
 
     # shutdown
-    return
+    logger.info("Killing background jobs")
+    scheduler.shutdown()
+    app.state.scheduler = None
 
 
 app = FastAPI(
