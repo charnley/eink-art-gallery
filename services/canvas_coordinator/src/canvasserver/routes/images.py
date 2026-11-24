@@ -51,7 +51,7 @@ def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
     responses={200: {"content": {f"image/{IMAGE_EXTENSION}": {}}}},
     response_class=Response,
 )
-async def read_item_png(
+def read_item_png(
     id: uuid.UUID, use_dithering: bool = False, session: Session = Depends(get_session)
 ):
 
@@ -68,7 +68,7 @@ async def read_item_png(
 
 
 @router.post("/")
-async def create_items(
+def create_items(
     base: ImageCreate = Depends(),
     files: list[UploadFile] = File(...),
     session: Session = Depends(get_session),

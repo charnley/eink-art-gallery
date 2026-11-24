@@ -5,9 +5,8 @@ from pathlib import Path
 import uvicorn
 import yaml
 from canvasserver.config import get_settings
-from canvasserver.cron_jobs import attach_group_crons
 
-from .models.db import create_db_and_tables, get_engine, has_tables, session_scope
+from .models.db import create_db_and_tables, get_engine, has_tables
 from .version import __version__
 
 logger = logging.getLogger(__name__)
@@ -22,7 +21,6 @@ def main(args=None):
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--reload", action="store_true")
     parser.add_argument("--start", action="store_true")
-    parser.add_argument("--workers", type=int, default=2)
     parser.add_argument("--logging-config", type=Path, default=Path("./logging_config.yaml"))
 
     args = parser.parse_args(args)
@@ -48,15 +46,9 @@ def main(args=None):
         logger.info("There is a file, but no tables found, generating tables...")
         create_db_and_tables(None)
 
-    with session_scope() as session:
-        scheduler = attach_group_crons(session)
-
     if args.start:
 
         logger.info(f"Version {__version__}")
-
-        logger.info("Starting background jobs")
-        scheduler.start()
 
         uvicorn.run(
             "canvasserver.main:app",
@@ -65,11 +57,7 @@ def main(args=None):
             reload=args.reload,
             log_level=None,
             log_config=str(args.logging_config),
-            workers=args.workers,
         )
-
-        logger.info("Killing background jobs")
-        scheduler.shutdown()
 
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@ def read_items(
     limit=100,
     filter: str | None = Query(
         default=None,
-        enum=prompt_filters,
+        json_schema_extra={"enum": prompt_filters},
     ),
     session: Session = Depends(get_session),
 ):

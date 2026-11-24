@@ -5,9 +5,10 @@ from typing import Annotated
 from apscheduler.triggers.cron import CronTrigger
 from canvasserver.models.queries import get_group_prompts, rotate_prompt_for_group
 from canvasserver.time_funcs import get_schedule_datetimes
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from ..cron_jobs import reload_crons
 from ..jobs.push_device_logic import send_images_to_push_frames
 from ..models.db import get_session
 from ..models.db_models import Frame, FrameGroup, FrameType, Prompt
@@ -60,7 +61,7 @@ def read_item(id: uuid.UUID, session: Session = Depends(get_session)):
 
 
 @router.delete("/{id}", response_model=FrameGroup)
-def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
+def delete_item(id: uuid.UUID, request: Request, session: Session = Depends(get_session)):
 
     group = session.get(FrameGroup, id)
 
@@ -73,6 +74,7 @@ def delete_item(id: uuid.UUID, session: Session = Depends(get_session)):
     session.delete(group)
 
     session.commit()
+    reload_crons(request.app)
     session.close()
 
     return group
@@ -96,7 +98,7 @@ AnnotatedFrameGroup = Annotated[
 
 
 @router.post("/")
-def create_item(new_group: FrameGroup, session: Session = Depends(get_session)):
+def create_item(request: Request, new_group: FrameGroup, session: Session = Depends(get_session)):
 
     validate_cron(new_group.schedule_frame)
     validate_cron(new_group.schedule_prompt)
@@ -117,12 +119,15 @@ def create_item(new_group: FrameGroup, session: Session = Depends(get_session)):
             detail="An error occurred while saving the item.",
         )
 
+    reload_crons(request.app)
+
     session.close()
     return new_group
 
 
 @router.patch("/{id}", response_model=FrameGroup)
 def update_group(
+    request: Request,
     id: uuid.UUID,
     group_update: AnnotatedFrameGroup,
     session: Session = Depends(get_session),
@@ -146,6 +151,7 @@ def update_group(
     session.add(group)
     session.commit()
     session.refresh(group)
+    reload_crons(request.app)
     session.close()
     return group
 

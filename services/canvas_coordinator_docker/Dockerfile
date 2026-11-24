@@ -13,9 +13,6 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir llvmlite==0.47.0 numba==0.65.0
 
-COPY ./canvas_coordinator/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r ./requirements.txt
-
 COPY ./canvas_coordinator/ ./canvas_coordinator
 COPY ./shared/ ./shared
 

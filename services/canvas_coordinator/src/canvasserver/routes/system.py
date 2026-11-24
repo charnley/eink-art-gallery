@@ -4,7 +4,8 @@ import logging
 from canvasserver.models.db import get_db_size, get_session
 from canvasserver.models.db_models import Frame, FrameGroup
 from canvasserver.models.schemas import DiskUsage, FrameGroupWithFrames, FrameUpdateNoGroup
-from fastapi import APIRouter, Depends
+from canvasserver.cron_jobs import reload_crons
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ def get_groups(session: Session = Depends(get_session)):
 
 @router.post("/import/groups", response_model=list[FrameGroup], tags=["system"])
 def set_groups(
+    request: Request,
     update_groups: list[FrameGroupWithFrames],
     session: Session = Depends(get_session),
 ):
@@ -74,6 +76,19 @@ def set_groups(
             session.add(frame)
 
     session.commit()
+    reload_crons(request.app)
     session.close()
 
     return groups
+
+
+@router.post("/reload-crons", response_model=int, tags=["system"])
+def reload_cron_jobs(request: Request):
+    """Re-sync scheduled jobs with the group schedules. Returns number of jobs."""
+
+    count = reload_crons(request.app)
+
+    if count is None:
+        raise HTTPException(status_code=503, detail="Scheduler is not running")
+
+    return count

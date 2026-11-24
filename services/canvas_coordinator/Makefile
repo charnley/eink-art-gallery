@@ -12,18 +12,16 @@ all: ${env}
 
 ${env}:
 	uv venv ${env} --python 3.12
-	uv pip install -r requirements.txt --python ./${env}/bin/python
-	uv pip install -r requirements-dev.txt --python ./${env}/bin/python
-	uv pip install -e . --python ./${env}/bin/python
+	uv pip install -e ".[dev]" --python ./${env}/bin/python
 	uv pip install -e ../shared/ --python ./${env}/bin/python
 
 ## Python
 
 dev:
-	${python} -m ${package} --start --port ${port} --reload --workers 1 --logging-config ./logging_config.yaml
+	${python} -m ${package} --start --port ${port} --reload --logging-config ./logging_config.yaml
 
 start:
-	${python} -m ${package} --start --port ${port} --workers 1 --logging-config ./logging_config.yaml
+	${python} -m ${package} --start --port ${port} --logging-config ./logging_config.yaml
 
 init:
 	${python} -m ${package}.example --prompts-filename ${GIT_ROOT}/assets/random_artists.txt

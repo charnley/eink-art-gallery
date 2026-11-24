@@ -7,8 +7,8 @@ from typing import Any
 import numpy as np
 import qrcode
 from matplotlib import patheffects
-from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from PIL import Image
@@ -67,7 +67,10 @@ def calculate_font_size(width, height, text, font, target_pct=0.60):
 def get_figure(
     width: int = IMAGE_WIDTH, height: int = IMAGE_HEIGHT, dpi: int = IMAGE_DPI
 ) -> tuple[Figure, Axes]:
-    fig, ax = plt.subplots(1, 1, figsize=(width / dpi, height / dpi), dpi=dpi)
+    # Not pyplot: it keeps global figure state and is not thread-safe
+    fig = Figure(figsize=(width / dpi, height / dpi), dpi=dpi)
+    FigureCanvasAgg(fig)
+    ax = fig.subplots(1, 1)
     return fig, ax
 
 
@@ -80,10 +83,8 @@ def plot_to_image(fig: Figure, dpi: int = IMAGE_DPI) -> PilImage:
 
 
 def close(fig=None):
-    if fig is None:
-        plt.close()
-        return
-    plt.close(fig)
+    # Figures are not registered globally, they are freed when out of scope
+    return
 
 
 def get_basic_text(
