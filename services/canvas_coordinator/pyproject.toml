@@ -21,7 +21,7 @@ dependencies = [
     "qrcode",
     "requests",
     "rich",
-    "sqlmodel>=0.0.22",
+    "sqlmodel>=0.0.21",  # Field(ondelete=...)
     "uvicorn",
 ]
 
