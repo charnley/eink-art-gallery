@@ -21,7 +21,6 @@ def main(args=None):
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--reload", action="store_true")
     parser.add_argument("--start", action="store_true")
-    parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--logging-config", type=Path, default=Path("./logging_config.yaml"))
 
     args = parser.parse_args(args)
@@ -49,9 +48,6 @@ def main(args=None):
 
     if args.start:
 
-        if args.workers > 1:
-            logger.warning("workers > 1 runs one scheduler per worker, jobs fire repeatedly")
-
         logger.info(f"Version {__version__}")
 
         uvicorn.run(
@@ -61,7 +57,6 @@ def main(args=None):
             reload=args.reload,
             log_level=None,
             log_config=str(args.logging_config),
-            workers=args.workers,
         )
 
 
